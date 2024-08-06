@@ -11,8 +11,8 @@ const Logo = () => {
         alt="logo-pkbm"
       />
       <div>
-        <p className="text-yellow-300">PKBM</p>
-        <p className="text-emerald-400">Flamboyan</p>
+        <p className="text-amber-500">PKBM</p>
+        <p className="text-emerald-500">Flamboyan</p>
       </div>
     </Link>
   );
