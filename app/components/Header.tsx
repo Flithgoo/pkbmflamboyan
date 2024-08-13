@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { IoCloseSharp } from "react-icons/io5";
 import { FaBars } from "react-icons/fa6";
-import Logo from "./(Navbar)/Logo";
-import DesktopLink from "./(Navbar)/DesktopLink";
-import MobileLink from "./(Navbar)/MobileLink";
+import Logo from "./(Header)/Logo";
+import DesktopLink from "./(Header)/DesktopLink";
+import MobileLink from "./(Header)/MobileLink";
 
 const Navbar = () => {
   const [activeLink, setActiveLink] = useState("undefined");
@@ -38,7 +38,7 @@ const Navbar = () => {
             />
             <DesktopLink
               title={"Tentang kami"}
-              link={"tentang-kami"}
+              link={"about"}
               setActiveLink={setActiveLink}
               activeLink={activeLink}
             />
@@ -81,7 +81,7 @@ const Navbar = () => {
                     <MobileLink title={"Beranda"} link={"home"} close={close} />
                     <MobileLink
                       title={"Tentang kami"}
-                      link={"tentang-kami"}
+                      link={"about"}
                       close={close}
                     />
                     <MobileLink

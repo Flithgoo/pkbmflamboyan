@@ -1,5 +1,6 @@
 import Hero from "./components/Hero";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Header";
+import About from "./components/About";
 
 export default function Home() {
   return (
@@ -7,10 +8,8 @@ export default function Home() {
       <Navbar />
       <main className="bg-white">
         <Hero />
-        <div id="tentang-kami" className="h-96 bg-white">
-          <h1>halo</h1>
-        </div>
-        <div className="h-96 bg-neutral-400">
+        <About />
+        <div className="h-96 bg-orange-400">
           <h1>halo</h1>
         </div>
         <h1 className="h-lvh"></h1>
