@@ -10,15 +10,16 @@ const Hero = () => {
           <div className="self-center px-4 lg:w-1/2 text-green">
             <h1 className="text-base font-semibold text-primary md:text-xl">
               Selamat datang di website
-              <span className="mt-1 block text-4xl font-bold text-slate-900 lg:text-5xl">
+              <span className="mt-1 block text-4xl font-bold primary-yellow lg:text-5xl">
                 PKBM Flamboyan
               </span>
             </h1>
-            <p className="mb-10 font-medium leading-relaxed text-secondary">
-              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-              Provident nemo quia autem soluta voluptates temporibus aspernatur
-              recusandae reprehenderit in deleniti esse, voluptatum molestias
-              explicabo architecto perferendis. Aliquam eius aut quae.{" "}
+            <p className="mb-10 font-medium text-justify leading-relaxed text-secondary mt-2">
+              Pusat pendidikan untuk semua kalangan tanpa memandang usia. Kami
+              menyediakan program kesetaraan dan keterampilan dengan jadwal
+              pembelajaran yang fleksibel, cocok bagi Anda yang ingin tetap
+              bekerja sambil belajar. Bergabunglah dan wujudkan masa depan lebih
+              cerah bersama kami!
             </p>
 
             <Link
@@ -29,22 +30,14 @@ const Hero = () => {
             </Link>
           </div>
           <div className="w-full lg:self-end px-4 lg:w-1/2">
-            <div className="flex justify-center mt-12 lg:mt-9">
+            <div className="flex justify-center mt-16 lg:mt-9">
               <Image
-                src="/heroimg/FOTO BERJAS.jpg"
+                src="/heroimg/Profile Pkbm.jpg"
                 alt="Sandhika Galih"
-                width={300}
-                height={500}
-                className="relative z-10 lg:ml-auto max-w-full"
+                width={550}
+                height={200}
+                className="relative rounded-lg shadow-lg lg:ml-auto max-w-full"
               />
-            </div>
-            <div className="text-lg mt-3">
-              <p className="font-semibold text-center text-slate-700">
-                Drs. Casmadi
-              </p>
-              <p className="font-normal text-sm text-center text-slate-600">
-                Kepala PKBM Flamboyan
-              </p>
             </div>
           </div>
         </div>

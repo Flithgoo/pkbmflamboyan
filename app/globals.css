@@ -40,6 +40,9 @@ body {
   @apply left-0 w-full;
 }
 
+.primary-yellow {
+  color: #ffcc00;
+}
 .text-green {
   @apply text-emerald-500;
 }

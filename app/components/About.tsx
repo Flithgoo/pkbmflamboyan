@@ -1,46 +1,98 @@
+import Image from "next/image";
 import React from "react";
 
 const About = () => {
   return (
-    <section id="about" className="pt-36">
-      <h1 className="text-center font-semibold text-4xl text-slate-800">
+    <section id="about" className="mt-36">
+      {/* SVG Divider */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 300"
+        className="block w-full -mb-1"
+      >
+        <path
+          fill="#059669"
+          fillOpacity="1"
+          d="M0,160L80,149.3C160,139,320,117,480,122.7C640,128,800,160,960,181.3C1120,203,1280,213,1360,218.7L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+        ></path>
+      </svg>
+
+      {/* Konten Section */}
+      <h1 className="text-center bg-emerald-600 font-semibold text-slate-100 text-4xl lg:mt-[-50px]">
         Tentang kami
       </h1>
-      <p className="text-zinc-200 pt-16">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat ex id,
-        perspiciatis praesentium vero excepturi necessitatibus expedita eligendi
-        possimus earum impedit corporis, nisi, maxime officiis ipsum assumenda.
-        Neque, pariatur est. Aperiam distinctio obcaecati dolore itaque
-        inventore accusamus necessitatibus velit tempora ad nisi laborum quae
-        nostrum delectus perspiciatis minus natus, voluptatem molestiae iusto
-        enim adipisci vel? Nesciunt, autem dolore. Atque, quam! Temporibus nihil
-        magnam et ea fuga dolores perferendis odio atque. Est alias hic aperiam,
-        reiciendis veritatis eum esse, libero labore doloremque quas voluptas
-        voluptatibus? Magnam commodi natus provident corrupti necessitatibus.
-        Placeat cupiditate tenetur temporibus itaque beatae aperiam nisi
-        inventore autem eum! Quibusdam consequuntur praesentium id suscipit,
-        quos maiores animi, quia impedit, sit adipisci minima sed natus
-        exercitationem minus cumque iusto? Repellat esse dicta dolores nemo fuga
-        officia ullam nam labore debitis corrupti! Ut eligendi dicta sed?
-        Inventore impedit, nesciunt, molestias sit alias animi cum veritatis
-        unde illo maxime voluptate qui! Soluta earum, quaerat, optio delectus,
-        facere atque vero labore nobis nisi sed iure perspiciatis? Vel
-        aspernatur ipsa odio laborum ad quo illum? Maxime eos non sunt hic
-        tempora reprehenderit qui! Praesentium, ea quas? Quis cum eos laborum
-        iusto voluptatum sit similique aperiam possimus quidem laboriosam
-        consequatur quia vitae deleniti vel, officia atque porro facere magnam
-        itaque voluptates. Sunt, labore quam. Nemo distinctio obcaecati, sequi
-        dolorum vel consequuntur fugit nobis, corporis omnis numquam
-        exercitationem laborum voluptate doloribus assumenda ex similique
-        debitis hic? Fugit nostrum, quidem nobis libero dolor natus id pariatur.
-        Ipsum maiores esse illo reprehenderit! Sint, illum perferendis sed
-        laborum ex eius eligendi, amet reprehenderit, consequatur asperiores
-        repellat! Commodi consequuntur soluta culpa magnam dolorem, error qui
-        rem alias vero sequi. Modi laboriosam voluptate excepturi. Repellendus
-        fuga ducimus enim officia, dolorem similique excepturi odit voluptas.
-        Maiores, quasi quaerat. Iure, nihil id itaque quae sequi quod ducimus,
-        sed beatae fuga incidunt illo.
-      </p>
+
+      <div className="flex justify-center bg-emerald-600">
+        <div className="container flex flex-wrap">
+          <div className="w-full mt-14 lg:self-start px-4 lg:w-1/3">
+            <div className="flex flex-col items-center justify-center self-center text-center lg:mt-9">
+              <Image
+                src="/Drs. Casmadi.jpg"
+                alt="Drs. Casmadi"
+                width={300}
+                height={300}
+                className="relative shadow-lg lg:mx-auto max-w-full"
+              />
+              <p className="text-lg font-semibold mt-3">Drs. Casmadi</p>
+              <p className="text-sm text-slate-200">
+                Kepala PKBM Flamboyan Comal
+              </p>
+            </div>
+          </div>
+          {/* Bagian Visi dan Misi */}
+          <div className="w-full lg:self-start mt-11 px-4 lg:w-2/3">
+            <div className="text-white">
+              <h2 className="text-2xl font-bold mb-4">Visi</h2>
+              <p className="mb-6">
+                “Menjadi pusat kegiatan belajar yang inovatif dan inklusif,
+                memberdayakan masyarakat melalui pendidikan yang berkualitas,
+                untuk menciptakan komunitas yang mandiri, berpengetahuan luas,
+                dan berdaya saing tinggi.”
+              </p>
+              <h2 className="text-2xl font-bold mb-4">Misi</h2>
+              <ul className="list-disc list-inside space-y-2">
+                <li>
+                  <strong>Menyediakan Pendidikan Berkualitas:</strong>{" "}
+                  Menawarkan berbagai program pendidikan yang relevan, baik
+                  formal maupun non-formal, untuk meningkatkan keterampilan dan
+                  pengetahuan masyarakat.
+                </li>
+                <li>
+                  <strong>Memberdayakan Komunitas:</strong> Mengembangkan dan
+                  melaksanakan program yang mendukung pemberdayaan masyarakat,
+                  termasuk pelatihan keterampilan, kursus kewirausahaan, dan
+                  pengembangan kapasitas.
+                </li>
+                <li>
+                  <strong>Mendorong Inovasi dan Kreativitas:</strong>{" "}
+                  Menciptakan lingkungan belajar yang inovatif dan mendukung
+                  pengembangan kreativitas, guna mempersiapkan peserta didik
+                  menghadapi tantangan masa depan.
+                </li>
+                <li>
+                  <strong>Meningkatkan Akses dan Kesempatan:</strong> Menjamin
+                  akses yang adil dan merata ke berbagai program pendidikan
+                  untuk semua lapisan masyarakat, termasuk kelompok rentan dan
+                  kurang beruntung.
+                </li>
+                <li>
+                  <strong>Membangun Kerja Sama:</strong> Menjalin kemitraan
+                  dengan lembaga pendidikan, pemerintah, dan sektor swasta untuk
+                  memperluas jaringan, sumber daya, dan peluang pendidikan.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+        <path
+          fill="#059669"
+          fill-opacity="1"
+          d="M0,160L80,149.3C160,139,320,117,480,122.7C640,128,800,160,960,176C1120,192,1280,192,1360,192L1440,192L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
+        ></path>
+      </svg>
     </section>
   );
 };

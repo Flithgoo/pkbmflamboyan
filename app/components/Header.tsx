@@ -22,7 +22,7 @@ const Navbar = () => {
     <>
       <header
         className={
-          "fixed backdrop-blur-sm top-0 w-full z-30 bg-white/90 transition-all " +
+          "fixed backdrop-blur-sm top-0 w-full z-30 bg-white/80 transition-all " +
           (activeScroll ? " shadow-md pt-0" : " pt-4")
         }
       >
