@@ -43,8 +43,20 @@ const Navbar = () => {
               activeLink={activeLink}
             />
             <DesktopLink
+              title={"Program"}
+              link={"program"}
+              setActiveLink={setActiveLink}
+              activeLink={activeLink}
+            />
+            <DesktopLink
+              title={"Pendaftaran"}
+              link={"registration"}
+              setActiveLink={setActiveLink}
+              activeLink={activeLink}
+            />
+            <DesktopLink
               title={"Kontak kami"}
-              link={"kontak-kami"}
+              link={"contact"}
               setActiveLink={setActiveLink}
               activeLink={activeLink}
             />
