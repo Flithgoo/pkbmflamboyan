@@ -7,10 +7,10 @@ const Hero = () => {
     <section id="home" className="pt-36">
       <div className="flex justify-center">
         <div className="container flex flex-wrap">
-          <div className="self-center px-4 lg:w-1/2 text-green">
-            <h1 className="text-base font-semibold text-primary md:text-xl">
+          <div className="self-center px-4 lg:w-1/2 text-emerald-700">
+            <h1 className="text-base font-semibold md:text-xl">
               Selamat datang di website
-              <span className="mt-1 block text-4xl font-bold primary-yellow lg:text-5xl">
+              <span className="mt-1 block text-4xl font-bold text-yellow-500 lg:text-5xl">
                 PKBM Flamboyan
               </span>
             </h1>
@@ -33,7 +33,7 @@ const Hero = () => {
             <div className="flex justify-center mt-16 lg:mt-9">
               <Image
                 src="/heroimg/Profile Pkbm.jpg"
-                alt="Sandhika Galih"
+                alt="Foto bareng PKBM"
                 width={550}
                 height={200}
                 className="relative rounded-lg shadow-lg lg:ml-auto max-w-full"

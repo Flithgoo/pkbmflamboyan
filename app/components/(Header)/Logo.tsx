@@ -13,7 +13,7 @@ const Logo = () => {
       />
       <div>
         <p className="text-amber-500">PKBM</p>
-        <p className="text-emerald-500">Flamboyan</p>
+        <p className="text-emerald-600">Flamboyan</p>
       </div>
     </Link>
   );

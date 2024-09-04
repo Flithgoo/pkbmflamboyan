@@ -97,8 +97,18 @@ const Navbar = () => {
                       close={close}
                     />
                     <MobileLink
+                      title={"Program"}
+                      link={"program"}
+                      close={close}
+                    />
+                    <MobileLink
+                      title={"Pendaftaran"}
+                      link={"registration"}
+                      close={close}
+                    />
+                    <MobileLink
                       title={"Kontak kami"}
-                      link={"kontak-kami"}
+                      link={"contact"}
                       close={close}
                     />
                   </div>
