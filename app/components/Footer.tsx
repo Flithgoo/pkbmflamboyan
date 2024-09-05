@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="bg-dark pt-24 pb-12">
       <div className="flex flex-col justify-center items-center">
         <div className="container flex flex-wrap">
-          <div className="mb-12 w-full px-4 font-medium text-slate-300 md:w-1/3">
+          <div className="mb-12 w-full px-4 font-medium text-slate-300 md:w-2/5">
             <h2 className="mb-5 mt-7 text-4xl font-bold text-white">
               PKBM Flamboyan
             </h2>
@@ -15,7 +15,7 @@ const Footer = () => {
             <p>Jl. Desa Wonokromo, Comal, Pemalang, Jawa Tengah</p>
             <p>(Dekat Balai Desa Wonokromo)</p>
           </div>
-          <div className="mb-12 w-full px-4 flex text-slate-300 md:w-2/3">
+          <div className="mb-12 w-full px-4 flex text-slate-300 md:w-3/5">
             <GoogleMap />
           </div>
         </div>
@@ -108,7 +108,7 @@ const Footer = () => {
             </a>
           </div>
           <p className="text-center text-base mt-3 font-medium text-slate-400">
-            Copyright© 2024, PKBM Flamboyan .
+            Copyright© 2024, PKBM Flamboyan.
           </p>
         </div>
       </div>

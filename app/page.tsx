@@ -5,6 +5,7 @@ import Program from "./components/Program";
 import Registration from "./components/Registration";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import Gallery from "./components/Gallery";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
         <Program />
         <Registration />
         <Contact />
+        <Gallery />
 
         <h1 className="h-lvh"></h1>
       </main>

@@ -10,7 +10,7 @@ const Hero = () => {
           <div className="self-center px-4 lg:w-1/2 text-emerald-700">
             <h1 className="text-base font-semibold md:text-xl">
               Selamat datang di website
-              <span className="mt-1 block text-4xl font-bold text-yellow-500 lg:text-5xl">
+              <span className="mt-1 block text-4xl font-bold text-amber-500 lg:text-5xl">
                 PKBM Flamboyan
               </span>
             </h1>

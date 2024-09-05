@@ -51,4 +51,14 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  .container {
+    @apply max-w-full;
+  }
+
+  @screen lg {
+    .container {
+      max-width: 90%;
+    }
+  }
 }
