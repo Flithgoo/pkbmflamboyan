@@ -6,6 +6,7 @@ import Registration from "./components/Registration";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import Gallery from "./components/Gallery";
+import Testimoni from "./components/Testimoni";
 
 export default function Home() {
   return (
@@ -18,8 +19,7 @@ export default function Home() {
         <Registration />
         <Contact />
         <Gallery />
-
-        <h1 className="h-lvh"></h1>
+        <Testimoni />
       </main>
       <Footer />
     </>

@@ -20,7 +20,7 @@ const DesktopLink = ({ title, link, setActiveLink, activeLink }: NavTypes) => {
         setActiveLink(link);
       }}
       className={
-        "px-4 py-2 mx-2 cursor-pointer animation-hover inline-block relative" +
+        "px-2 py-2 mx-2 cursor-pointer animation-hover inline-block relative" +
         (activeLink === link
           ? " text-amber-500 animation-active "
           : " hover:text-amber-500 ")

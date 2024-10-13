@@ -27,6 +27,9 @@ const Gallery = () => {
 
   return (
     <section id="gallery" className="container mx-auto pt-32 p-4">
+      <h1 className="text-center font-semibold text-slate-800 text-4xl mb-7">
+        Galeri
+      </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-center items-center">
         {images.map((image, index) => (
           <ImageItem key={index} src={image} onClick={() => openModal(image)} />

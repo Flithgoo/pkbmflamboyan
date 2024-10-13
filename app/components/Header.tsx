@@ -22,14 +22,14 @@ const Navbar = () => {
     <>
       <header
         className={
-          "fixed backdrop-blur-sm top-0 w-full z-30 bg-white/80 transition-all " +
+          "fixed backdrop-blur-sm top-0 w-full z-30 bg-white/90 transition-all " +
           (activeScroll ? " shadow-md pt-0" : " pt-4")
         }
       >
         <nav className="max-w-screen-xl px-6 sm:px-8 lg:px-16 mx-auto flex justify-between py-3 sm:py-4">
           <Logo />
           {/* Start Desktop Navigation */}
-          <ul className="hidden lg:flex col-start-4 col-end-8 text-emerald-500  items-center">
+          <ul className="hidden lg:flex col-start-4 col-end-8 text-emerald-500 text-sm items-center">
             <DesktopLink
               title={"Beranda"}
               link={"home"}
@@ -66,6 +66,12 @@ const Navbar = () => {
               setActiveLink={setActiveLink}
               activeLink={activeLink}
             />
+            <DesktopLink
+              title={"Testimoni"}
+              link={"testimoni"}
+              setActiveLink={setActiveLink}
+              activeLink={activeLink}
+            />
           </ul>
           {/* End Desktop Navigation */}
 
@@ -87,7 +93,7 @@ const Navbar = () => {
                 <PopoverPanel
                   transition
                   anchor={{ to: "left end", gap: "-3em" }}
-                  className="w-52 z-40 mt-20 rounded-xl bg-emerald-500/80 text-sm/6 transition duration-200 ease-in-out data-[closed]:-translate-y-1 data-[closed]:opacity-0"
+                  className="w-52 z-40 mt-20 rounded-xl bg-emerald-600/90 text-sm/6 transition duration-200 ease-in-out data-[closed]:-translate-y-1 data-[closed]:opacity-0"
                 >
                   <div className="p-3">
                     <MobileLink title={"Beranda"} link={"home"} close={close} />
@@ -114,6 +120,11 @@ const Navbar = () => {
                     <MobileLink
                       title={"Galeri"}
                       link={"gallery"}
+                      close={close}
+                    />
+                    <MobileLink
+                      title={"Testimoni"}
+                      link={"testimoni"}
                       close={close}
                     />
                   </div>
