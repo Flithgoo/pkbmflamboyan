@@ -9,7 +9,7 @@ interface ImageItemProps {
 const ImageItem: React.FC<ImageItemProps> = ({ src, onClick }) => {
   return (
     <div
-      className="cursor-pointer flex justify-center transform transition duration-300 hover:scale-105"
+      className="cursor-pointer transform transition duration-300 hover:scale-105"
       onClick={onClick}
     >
       <Image

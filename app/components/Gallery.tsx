@@ -5,10 +5,12 @@ import ImageItem from "./(Gallery)/ImageItem";
 import Modal from "./(Gallery)/Modal";
 
 const images = [
-  "/gallery/fox.jpg", // replace with your image paths
+  "/gallery/lab_komputer.jpg", // replace with your image paths
   "/gallery/foto bersama dinas.jpg",
-  "/gallery/apikanime.jpg",
-  "/gallery/anime-landscape-d5-1360x768.jpg",
+  "/gallery/pelepasan_bersama.jpg",
+  "/gallery/ujian_formulatif.jpg",
+  "/gallery/UPK.jpg",
+  "/gallery/pondok.jpg",
 ];
 
 const Gallery = () => {
@@ -30,7 +32,7 @@ const Gallery = () => {
       <h1 className="text-center font-semibold text-slate-800 text-4xl mb-7">
         Galeri
       </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-center items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
         {images.map((image, index) => (
           <ImageItem key={index} src={image} onClick={() => openModal(image)} />
         ))}

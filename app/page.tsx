@@ -17,9 +17,9 @@ export default function Home() {
         <About />
         <Program />
         <Registration />
-        <Contact />
         <Gallery />
         <Testimoni />
+        <Contact />
       </main>
       <Footer />
     </>

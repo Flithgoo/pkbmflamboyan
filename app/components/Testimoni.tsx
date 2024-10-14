@@ -9,21 +9,21 @@ const Testimoni = ({
   listTestimoni = [
     {
       name: "Jauhar Effendi",
-      image: "/assets/people-3.png",
+      image: "/assets/people-1.png",
       email: "joeankkun@gmail.com",
       testimoni:
         "Tempat terbaik untuk belajar bagi yang sudah putus sekolah,memberikan kesetaraan pendidikan sebagai hak warga negara Indonesia",
     },
     {
       name: "Aprilia",
-      image: "/assets/people-3.png",
+      image: "/assets/people-2.png",
       email: "rizhanfarazah93@gmail.com",
       testimoni:
         "Para guru²nya sangat ramah baik,sabar mengajarkan ilmu kepada kami, semoga pkbm sukses selalu tambah maju, makin ramai yg belajar, yg putus sekolah bisa sekolah lagi karna ada flamboyan",
     },
     {
       name: "Mega indriyani",
-      image: "/assets/people-3.png",
+      image: "/assets/people/MegaIndriyani.jpg",
       email: "muhamadtayal@gmail.com",
       testimoni:
         "PKBM sangat membantu kita yg terlambat melanjutkan sekolah, gurunya sangat baik & ramah2 , pokoknya top markotop buat PKBM 👍🏻👍🏻👍🏻❤️❤️❤️",
@@ -88,7 +88,7 @@ const Testimoni = ({
   };
 
   return (
-    <section id="testimoni" className="pt-32 pb-32">
+    <section id="testimoni" className="pt-32">
       <h1 className="text-center font-semibold text-slate-800 text-4xl mb-7">
         Testimoni
       </h1>
@@ -111,6 +111,7 @@ const Testimoni = ({
                         height={50}
                         width={50}
                         alt={`Icon ${t.name}`}
+                        className="rounded-full"
                       />
                       <div className="flex flex-col ml-5 text-left">
                         <p className="text-lg text-slate-800 capitalize">
