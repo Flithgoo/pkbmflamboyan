@@ -19,7 +19,7 @@ const Testimoni = ({
       image: "/assets/people-3.png",
       email: "rizhanfarazah93@gmail.com",
       testimoni:
-        "Para guru²nya sangat ramah baik,sabar mengajarkan ilmu kepada kami, semoga pkbm sukses selalu tambah maju, makin ramai yg belajar, yg putus sekolah bisa sekolah lagi karna ada pkbm flamboyan, sukses selalu pkbm flamboyan, pkbm semakin di depan, Aamiin ya Allah...",
+        "Para guru²nya sangat ramah baik,sabar mengajarkan ilmu kepada kami, semoga pkbm sukses selalu tambah maju, makin ramai yg belajar, yg putus sekolah bisa sekolah lagi karna ada flamboyan",
     },
     {
       name: "Mega indriyani",
@@ -99,11 +99,11 @@ const Testimoni = ({
             {...settings}
             arrows={false}
             ref={sliderRef} // Berikan referensi ke Slider
-            className="flex items-stretch justify-items-stretch"
+            className="flex items-stretch"
           >
             {listTestimoni.map((t, index) => (
-              <div key={index} className="px-3 flex items-stretch">
-                <div className="border-2 border-gray-200 hover:border-emerald-400 transition-all rounded-lg p-8 flex flex-col">
+              <div key={index} className="px-3">
+                <div className="border-2 border-gray-200 hover:border-emerald-400 transition-all rounded-lg p-8 pb-5 flex flex-col min-h-[17em]">
                   <div className="flex flex-col xl:flex-row w-full items-stretch xl:items-center">
                     <div className="flex order-2 xl:order-1">
                       <Image
@@ -120,7 +120,7 @@ const Testimoni = ({
                       </div>
                     </div>
                   </div>
-                  <p className="mt-5 text-left text-slate-700">{t.testimoni}</p>
+                  <p className="mt-4 text-left text-slate-700">{t.testimoni}</p>
                 </div>
               </div>
             ))}
