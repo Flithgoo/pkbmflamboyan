@@ -3,15 +3,7 @@
 import { useState } from "react";
 import ImageItem from "./(Gallery)/ImageItem";
 import Modal from "./(Gallery)/Modal";
-
-const images = [
-  "/gallery/lab_komputer.jpg", // replace with your image paths
-  "/gallery/foto bersama dinas.jpg",
-  "/gallery/pelepasan_bersama.jpg",
-  "/gallery/ujian_formulatif.jpg",
-  "/gallery/UPK.jpg",
-  "/gallery/pondok.jpg",
-];
+import { imageData } from "../utils/data";
 
 const Gallery = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -33,7 +25,7 @@ const Gallery = () => {
         Galeri
       </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-        {images.map((image, index) => (
+        {imageData.map((image, index) => (
           <ImageItem key={index} src={image} onClick={() => openModal(image)} />
         ))}
       </div>

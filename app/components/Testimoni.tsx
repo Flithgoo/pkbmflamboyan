@@ -4,53 +4,9 @@ import React, { useRef } from "react";
 import Slider from "react-slick";
 import Image from "next/image";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { listTestimoni } from "../utils/data";
 
-const Testimoni = ({
-  listTestimoni = [
-    {
-      name: "Jauhar Effendi",
-      image: "/assets/people-1.png",
-      email: "joeankkun@gmail.com",
-      testimoni:
-        "Tempat terbaik untuk belajar bagi yang sudah putus sekolah,memberikan kesetaraan pendidikan sebagai hak warga negara Indonesia",
-    },
-    {
-      name: "Aprilia",
-      image: "/assets/people-2.png",
-      email: "rizhanfarazah93@gmail.com",
-      testimoni:
-        "Para guru²nya sangat ramah baik,sabar mengajarkan ilmu kepada kami, semoga pkbm sukses selalu tambah maju, makin ramai yg belajar, yg putus sekolah bisa sekolah lagi karna ada flamboyan",
-    },
-    {
-      name: "Mega indriyani",
-      image: "/assets/people/MegaIndriyani.jpg",
-      email: "muhamadtayal@gmail.com",
-      testimoni:
-        "PKBM sangat membantu kita yg terlambat melanjutkan sekolah, gurunya sangat baik & ramah2 , pokoknya top markotop buat PKBM 👍🏻👍🏻👍🏻❤️❤️❤️",
-    },
-    {
-      name: "Siti Romlah",
-      image: "/assets/people-3.png",
-      email: "sitiromlah05781@gmail.com",
-      testimoni:
-        "Ajang pembelajaran yang sangat membantu dan bermanfaat sekali bagi saya yg putus sekolah",
-    },
-    {
-      name: "Wartiah",
-      image: "/assets/people-3.png",
-      email: "wartiahpml07@gmail.com",
-      testimoni:
-        "Sangat mendukung kita yang sempat terhambat dengan pendidikan. Tutornya sangat ramah dan penjelasan materinya mudah dicerna.",
-    },
-    {
-      name: "Liana Saputri ",
-      image: "/assets/people-2.png",
-      email: "rizqyhafizhah56@gmail.com",
-      testimoni:
-        "Terima kasih... atas adanya PKBM.  Saya bisa melanjutkan sekolah 🙏 PKBM sukses dan tetap semangat ",
-    },
-  ],
-}) => {
+const Testimoni = () => {
   // Berikan tipe SliderType atau null ke useRef
   const sliderRef = useRef<any>(null);
 
@@ -132,13 +88,13 @@ const Testimoni = ({
                 className="mx-2 flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-white border-emerald-500 border hover:bg-emerald-500 hover:text-slate-50 transition-all text-emerald-500 cursor-pointer"
                 onClick={() => sliderRef.current?.slickPrev()} // Akses ref current
               >
-                <FaAngleLeft className="h-6 w-h-6 " />
+                <FaAngleLeft size={25} />
               </div>
               <div
                 className="mx-4 flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-white border-emerald-500 border hover:bg-emerald-500 hover:text-slate-50 transition-all text-emerald-500 cursor-pointer"
                 onClick={() => sliderRef.current?.slickNext()} // Akses ref current
               >
-                <FaAngleRight className="h-6 w-h-6" />
+                <FaAngleRight size={25} />
               </div>
             </div>
           </div>

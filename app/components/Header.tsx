@@ -55,12 +55,6 @@ const Navbar = () => {
               activeLink={activeLink}
             />
             <DesktopLink
-              title={"Kontak kami"}
-              link={"contact"}
-              setActiveLink={setActiveLink}
-              activeLink={activeLink}
-            />
-            <DesktopLink
               title={"Galeri"}
               link={"gallery"}
               setActiveLink={setActiveLink}
@@ -69,6 +63,12 @@ const Navbar = () => {
             <DesktopLink
               title={"Testimoni"}
               link={"testimoni"}
+              setActiveLink={setActiveLink}
+              activeLink={activeLink}
+            />
+            <DesktopLink
+              title={"Kontak kami"}
+              link={"contact"}
               setActiveLink={setActiveLink}
               activeLink={activeLink}
             />
@@ -113,11 +113,6 @@ const Navbar = () => {
                       close={close}
                     />
                     <MobileLink
-                      title={"Kontak kami"}
-                      link={"contact"}
-                      close={close}
-                    />
-                    <MobileLink
                       title={"Galeri"}
                       link={"gallery"}
                       close={close}
@@ -125,6 +120,11 @@ const Navbar = () => {
                     <MobileLink
                       title={"Testimoni"}
                       link={"testimoni"}
+                      close={close}
+                    />
+                    <MobileLink
+                      title={"Kontak kami"}
+                      link={"contact"}
                       close={close}
                     />
                   </div>
