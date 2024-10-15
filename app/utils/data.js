@@ -31,7 +31,7 @@ const listTestimoni = [
   },
   {
     name: "Siti Romlah",
-    image: "/assets/people/Siti_romlah.jpg",
+    image: "/assets/people/Siti_Romlah.jpg",
     email: "sitiromlah05781@gmail.com",
     testimoni:
       "Ajang pembelajaran yang sangat membantu dan bermanfaat sekali bagi saya yg putus sekolah",
