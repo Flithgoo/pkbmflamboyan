@@ -63,7 +63,7 @@ const About = () => {
             <h2 className="text-3xl font-bold mb-6">Misi</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Misi 1 */}
-              <div className="flex items-start space-x-4 bg-emerald-700 p-4 rounded-lg shadow-lg transition-transform duration-300 transform 5 hover:bg-emerald-500 hover:shadow-xl">
+              <div className="flex items-start space-x-4 bg-emerald-700 p-4 rounded-lg shadow-lg transition-transform hover:scale-105 duration-300 transform 5 hover:bg-emerald-500 hover:shadow-xl">
                 <FaBookOpen className="text-4xl text-white transition-transform duration-300" />
                 <div>
                   <h3 className="text-xl font-bold">
