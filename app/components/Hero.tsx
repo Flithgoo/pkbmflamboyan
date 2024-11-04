@@ -23,7 +23,7 @@ const Hero = () => {
             </p>
 
             <Link
-              href="#"
+              href="https://wa.link/g4u86l"
               className="rounded-full bg-emerald-600 py-3 px-8 text-base font-semibold text-slate-100 transition duration-300 ease-in-out hover:opacity-80 hover:shadow-lg"
             >
               Daftar sekarang!

@@ -67,6 +67,12 @@ const Navbar = () => {
               activeLink={activeLink}
             />
             <DesktopLink
+              title={"FAQ"}
+              link={"faq"}
+              setActiveLink={setActiveLink}
+              activeLink={activeLink}
+            />
+            <DesktopLink
               title={"Kontak kami"}
               link={"contact"}
               setActiveLink={setActiveLink}
@@ -122,6 +128,7 @@ const Navbar = () => {
                       link={"testimoni"}
                       close={close}
                     />
+                    <MobileLink title={"FAQ"} link={"faq"} close={close} />
                     <MobileLink
                       title={"Kontak kami"}
                       link={"contact"}

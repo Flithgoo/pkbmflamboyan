@@ -52,4 +52,48 @@ const listTestimoni = [
   },
 ];
 
-export { imageData, listTestimoni };
+const listFaq = [
+  {
+    question: "Apa itu PKBM?",
+    response:
+      "PKBM adalah lembaga pendidikan nonformal yang menyediakan pendidikan dasar, menengah, dan keterampilan vokasional bagi masyarakat yang tidak memiliki akses ke sekolah formal.",
+  },
+  {
+    question: "Program apa saja yang tersedia di PKBM Flamboyan?",
+    response:
+      "PKBM Flamboyan menawarkan program Paket A (setara SD), Paket B (setara SMP), dan Paket C (setara SMA). Selain itu, ada juga program keterampilan dan pelatihan untuk membantu siswa meningkatkan keterampilan kerja.",
+  },
+  {
+    question: "Apakah PKBM Flamboyan menerima siswa dari semua kalangan usia?",
+    response:
+      "Ya, PKBM Flamboyan terbuka untuk semua usia, termasuk anak-anak putus sekolah, remaja, dan orang dewasa yang ingin melanjutkan pendidikan atau mendapatkan ijazah yang diakui.",
+  },
+  {
+    question: "Apakah ijazah dari PKBM Flamboyan diakui oleh pemerintah?",
+    response:
+      "Ya, ijazah yang diterima dari PKBM Flamboyan diakui oleh pemerintah dan setara dengan ijazah dari sekolah formal, sehingga dapat digunakan untuk melanjutkan pendidikan ke tingkat yang lebih tinggi atau untuk keperluan pekerjaan.",
+  },
+  {
+    question: "Apakah PKBM Flamboyan menyediakan pembelajaran daring?",
+    response:
+      "PKBM Flamboyan berusaha fleksibel dalam metode pembelajaran, termasuk menyediakan opsi pembelajaran daring atau campuran untuk siswa yang memiliki kendala waktu atau akses.",
+  },
+  {
+    question:
+      "Apakah lulusan PKBM Flamboyan bisa melanjutkan ke perguruan tinggi?",
+    response:
+      "Lulusan Paket C dari PKBM Flamboyan dapat melanjutkan ke perguruan tinggi, asalkan memenuhi persyaratan pendaftaran di universitas atau akademi yang dituju.",
+  },
+];
+
+const links = [
+  { name: "Home", href: "/dashboard", icon: "HomeIcon" },
+  {
+    name: "Invoices",
+    href: "/dashboard/invoices",
+    icon: "DocumentDuplicateIcon",
+  },
+  { name: "Customers", href: "/dashboard/customers", icon: "UserGroupIcon" },
+];
+
+export { imageData, listTestimoni, listFaq, links };

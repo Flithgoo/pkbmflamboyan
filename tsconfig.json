@@ -17,8 +17,11 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@utils/*": ["app/utils/*"], // Contoh untuk mengakses folder utils
+      "@components/*": ["app/components/*"] // Contoh untuk mengakses folder components
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
