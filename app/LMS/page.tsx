@@ -1,12 +1,10 @@
 import React from "react";
-import SideNav from "../components/LMS/Sidenav";
 
-const Dashboard = ({ children }: { children: React.ReactNode }) => {
+const Dashboard = () => {
   return (
-    <div>
-      <SideNav />
-      <main>{children}</main>
-    </div>
+    <main>
+      <h1>Sedang dalam tahap pengembangan</h1>
+    </main>
   );
 };
 

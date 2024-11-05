@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { IoCloseSharp } from "react-icons/io5";
 import { FaBars } from "react-icons/fa6";
-import Logo from "./(Header)/Logo";
+import Logo from "./ui/Logo";
 import DesktopLink from "./(Header)/DesktopLink";
 import MobileLink from "./(Header)/MobileLink";
 import Link from "next/link";

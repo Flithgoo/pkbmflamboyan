@@ -3,7 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "./slick.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "PKBM Flamboyan",
@@ -17,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={inter.className + " bg-slate-50"}>{children}</body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

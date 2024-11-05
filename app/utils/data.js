@@ -87,13 +87,20 @@ const listFaq = [
 ];
 
 const links = [
-  { name: "Home", href: "/dashboard", icon: "HomeIcon" },
+  { name: "Dashboard", href: "/LMS", icon: "HomeIcon" },
   {
-    name: "Invoices",
-    href: "/dashboard/invoices",
+    name: "Peserta didik",
+    href: "/LMS/PD",
     icon: "DocumentDuplicateIcon",
   },
-  { name: "Customers", href: "/dashboard/customers", icon: "UserGroupIcon" },
+  {
+    name: "Materi",
+    href: "/LMS/Materi",
+    icon: "DocumentDuplicateIcon",
+  },
+  { name: "Tugas", href: "/LMS/Tugas", icon: "UserGroupIcon" },
+  { name: "Pengumuman", href: "/LMS/Pengumuman", icon: "Pengumuman" },
+  { name: "Ujian", href: "/LMS/Ujian", icon: "Ujian" },
 ];
 
 export { imageData, listTestimoni, listFaq, links };
