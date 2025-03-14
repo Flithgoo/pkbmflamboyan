@@ -3,7 +3,7 @@ import React from "react";
 const Dashboard = () => {
   return (
     <main>
-      <h1>Sedang dalam tahap pengembangan</h1>
+      <div className="h-96 bg-white rounded-md"></div>
     </main>
   );
 };
