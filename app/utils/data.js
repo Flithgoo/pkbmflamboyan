@@ -101,6 +101,7 @@ const links = [
   { name: "Tugas", href: "/LMS/Tugas", icon: "UserGroupIcon" },
   { name: "Pengumuman", href: "/LMS/Pengumuman", icon: "Pengumuman" },
   { name: "Ujian", href: "/LMS/Ujian", icon: "Ujian" },
+  { name: "Bantuan", href: "/LMS/Bantuan", icon: "Bantuan" },
 ];
 
 export { imageData, listTestimoni, listFaq, links };
