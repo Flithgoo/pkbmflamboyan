@@ -7,10 +7,10 @@ const Dashboard = async () => {
     .from("tutor")
     .select("foto_profil")
     .eq("id", 1);
+  console.log(data);
 
   if (error) return <p>Error: {error.message}</p>;
   const { foto_profil } = data[0];
-  console.log(foto_profil);
 
   return (
     <main>

@@ -22,7 +22,7 @@ const Hero = () => {
                     PKBM Flamboyan
                   </span>
                 </h1>
-                <p className="mb-10 font-medium text-justify leading-relaxed text-secondary mt-2">
+                <p className="mb-10 font-medium text-justify leading-relaxed mt-2">
                   Pusat pendidikan untuk semua kalangan tanpa memandang usia.
                   Kami menyediakan program kesetaraan dan keterampilan dengan
                   jadwal pembelajaran yang fleksibel, cocok bagi Anda yang ingin
