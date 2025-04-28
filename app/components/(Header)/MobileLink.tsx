@@ -16,7 +16,7 @@ const MobileLink = ({ title, link, close }: NavTypes) => {
       duration={1000}
       onClick={() => close()}
       className={
-        "cursor-pointer font-semibold block px-5 py-3 rounded-lg hover:bg-white/20"
+        "text-white cursor-pointer font-semibold block px-5 py-3 rounded-lg hover:bg-white/20"
       }
     >
       {title}

@@ -1,5 +1,4 @@
 export default function getScrollAnimation() {
-  console.log("coba");
   return {
     offscreen: {
       y: 140,

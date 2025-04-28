@@ -1,40 +1,45 @@
-"use client"; // Jika menggunakan struktur app
+"use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // Gunakan 'next/router' jika di pages
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/app/utils/supabase";
 
-type FormData = {
-  username: string;
-  password: string;
-};
-
-const LoginTutor: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    username: "",
-    password: "",
-  });
+export default function LoginTutor() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // State untuk loading
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = (e: React.FormEvent): void => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logika autentikasi login tutor
-    console.log("Form Submitted:", formData);
 
-    // Contoh logika setelah login berhasil
-    // TODO: Panggil API login dan validasi autentikasi
-    if (
-      formData.username === "tutor@example.com" &&
-      formData.password === "password"
-    ) {
-      router.push("/tutor/dashboard"); // Redireksi ke halaman dashboard
-    } else {
-      alert("Login gagal. Periksa username dan password Anda.");
+    // Set loading menjadi true saat login mulai
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    // Set loading menjadi false setelah proses login selesai
+    setLoading(false);
+
+    if (error) {
+      alert("Login gagal: " + error.message);
+      return;
     }
+
+    const { user } = data;
+    if (user) {
+      await supabase.from("users").upsert({
+        id: user.id,
+        email: user.email,
+        role: "tutor",
+      });
+    }
+
+    // Redirect ke dashboard setelah login berhasil
+    // router.push("/LMS/tutor");
   };
 
   return (
@@ -47,20 +52,20 @@ const LoginTutor: React.FC = () => {
           {/* Input username */}
           <div>
             <label
-              htmlFor="username"
+              htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Username
+              Email
             </label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="mt-1 block text-slate-900 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Masukkan username"
+              placeholder="Masukkan Email"
             />
           </div>
 
@@ -76,8 +81,8 @@ const LoginTutor: React.FC = () => {
               type="password"
               id="password"
               name="password"
-              value={formData.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               className="mt-1 block text-slate-900 w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
               placeholder="Masukkan password"
@@ -88,13 +93,12 @@ const LoginTutor: React.FC = () => {
           <button
             type="submit"
             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={loading}
           >
-            Login
+            {loading ? "Loading..." : "Login"}
           </button>
         </form>
       </div>
     </div>
   );
-};
-
-export default LoginTutor;
+}

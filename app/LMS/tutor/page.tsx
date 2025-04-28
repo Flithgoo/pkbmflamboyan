@@ -4,13 +4,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Dashboard = async () => {
   const { data, error } = await supabase
-    .from("tutor")
-    .select("foto_profil")
-    .eq("id", 1);
-  console.log(data);
+    .from("users")
+    .select("profile_picture")
+    .eq("id", 1)
+    .single();
 
   if (error) return <p>Error: {error.message}</p>;
-  const { foto_profil } = data[0];
+  const { profile_picture } = data;
 
   return (
     <main>
@@ -25,7 +25,7 @@ const Dashboard = async () => {
               <p className="text-slate-500 text-xs font-semibold">Tutor TIK</p>
             </div>
             <Avatar className="w-14 h-14">
-              <AvatarImage src={foto_profil} />
+              <AvatarImage src={profile_picture} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
           </div>

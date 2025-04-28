@@ -87,15 +87,10 @@ const listFaq = [
 ];
 
 const links = [
-  { name: "Dashboard", href: "/LMS", icon: "HomeIcon" },
-  {
-    name: "Peserta didik",
-    href: "/LMS/PD",
-    icon: "DocumentDuplicateIcon",
-  },
+  { name: "Dashboard", href: "/LMS/tutor", icon: "HomeIcon" },
   {
     name: "Materi",
-    href: "/LMS/Materi",
+    href: "/LMS/tutor/Materi",
     icon: "DocumentDuplicateIcon",
   },
   { name: "Tugas", href: "/LMS/Tugas", icon: "UserGroupIcon" },

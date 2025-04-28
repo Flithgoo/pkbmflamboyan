@@ -145,7 +145,7 @@ const Navbar = () => {
                     <Link
                       href={"/login/pelajar"}
                       className={
-                        "cursor-pointer font-semibold block px-5 py-3 rounded-lg hover:bg-white/20"
+                        "text-white cursor-pointer font-semibold block px-5 py-3 rounded-lg hover:bg-white/20"
                       }
                     >
                       LMS
