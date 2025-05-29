@@ -1,7 +1,10 @@
 import React from "react";
 import Link from "next/link";
+import { getUserFromCookie } from "@/lib/getUser";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const user = await getUserFromCookie();
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
@@ -37,8 +40,9 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="flex-1 p-6 bg-gray-50 grid gap-6">
-        <h2 className="text-2xl font-semibold">Dashboard Siswa</h2>
-
+        <h2 className="text-2xl font-semibold">
+          Selamat datang {(user as { name: string }).name}
+        </h2>
         {/* Mata Pelajaran */}
         <div className="bg-white rounded-2xl shadow p-4">
           <h3 className="text-xl font-semibold mb-2">Mata Pelajaran</h3>
@@ -51,7 +55,6 @@ export default function DashboardPage() {
             </li>
           </ul>
         </div>
-
         {/* Progress Belajar */}
         <div className="bg-white rounded-2xl shadow p-4">
           <h3 className="text-xl font-semibold mb-2">Progress Belajar</h3>
@@ -65,7 +68,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
         {/* Tugas */}
         <div className="bg-white rounded-2xl shadow p-4">
           <h3 className="text-xl font-semibold mb-2">Tugas</h3>
@@ -83,7 +85,6 @@ export default function DashboardPage() {
             </li>
           </ul>
         </div>
-
         {/* Pengumuman */}
         <div className="bg-white rounded-2xl shadow p-4">
           <h3 className="text-xl font-semibold mb-2">Pengumuman</h3>
