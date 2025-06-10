@@ -1,9 +1,14 @@
 import React from "react";
-import { supabase } from "@utils/supabase-server";
+import { createSupabaseServerClient } from "@utils/supabase-server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Dashboard = async () => {
-  console.log("Running in server:", typeof window === "undefined");
+  console.log(
+    "Running in server /LMS/tutor/page.tsx:",
+    typeof window === "undefined"
+  );
+
+  const supabase = createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("users")
