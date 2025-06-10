@@ -1,23 +1,29 @@
 import Link from "next/link";
 import NavLinks from "./(NavLinks)/Navlinks";
-import Image from "next/image";
 import Logo from "../ui/Logo";
-// import { PowerIcon } from "@heroicons/react/24/outline";
 
 export default function SideNav() {
   return (
-    <div className="flex h-full flex-col px-3 py-4 md:px-2">
-      <div className="mb-2 flex md:flex-col justify-around h-20 bg-gray-100 p-4 md:h-32 rounded-md">
+    <div className="flex h-full flex-col px-4 py-6 bg-white rounded-2xl shadow-md">
+      {/* Logo Section */}
+      <div className="mb-8 flex items-center justify-center">
         <Logo />
       </div>
-      <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2 text-slate-900 bg-gray-300">
+      {/* Navigation Links */}
+      <nav className="flex-1 flex flex-col gap-2">
         <NavLinks />
-        <form>
-          <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-amber-500 md:flex-none md:justify-start md:p-2 md:px-3">
-            Sign Out
-          </button>
-        </form>
-      </div>
+      </nav>
+      {/* Sign Out Button */}
+      {/* Sign Out Button */}
+      <form className="mt-8">
+        <button
+          className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-50 text-emerald-700 font-semibold py-2 transition hover:bg-emerald-100 hover:text-emerald-900 shadow-sm"
+          type="submit"
+        >
+          {/* <PowerIcon className="w-5 h-5" /> */}
+          Sign Out
+        </button>
+      </form>
     </div>
   );
 }

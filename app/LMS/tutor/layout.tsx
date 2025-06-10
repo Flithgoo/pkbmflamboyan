@@ -1,50 +1,26 @@
 import React from "react";
-import { redirect } from "next/navigation";
-import { supabase } from "@/app/utils/supabase";
 import SideNav from "../../components/LMS/Sidenav";
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {
-  async function getCurrentUser() {
-    try {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-
-      if (error) throw error;
-
-      if (!user) {
-        return { authenticated: false };
-      }
-
-      // Dapatkan data profil
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      return {
-        authenticated: true,
-        user,
-        profile: profileData,
-      };
-    } catch (error) {
-      console.error("Error mendapatkan user:", (error as Error).message);
-      return { authenticated: false, error: (error as Error).message };
-    }
-  }
-
-  const { user } = await getCurrentUser();
-  console.log(user + "cek");
   return (
-    <div className="flex min-h-screen flex-col md:flex-row md:overflow-hidden">
-      <div className="w-full flex-none md:w-64">
-        <SideNav />
-      </div>
-      <div className="flex-grow p-4 md:overflow-y-auto md:p-4">{children}</div>
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-emerald-50 to-amber-50">
+      {/* Sidebar */}
+      <aside className="w-full md:w-64 bg-white shadow-lg md:rounded-r-3xl flex-none">
+        <div className="h-full flex flex-col">
+          <div className="p-6 border-b border-emerald-100">
+            <span className="text-2xl font-bold text-emerald-600 tracking-tight">
+              Tutor LMS
+            </span>
+          </div>
+          <nav className="flex-1 p-4">
+            <SideNav />
+          </nav>
+        </div>
+      </aside>
+      {/* Main Content */}
+      <main className="flex-1 p-4 md:p-8 bg-transparent flex flex-col">
+        <div className="w-full max-w-5xl mx-auto flex-1">{children}</div>
+      </main>
     </div>
   );
 };

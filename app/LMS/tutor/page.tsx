@@ -1,36 +1,79 @@
 import React from "react";
-import { supabase } from "@utils/supabase";
+import { supabase } from "@utils/supabase-server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Dashboard = async () => {
+  console.log("Running in server:", typeof window === "undefined");
+
   const { data, error } = await supabase
     .from("users")
-    .select("profile_picture")
-    .eq("id", 1)
+    .select("profile_picture, name, role")
+    .eq("id", 6)
     .single();
 
-  if (error) return <p>Error: {error.message}</p>;
-  const { profile_picture } = data;
+  if (error)
+    return (
+      <main className="flex items-center justify-center min-h-[60vh]">
+        <p className="text-red-500 font-medium">{error.message}</p>
+      </main>
+    );
+
+  const { profile_picture, name, role } = data;
 
   return (
-    <main>
-      <div className="h-96 bg-white rounded-md p-5">
-        <div className="flex justify-between">
-          <h1 className="font-bold text-xl m-1">Dashboard</h1>
-          <div className="flex">
-            <div className="flex me-4 mt-2 flex-col text-end">
-              <p className="text-slate-800 text-sm font-semibold">
-                Prassetiyo Utomo
-              </p>
-              <p className="text-slate-500 text-xs font-semibold">Tutor TIK</p>
-            </div>
-            <Avatar className="w-14 h-14">
-              <AvatarImage src={profile_picture} />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          </div>
+    <main className="flex flex-col gap-8 items-center justify-center min-h-[60vh] px-4">
+      <section className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
+        <Avatar className="w-20 h-20 shadow-md">
+          <AvatarImage
+            src={profile_picture || undefined}
+            alt={name || "Tutor"}
+          />
+          <AvatarFallback>
+            {name
+              ? name
+                  .split(" ")
+                  .map((n: string) => n[0])
+                  .join("")
+                  .toUpperCase()
+              : "TU"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 text-center md:text-left">
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">
+            {name || "Nama Tutor"}
+          </h1>
+          <p className="text-emerald-600 font-semibold capitalize">
+            {role || "Tutor"}
+          </p>
+          <p className="text-gray-500 mt-2">
+            Selamat datang di dashboard tutor. Kelola materi, tugas, dan pantau
+            perkembangan pelajar Anda di sini.
+          </p>
         </div>
-      </div>
+      </section>
+
+      <section className="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-emerald-50 rounded-xl p-5 shadow hover:shadow-md transition">
+          <h2 className="text-lg font-semibold text-emerald-700 mb-2">
+            Materi
+          </h2>
+          <p className="text-gray-600 text-sm mb-4">
+            Kelola dan unggah materi pembelajaran untuk pelajar.
+          </p>
+          <button className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 transition">
+            Lihat Materi
+          </button>
+        </div>
+        <div className="bg-amber-50 rounded-xl p-5 shadow hover:shadow-md transition">
+          <h2 className="text-lg font-semibold text-amber-700 mb-2">Tugas</h2>
+          <p className="text-gray-600 text-sm mb-4">
+            Buat dan pantau tugas yang diberikan kepada pelajar.
+          </p>
+          <button className="bg-amber-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition">
+            Lihat Tugas
+          </button>
+        </div>
+      </section>
     </main>
   );
 };
