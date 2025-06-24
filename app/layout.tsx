@@ -8,8 +8,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pkbmflamboyan.sch.id"),
   title: "PKBM Flamboyan",
   description: "website resmi pkbm flamboyan comal",
+  openGraph: {
+    title: "PKBM Flamboyan",
+    description:
+      "Website resmi PKBM Flamboyan Comal. Pusat Kegiatan Belajar Masyarakat untuk pendidikan berkualitas.",
+    url: "https://pkbmflamboyan.sch.id",
+    siteName: "PKBM Flamboyan",
+    locale: "id_ID",
+    type: "website",
+    images: [
+      {
+        url: "/logo/Logo_PKBM_no-bg.png", // path relatif dari public
+        width: 500,
+        height: 500,
+        alt: "PKBM Flamboyan",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
