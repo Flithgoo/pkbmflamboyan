@@ -1,19 +1,29 @@
 import React from "react";
 import { createSupabaseServerClient } from "@utils/supabase-server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cookies } from "next/headers";
+import { verifyJwt } from "@/lib/jwt";
 
 const Dashboard = async () => {
-  console.log(
-    "Running in server /LMS/tutor/page.tsx:",
-    typeof window === "undefined"
-  );
-
   const supabase = createSupabaseServerClient();
+
+  // Fetch user data from Supabase
+  const token = cookies().get("token")?.value;
+
+  let user = null; // Initialize user as null
+  if (token) {
+    try {
+      user = await verifyJwt(token); // user = { id, email, role }
+    } catch (error) {
+      console.error("JWT verification failed:", error);
+      user = null;
+    }
+  }
 
   const { data, error } = await supabase
     .from("users")
     .select("profile_picture, name, role")
-    .eq("id", 6)
+    .eq("id", user?.id)
     .single();
 
   if (error)
@@ -40,7 +50,7 @@ const Dashboard = async () => {
                   .map((n: string) => n[0])
                   .join("")
                   .toUpperCase()
-              : "TU"}
+              : "Error"}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 text-center md:text-left">

@@ -9,7 +9,7 @@ const Layout = async ({ children }: { children: React.ReactNode }) => {
         <div className="h-full flex flex-col">
           <div className="p-6 border-b border-emerald-100">
             <span className="text-2xl font-bold text-emerald-600 tracking-tight">
-              Tutor LMS
+              Halaman Tutor
             </span>
           </div>
           <nav className="flex-1 p-4">
