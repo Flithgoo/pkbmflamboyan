@@ -4,9 +4,9 @@ import { verifyJwt } from "@/lib/jwt";
 
 const supabase = createSupabaseServerClient();
 
-const token = cookies().get("token")?.value;
-
 export async function getUser() {
+  const token = cookies().get("token")?.value;
+
   let user = null; // Initialize user as null
   if (token) {
     try {
@@ -27,6 +27,8 @@ export async function getUser() {
 }
 
 export async function getAllUser() {
+  const token = cookies().get("token")?.value;
+
   let user = null; // Initialize user as null
   if (token) {
     try {
