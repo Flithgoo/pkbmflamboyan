@@ -1,6 +1,6 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getUser } from "@/lib/api/user";
+import { getUser } from "@/app/lib/api/user";
 
 const Dashboard = async () => {
   const { data, error } = await getUser();

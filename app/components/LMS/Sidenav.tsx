@@ -1,7 +1,7 @@
 import Link from "next/link";
 import NavLinks from "./(NavLinks)/Navlinks";
 import Logo from "../ui/Logo";
-import { logoutAction } from "@/lib/actions/logout"; // import server action
+import { logoutAction } from "@/app/lib/actions/logout"; // import server action
 
 export default function SideNav() {
   return (
