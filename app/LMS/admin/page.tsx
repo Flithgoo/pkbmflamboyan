@@ -1,4 +1,4 @@
-import { getAllUser } from "@/app/lib/api/user";
+import { getAllUser } from "@/lib/api/user";
 import React from "react";
 import {
   Table,
