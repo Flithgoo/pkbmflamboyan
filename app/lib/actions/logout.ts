@@ -1,6 +1,6 @@
 "use server";
 
-import { logout } from "@/lib/api/user";
+import { logout } from "@/app/lib/api/user";
 import { redirect } from "next/navigation";
 
 export async function logoutAction() {

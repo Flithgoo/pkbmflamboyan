@@ -1,4 +1,4 @@
-import { getAllUser } from "@/lib/api/user";
+import { getAllUser } from "@/app/lib/api/user";
 import React from "react";
 import {
   Table,
@@ -77,8 +77,7 @@ export default async function AdminDashboard() {
                     <TableCell>{user.created_at}</TableCell>
                     <TableCell>
                       <Link href={"/"}>
-                        {" "}
-                        // ubah sesuaikan dengan route edit user
+                        {/* ubah sesuaikan dengan route edit user */}
                         <FaUserEdit />
                       </Link>
                     </TableCell>
