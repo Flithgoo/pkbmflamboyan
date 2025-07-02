@@ -1,37 +1,13 @@
 import React from "react";
-import { createSupabaseServerClient } from "@utils/supabase-server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cookies } from "next/headers";
-import { verifyJwt } from "@/lib/jwt";
+import { getUser } from "@/lib/api/user";
 
 const Dashboard = async () => {
-  const supabase = createSupabaseServerClient();
-
-  // Fetch user data from Supabase
-  const token = cookies().get("token")?.value;
-
-  let user = null; // Initialize user as null
-  if (token) {
-    try {
-      user = await verifyJwt(token); // user = { id, email, role }
-    } catch (error) {
-      console.error("JWT verification failed:", error);
-      user = null;
-    }
+  const { data, error } = await getUser();
+  if (error || !data) {
+    console.error("Failed to fetch user data:", error);
+    return <div className="text-red-500">Gagal memuat data pengguna.</div>;
   }
-
-  const { data, error } = await supabase
-    .from("users")
-    .select("profile_picture, name, role")
-    .eq("id", user?.id)
-    .single();
-
-  if (error)
-    return (
-      <main className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-red-500 font-medium">{error.message}</p>
-      </main>
-    );
 
   const { profile_picture, name, role } = data;
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import NavLinks from "./(NavLinks)/Navlinks";
 import Logo from "../ui/Logo";
+import { logoutAction } from "@/lib/actions/logout"; // import server action
 
 export default function SideNav() {
   return (
@@ -14,13 +15,11 @@ export default function SideNav() {
         <NavLinks />
       </nav>
       {/* Sign Out Button */}
-      {/* Sign Out Button */}
-      <form className="mt-8">
+      <form className="mt-8" action={logoutAction} method="POST">
         <button
           className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-50 text-emerald-700 font-semibold py-2 transition hover:bg-emerald-100 hover:text-emerald-900 shadow-sm"
           type="submit"
         >
-          {/* <PowerIcon className="w-5 h-5" /> */}
           Sign Out
         </button>
       </form>

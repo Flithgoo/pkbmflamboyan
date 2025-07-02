@@ -20,7 +20,6 @@ export async function middleware(request: NextRequest) {
 
   // Proteksi berdasarkan role dan path
   const path = request.nextUrl.pathname;
-  console.log("User path:", path);
 
   // Jika user mencoba mengakses path yang bukan rolenya, redirect ke path sesuai role user
   if (path.startsWith("/LMS/admin") && user.role !== "admin") {
