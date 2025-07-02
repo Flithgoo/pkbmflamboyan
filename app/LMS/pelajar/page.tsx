@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { getUserFromCookie } from "@/app/lib/getUser";
+import { getUserFromCookie } from "@/lib/getUser";
 
 export default async function DashboardPage() {
   const user = await getUserFromCookie();
