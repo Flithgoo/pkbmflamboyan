@@ -2,11 +2,18 @@ import { createSupabaseServerClient } from "@/app/utils/supabase-server";
 import { cookies } from "next/headers";
 import { verifyJwt } from "@/lib/jwt";
 
-const supabase = createSupabaseServerClient();
-
-export async function getUser() {
+const getToken = async () => {
+  const supabase = createSupabaseServerClient();
   const token = cookies().get("token")?.value;
 
+  if (!token) {
+    throw new Error("No token found in cookies");
+  }
+  return { token, supabase };
+};
+
+export async function getUser() {
+  const { token, supabase } = await getToken();
   let user = null; // Initialize user as null
   if (token) {
     try {
@@ -27,8 +34,7 @@ export async function getUser() {
 }
 
 export async function getAllUser() {
-  const token = cookies().get("token")?.value;
-
+  const { token, supabase } = await getToken();
   let user = null; // Initialize user as null
   if (token) {
     try {
@@ -39,8 +45,8 @@ export async function getAllUser() {
     }
   }
 
-  if (!user) {
-    return { data: null, error: "User not authenticated" };
+  if (!user || user.role !== "admin") {
+    return { data: null, error: "Not authorized" };
   }
 
   const { data, error } = await supabase.from("users").select("*");
