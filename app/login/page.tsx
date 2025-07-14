@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { FaArrowLeft } from "react-icons/fa";
 
 export default function LoginSelection() {
   return (
@@ -95,6 +96,15 @@ export default function LoginSelection() {
               </div>
             </Link>
           </motion.div>
+        </div>
+        <div className="mt-8 text-center">
+          <Link
+            href="/"
+            className="flex items-center justify-center gap-2 mt-2 text-emerald-600 hover:text-emerald-900 font-semibold transition"
+          >
+            <FaArrowLeft />
+            Kembali ke Beranda
+          </Link>
         </div>
       </motion.div>
     </div>

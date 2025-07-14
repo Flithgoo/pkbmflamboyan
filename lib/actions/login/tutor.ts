@@ -18,9 +18,8 @@ export async function authTutor(_: any, formData: FormData) {
 
   if (error || !user) return "Username tidak ditemukan";
 
-  // const match = await bcrypt.compare(password, user.password);
-  //   if (!match) return 'Password salah'
-  if (password !== user.password) return "Password salah";
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) return "Password salah";
 
   if (user.role !== "tutor") {
     return "Anda bukan tutor!";
