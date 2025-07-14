@@ -57,3 +57,31 @@ export async function logout() {
   // Hapus cookie token
   cookies().set("token", "", { path: "/", maxAge: 0 });
 }
+
+export async function insertUser(
+  name: string,
+  username: string,
+  password: string,
+  role: string,
+  profile_picture?: string | null
+) {
+  const { token, supabase } = await getToken();
+
+  const { data, error } = await supabase
+    .from("users")
+    .insert([
+      {
+        name,
+        username,
+        password,
+        role,
+        profile_picture: profile_picture || null,
+      },
+    ])
+    .select();
+  if (error) {
+    console.error("Error inserting user:", error);
+    return { error };
+  }
+  return { data, error: null };
+}

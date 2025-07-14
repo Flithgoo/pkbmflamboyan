@@ -14,6 +14,7 @@ import Link from "next/link";
 
 export default async function AdminDashboard() {
   const { data, error } = await getAllUser();
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <header className="mb-8">
@@ -51,7 +52,16 @@ export default async function AdminDashboard() {
           </div>
         </div>
         <section className="bg-white rounded-lg shadow p-6 mt-6">
-          <h2 className="text-xl font-semibold mb-4">Daftar Pengguna</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Daftar Pengguna</h2>
+            {/* Tombol tambah pengguna */}
+            <Link
+              href="/LMS/admin/TambahPengguna"
+              className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 font-semibold"
+            >
+              + Tambah Pengguna
+            </Link>
+          </div>
           <Table>
             <TableCaption>Data seluruh pengguna sistem</TableCaption>
             <TableHeader>

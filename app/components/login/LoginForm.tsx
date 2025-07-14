@@ -1,8 +1,8 @@
 "use client";
 
-import { authPelajar } from "@/lib/actions/pelajar";
-import { authTutor } from "@/lib/actions/tutor";
-import { authAdmin } from "@/lib/actions/admin";
+import { authPelajar } from "@/lib/actions/login/pelajar";
+import { authTutor } from "@/lib/actions/login/tutor";
+import { authAdmin } from "@/lib/actions/login/admin";
 
 import Link from "next/link";
 import { useState } from "react";
