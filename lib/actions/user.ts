@@ -1,6 +1,6 @@
 "use server";
 
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { insertUser, editUser } from "@/lib/api/user";
 import { redirect } from "next/navigation";
 
