@@ -35,7 +35,6 @@ export default async function EditUserPage({
         action={editUserAction}
         method="POST"
         className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full"
-        // action={editUserAction} // tambahkan action jika sudah ada
       >
         <h1 className="text-2xl font-bold mb-6 text-center text-emerald-700">
           Edit Pengguna

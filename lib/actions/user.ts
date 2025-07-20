@@ -1,8 +1,9 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { insertUser, editUser } from "@/lib/api/user";
+import { insertUser, editUser, deleteUser } from "@/lib/api/user";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export async function addUserAction(formData: FormData) {
   const name = formData.get("name") as string;
@@ -21,7 +22,9 @@ export async function addUserAction(formData: FormData) {
     role,
     profile_picture
   );
-  if (error) return { error: error.message };
+  if (error) {
+    throw new Error(`Error inserting user: ${error.message}`);
+  }
 
   console.log("app/lib/actions/user.ts User added successfully:", data);
   redirect("/LMS/admin"); // redirect jika berhasil
@@ -46,8 +49,20 @@ export async function editUserAction(formData: FormData) {
     role,
     profile_picture
   );
-  if (error) return { error: error.message };
+  if (error) {
+    throw new Error(`Error editing user: ${error.message}`);
+  }
 
   console.log("app/lib/actions/user.ts User edited successfully:", data);
   redirect("/LMS/admin"); // redirect jika berhasil
+}
+
+export async function deleteUserAction(id: string) {
+  const { error } = await deleteUser(id);
+  if (error) return { error: error.message };
+
+  console.log(
+    `app/lib/actions/user.ts User with id = ${id} deleted successfully`
+  );
+  return { success: true };
 }

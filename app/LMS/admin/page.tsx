@@ -1,5 +1,6 @@
+"use client";
 import { getAllUser } from "@/lib/api/user";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -9,11 +10,44 @@ import {
   TableCell,
   TableCaption,
 } from "@/components/ui/table";
+import ConfirmDeleteModal from "@components/LMS/admin/ConfirmDeleteModal";
 import { FaUserEdit, FaTrashAlt, FaPlus } from "react-icons/fa";
 import Link from "next/link";
+import { deleteUserAction } from "@/lib/actions/user";
 
-export default async function AdminDashboard() {
-  const { data, error } = await getAllUser();
+export default function AdminDashboard() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [showDelete, setShowDelete] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const { data } = await getAllUser();
+      setUsers(data ?? []);
+    }
+    fetchData();
+  }, []);
+
+  function handleDelete(user: any) {
+    setSelectedUser(user);
+    setShowDelete(true);
+  }
+
+  async function handleConfirmDelete() {
+    if (!selectedUser) return;
+
+    const result = await deleteUserAction(selectedUser.id);
+
+    if (result?.success) {
+      setShowDelete(false); // Tutup modal
+      // Refresh data
+      const { data } = await getAllUser();
+      setUsers(data ?? []);
+    } else {
+      alert("Gagal menghapus pengguna. Silakan coba lagi.");
+      console.error("Error deleting user:", result?.error);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8">
@@ -26,13 +60,6 @@ export default async function AdminDashboard() {
             Selamat datang di halaman admin PKBM Flamboyan.
           </p>
         </div>
-        <Link
-          href="/LMS/admin/TambahPengguna"
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold shadow transition"
-        >
-          <FaPlus />
-          Tambah Pengguna
-        </Link>
       </header>
       <main>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -103,8 +130,8 @@ export default async function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data && data.length > 0 ? (
-                data.map((user: any, idx: number) => (
+              {users && users.length > 0 ? (
+                users.map((user, idx) => (
                   <TableRow
                     key={user.id}
                     className="hover:bg-emerald-50 transition"
@@ -143,7 +170,7 @@ export default async function AdminDashboard() {
                         type="button"
                         className="p-2 rounded hover:bg-red-100 text-red-600 transition"
                         title="Hapus User"
-                        // onClick={() => handleDelete(user.id)} // implementasikan handler hapus sesuai kebutuhan
+                        onClick={() => handleDelete(user)}
                       >
                         <FaTrashAlt />
                       </button>
@@ -161,6 +188,12 @@ export default async function AdminDashboard() {
           </Table>
         </section>
       </main>
+      <ConfirmDeleteModal
+        open={showDelete}
+        onClose={() => setShowDelete(false)}
+        onConfirm={handleConfirmDelete}
+        user={selectedUser}
+      />
     </div>
   );
 }

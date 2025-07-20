@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { addUserAction } from "@/lib/actions/user";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
@@ -78,6 +79,8 @@ export default function AddUserPage() {
             placeholder="URL Foto Profil (opsional)"
             className="border border-emerald-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition w-full"
           />
+          {/* <label htmlFor="picture">Picture</label>
+          <Input name="picture" id="picture" type="file" /> */}
           <button
             type="submit"
             className="bg-emerald-600 text-white rounded-lg px-4 py-2 font-semibold w-full hover:bg-emerald-700 transition"

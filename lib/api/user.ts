@@ -1,8 +1,13 @@
+"use server";
+
 import { createSupabaseServerClient } from "@/app/utils/supabase-server";
 import { cookies } from "next/headers";
 import { verifyJwt } from "@/lib/jwt";
 
-const getAuthContext = async () => {
+const getAuthContext = async (): Promise<{
+  token: string;
+  supabase: ReturnType<typeof createSupabaseServerClient>;
+}> => {
   const supabase = createSupabaseServerClient();
   const token = cookies().get("token")?.value;
 
@@ -155,7 +160,32 @@ export async function editUser(
     .eq("id", id)
     .select();
   if (error) {
-    console.error("Error inserting user:", error);
+    console.error("Error editing user:", error);
+    return { error };
+  }
+  return { data, error: null };
+}
+
+export async function deleteUser(id: string) {
+  const { token, supabase } = await getAuthContext();
+
+  let user = null; // Initialize user as null
+  if (token) {
+    try {
+      user = await verifyJwt(token); // user = { id, username, role }
+    } catch (error) {
+      console.error("JWT verification failed:", error);
+      user = null;
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("users")
+    .delete()
+    .eq("id", id)
+    .select();
+  if (error) {
+    console.error("Error deleting user:", error);
     return { error };
   }
   return { data, error: null };
