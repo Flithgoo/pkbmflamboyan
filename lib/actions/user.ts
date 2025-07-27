@@ -3,24 +3,29 @@
 import bcrypt from "bcryptjs";
 import { insertUser, editUser, deleteUser } from "@/lib/api/user";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { uploadProfilePicture } from "@/app/utils/uploadPicHelper";
 
 export async function addUserAction(formData: FormData) {
   const name = formData.get("name") as string;
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
   const role = formData.get("role") as string;
-  const profile_picture = formData.get("profile_picture") as string | null;
+  const file = formData.get("profile_picture") as File | null;
 
   // Hash password di sini
   const hashedPassword = await bcrypt.hash(password, 10);
+
+  let profilePictureUrl: string | null = null;
+  if (file) {
+    profilePictureUrl = await uploadProfilePicture(file);
+  }
 
   const { data, error } = await insertUser(
     name,
     username,
     hashedPassword,
     role,
-    profile_picture
+    profilePictureUrl
   );
   if (error) {
     throw new Error(`Error inserting user: ${error.message}`);
@@ -38,8 +43,11 @@ export async function editUserAction(formData: FormData) {
   const role = formData.get("role") as string;
   const profile_picture = formData.get("profile_picture") as string | null;
 
+  let hashedPassword = null;
   // Hash password di sini
-  const hashedPassword = await bcrypt.hash(password, 10);
+  if (password !== "") {
+    hashedPassword = await bcrypt.hash(password, 10);
+  }
 
   const { data, error } = await editUser(
     id,

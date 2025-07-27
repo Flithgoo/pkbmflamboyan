@@ -130,7 +130,7 @@ export async function editUser(
   id: string,
   name: string,
   username: string,
-  password: string, // sudah dalam bentuk hash
+  password: string | null, // sudah dalam bentuk hash
   role: string,
   profile_picture?: string | null
 ) {
@@ -146,19 +146,23 @@ export async function editUser(
     }
   }
 
+  const updateData: any = {
+    name,
+    username,
+    role,
+    profile_picture: profile_picture || null,
+  };
+
+  if (password) {
+    updateData.password = password;
+  }
+
   const { data, error } = await supabase
     .from("users")
-    .update([
-      {
-        name,
-        username,
-        password,
-        role,
-        profile_picture: profile_picture || null,
-      },
-    ])
+    .update(updateData)
     .eq("id", id)
     .select();
+
   if (error) {
     console.error("Error editing user:", error);
     return { error };
@@ -179,11 +183,27 @@ export async function deleteUser(id: string) {
     }
   }
 
+  const {
+    data: { profile_picture },
+  } = await getUserById(id);
+  console.log("🚀 ~ deleteUser ~ profile_picture:", profile_picture);
+
   const { data, error } = await supabase
     .from("users")
     .delete()
     .eq("id", id)
     .select();
+
+  if (profile_picture) {
+    // AMBIL nama file di bucket
+
+    const { error: errorDeleteBucket } = await supabase.storage
+      .from("profile-picture")
+      .remove([profile_picture]);
+
+    if (errorDeleteBucket) console.error("Gagal hapus file:", error);
+  }
+
   if (error) {
     console.error("Error deleting user:", error);
     return { error };

@@ -188,6 +188,7 @@ export default function AdminDashboard() {
           </Table>
         </section>
       </main>
+
       <ConfirmDeleteModal
         open={showDelete}
         onClose={() => setShowDelete(false)}
