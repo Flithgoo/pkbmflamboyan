@@ -46,14 +46,7 @@ export default function LoginSelection() {
             >
               <span className="flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 group-hover:bg-amber-200 transition">
                 <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
-                  <rect
-                    x="6"
-                    y="4"
-                    width="12"
-                    height="8"
-                    rx="4"
-                    fill="#F59E0B"
-                  />
+                  <circle cx="12" cy="8" r="4" fill="#F59E0B" />
                   <path d="M4 20c0-2.21 3.58-4 8-4s8 1.79 8 4" fill="#F59E0B" />
                 </svg>
               </span>

@@ -183,10 +183,31 @@ export async function deleteUser(id: string) {
     }
   }
 
-  const {
-    data: { profile_picture },
-  } = await getUserById(id);
-  console.log("🚀 ~ deleteUser ~ profile_picture:", profile_picture);
+  if (user?.role !== "admin") {
+    throw new Error("Forbidden: Not authorized to delete this user.");
+  }
+  const { data: userData, error: userError } = await getUserById(id);
+  const profile_picture = userData?.profile_picture;
+
+  // Mendapatkan path dari URL profile_picture
+  let profilePicturePath: string = "";
+  if (profile_picture) {
+    try {
+      // Jika profile_picture sudah berupa path (bukan URL), gunakan langsung
+      if (!profile_picture.startsWith("http")) {
+        profilePicturePath = profile_picture;
+      } else {
+        // Jika profile_picture berupa URL, ambil path setelah domain bucket
+        // Contoh: https://xxxx.supabase.co/storage/v1/object/public/profile-picture/folder/file.jpg
+        // Ambil bagian setelah "/profile-picture/"
+        const match = profile_picture.match(/\/profile-picture\/(.+)$/);
+        profilePicturePath = match ? match[1] : null;
+      }
+    } catch (e) {
+      console.error("Gagal mendapatkan path dari profile_picture:", e);
+      profilePicturePath = "";
+    }
+  }
 
   const { data, error } = await supabase
     .from("users")
@@ -195,11 +216,9 @@ export async function deleteUser(id: string) {
     .select();
 
   if (profile_picture) {
-    // AMBIL nama file di bucket
-
     const { error: errorDeleteBucket } = await supabase.storage
       .from("profile-picture")
-      .remove([profile_picture]);
+      .remove([profilePicturePath]);
 
     if (errorDeleteBucket) console.error("Gagal hapus file:", error);
   }
