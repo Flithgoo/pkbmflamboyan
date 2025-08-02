@@ -2,6 +2,7 @@ import { editUserAction } from "@/lib/actions/user";
 import { getUserById } from "@/lib/api/user";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
+import ProfilePicturePreview from "@/app/components/LMS/admin/ProfilePicturePreview";
 
 export default async function EditUserPage({
   params,
@@ -30,7 +31,7 @@ export default async function EditUserPage({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-amber-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br py-5 from-emerald-50 to-amber-50">
       <form
         action={editUserAction}
         method="POST"
@@ -40,6 +41,17 @@ export default async function EditUserPage({
           Edit Pengguna
         </h1>
         <div className="flex flex-col gap-4">
+          {/* Preview Foto Profil Saat Ini */}
+          <div className="flex flex-col items-center mb-4">
+            <label className="block mb-2 font-semibold text-gray-700">
+              Foto Profil Saat Ini
+            </label>
+            <ProfilePicturePreview
+              profilePictureUrl={user.profile_picture}
+              altText="Foto Profil"
+            />
+          </div>
+
           <input
             name="name"
             type="text"
@@ -79,14 +91,32 @@ export default async function EditUserPage({
               <option value="pelajar">Pelajar</option>
             </select>
           </div>
+
+          {/* Upload Foto Profil Baru */}
+          <div>
+            <label className="block mb-2 font-semibold text-gray-700">
+              Ganti Foto Profil (Opsional)
+            </label>
+            <input
+              name="profile_picture"
+              type="file"
+              accept="image/*"
+              className="border border-emerald-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition w-full"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Format: JPG, JPEG, PNG, maksimal 2MB. Kosongkan jika tidak ingin
+              mengubah foto.
+            </p>
+          </div>
+
+          {/* Hidden input untuk menyimpan URL foto lama */}
           <input
-            name="profile_picture"
-            type="text"
-            defaultValue={user.profile_picture || ""}
-            placeholder="URL Foto Profil (opsional)"
-            className="border border-emerald-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition w-full"
+            type="hidden"
+            name="current_profile_picture"
+            value={user.profile_picture || ""}
           />
           <input type="hidden" name="id" value={user.id} />
+
           <button
             type="submit"
             className="bg-emerald-600 text-white rounded-lg px-4 py-2 font-semibold w-full hover:bg-emerald-700 transition"

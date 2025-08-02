@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input";
 import { addUserAction } from "@/lib/actions/user";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
@@ -80,6 +79,10 @@ export default function AddUserPage() {
             placeholder="URL Foto Profil (opsional)"
             className="border border-emerald-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition w-full"
           />
+          <p className="text-xs text-gray-400 mt-1">
+            Format: JPG, JPEG, PNG, maksimal 2MB. Kosongkan jika tidak ingin
+            mengubah foto.
+          </p>
 
           <button
             type="submit"
