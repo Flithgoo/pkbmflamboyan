@@ -31,7 +31,7 @@ export default async function EditUserPage({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br py-5 from-emerald-50 to-amber-50">
+    <div className="min-h-screen flex flex-grow items-center justify-center bg-gradient-to-br py-5 from-emerald-50 to-amber-50">
       <form
         action={editUserAction}
         method="POST"

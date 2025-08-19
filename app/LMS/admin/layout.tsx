@@ -10,7 +10,6 @@ export default function DashboardLayout({
     <SidebarProvider>
       <Sidebar />
       <main className="flex flex-grow bg-gradient-to-br py-5 from-emerald-50 to-amber-50">
-        <SidebarTrigger />
         {children}
       </main>
     </SidebarProvider>
