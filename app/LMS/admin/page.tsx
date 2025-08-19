@@ -1,4 +1,6 @@
 "use client";
+
+import Image from "next/image";
 import { getAllUser } from "@/lib/api/user";
 import React, { useEffect, useState } from "react";
 import {
@@ -50,7 +52,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8">
+    <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 pt-8 md:p-8">
       <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-emerald-700">
@@ -100,6 +102,7 @@ export default function AdminDashboard() {
             </button>
           </div>
         </div>
+
         <section
           id="daftar-pengguna"
           className="bg-white rounded-2xl shadow p-6 mt-6 overflow-x-auto"
@@ -138,7 +141,23 @@ export default function AdminDashboard() {
                   >
                     <TableCell>{idx + 1}</TableCell>
                     <TableCell>{user.id}</TableCell>
-                    <TableCell>{user.name}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 w-10 h-10">
+                          <Image
+                            width={"40"}
+                            height={"40"}
+                            className="w-full h-full object-cover rounded-full"
+                            src={
+                              user.profile_picture ||
+                              "/assets/placeholder_profile/placeholder_avatar.png"
+                            }
+                            alt=""
+                          />
+                        </div>
+                        <p className="ml-3">{user.name}</p>
+                      </div>
+                    </TableCell>
                     <TableCell>{user.username}</TableCell>
                     <TableCell>
                       <div
