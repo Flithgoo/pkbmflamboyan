@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import Adminsidebar from "@components/LMS/admin/Sidebar";
+import Adminsidebar from "@/app/components/LMS/admin/AdminSidebar";
 
 export default function DashboardLayout({
   children,

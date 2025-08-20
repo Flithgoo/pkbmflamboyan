@@ -31,7 +31,7 @@ const menuItems = [
     icon: UserPlus,
     href: "/LMS/admin/TambahPengguna",
   },
-  { name: "Atur Kelas", icon: BookOpen, href: "/LMS/admin/kelas" },
+  { name: "Mata Pelajaran", icon: BookOpen, href: "/LMS/admin/MataPelajaran" },
   { name: "Laporan", icon: BarChart2, href: "/LMS/admin/laporan" },
   { name: "Pengaturan", icon: Settings, href: "/LMS/admin/settings" },
 ];
@@ -69,6 +69,11 @@ export default function AdminSidebar() {
                 <Link
                   key={item.name}
                   href={item.href}
+                  onClick={() => {
+                    if (isMobile) {
+                      toggleSidebar();
+                    }
+                  }}
                   className={cn(
                     "flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive

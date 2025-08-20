@@ -124,7 +124,6 @@ export default function AdminDashboard() {
             <TableHeader>
               <TableRow>
                 <TableHead>No</TableHead>
-                <TableHead>Id</TableHead>
                 <TableHead>Nama</TableHead>
                 <TableHead>Username / NIPD</TableHead>
                 <TableHead className="ps-6">Role</TableHead>
@@ -140,7 +139,6 @@ export default function AdminDashboard() {
                     className="hover:bg-emerald-50 transition"
                   >
                     <TableCell>{idx + 1}</TableCell>
-                    <TableCell>{user.id}</TableCell>
                     <TableCell>
                       <div className="flex items-center">
                         <div className="flex-shrink-0 w-10 h-10">

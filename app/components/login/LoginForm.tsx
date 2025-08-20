@@ -39,7 +39,7 @@ const LoginForm = ({ role }: { role: string }) => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-emerald-50 to-white">
+    <div className="min-h-screen p-3 flex items-center justify-center bg-gradient-to-br from-amber-50 via-emerald-50 to-white">
       <div className="w-full max-w-md bg-white/90 p-8 rounded-2xl shadow-xl border border-amber-100">
         <div className="flex flex-col items-center mb-6">
           <h2 className="text-3xl font-bold text-emerald-500 text-center mb-2 drop-shadow-sm">

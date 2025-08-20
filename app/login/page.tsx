@@ -6,7 +6,7 @@ import { FaArrowLeft } from "react-icons/fa";
 
 export default function LoginSelection() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-amber-50">
+    <div className="min-h-screen p-3 flex items-center justify-center bg-gradient-to-br from-emerald-50 to-amber-50">
       <motion.div
         className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full"
         initial={{ opacity: 0, scale: 0.95, y: 30 }}
