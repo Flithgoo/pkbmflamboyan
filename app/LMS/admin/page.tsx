@@ -119,7 +119,7 @@ export default function AdminDashboard() {
               Tambah Pengguna
             </Link>
           </div>
-          <Table>
+          <Table className="text-xs">
             <TableCaption>Data seluruh pengguna sistem</TableCaption>
             <TableHeader>
               <TableRow>
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
                 <TableHead>Username / NIPD</TableHead>
                 <TableHead className="ps-6">Role</TableHead>
                 <TableHead>Dibuat tgl</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
+                <TableHead className="text-right pe-7">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
                         ? new Date(user.created_at).toLocaleDateString("id-ID")
                         : "-"}
                     </TableCell>
-                    <TableCell className="flex gap-2 justify-end">
+                    <TableCell className="flex text-base gap-2 justify-end">
                       <Link
                         href={`/LMS/admin/edit/${user.id}`}
                         className="p-2 rounded hover:bg-emerald-100 text-emerald-700 transition"
