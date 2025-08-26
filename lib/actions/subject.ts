@@ -1,30 +1,44 @@
 "use server";
 
-import bcrypt from "bcryptjs";
-import { insertUser, editUser, deleteUser } from "@/lib/api/user";
-import { redirect } from "next/navigation";
-import { uploadProfilePicture } from "@/app/utils/uploadPicHelper";
+import { InsertSubject } from "../api/subject";
+import { InsertTutorSubject } from "../api/tutor_subject";
 
-export async function addSubjectAction(formData: FormData) {
-  console.log("🚀 ~ addSubjectAction ~ formData:", formData);
-  const name = formData.get("name") as string;
-  const tutor = formData.get("tutor") as string;
+export async function addTutorSubjectAction(
+  prevState: { success: boolean },
+  formData: FormData
+) {
+  try {
+    console.log("🚀 ~ addTutorSubjectAction ~ formData:", formData);
+    const name = formData.get("name") as string;
+    const tutorId = formData.get("tutor") as string;
 
-  let profilePictureUrl: string | null = null;
-  // if (file) {
-  //   profilePictureUrl = await uploadProfilePicture(file);
-  // }
+    const { data: subject, error: subjectError } = await InsertSubject(name);
+    if (subjectError) {
+      const errorMessage =
+        typeof subjectError === "string" ? subjectError : subjectError.message;
+      throw new Error(`Error inserting subject: ${errorMessage}`);
+    }
 
-  // const { data, error } = await insertUser(
-  //   name,
-  //   username,
-  //   hashedPassword,
-  //   role,
-  //   profilePictureUrl
-  // );
-  // if (error) {
-  //   throw new Error(`Error inserting user: ${error.message}`);
-  // }
+    if (!subject || !subject[0] || !subject[0].id) {
+      throw new Error("Subject data is missing or invalid.");
+    }
 
-  console.log("app/lib/actions/user.ts User added successfully:");
+    const { data: tutor_subject, error: tutorError } = await InsertTutorSubject(
+      tutorId,
+      subject[0].id
+    );
+    if (tutorError) {
+      const errorMessage =
+        typeof tutorError === "string" ? tutorError : tutorError.message;
+      throw new Error(`Error inserting tutor subject: ${errorMessage}`);
+    }
+
+    console.log(
+      "app/lib/actions/user.ts Subject added successfully:",
+      tutor_subject
+    );
+    return { success: true };
+  } catch (err) {
+    return { success: false };
+  }
 }

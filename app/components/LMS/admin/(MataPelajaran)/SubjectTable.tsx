@@ -1,6 +1,3 @@
-"use client";
-import Link from "next/link";
-import { FaUserEdit, FaTrashAlt } from "react-icons/fa";
 import {
   Table,
   TableHeader,
@@ -10,14 +7,25 @@ import {
   TableCell,
   TableCaption,
 } from "@/components/ui/table";
+import { FaUserEdit, FaTrashAlt } from "react-icons/fa";
+import Link from "next/link";
+
+interface Subject {
+  id: string | number;
+  name: string;
+  created_at?: string;
+  // Add other properties if needed
+}
+
+interface SubjectTableProps {
+  subjects: Subject[];
+  handleDelete: (subject: Subject) => void;
+}
 
 export default function SubjectTable({
   subjects,
-  onDelete,
-}: {
-  subjects: any[];
-  onDelete: (subject: any) => void;
-}) {
+  handleDelete,
+}: SubjectTableProps) {
   return (
     <Table>
       <TableCaption>Tabel Mata Pelajaran PKBM Flamboyan</TableCaption>
@@ -39,7 +47,7 @@ export default function SubjectTable({
             >
               <TableCell>{idx + 1}</TableCell>
               <TableCell>{subject.name}</TableCell>
-              <TableCell>Nama tutor</TableCell>
+              <TableCell>Prassetiyo Utomo</TableCell>
               <TableCell>
                 {subject.created_at
                   ? new Date(subject.created_at).toLocaleDateString("id-ID")
@@ -57,7 +65,7 @@ export default function SubjectTable({
                   type="button"
                   className="p-2 rounded hover:bg-red-100 text-red-600 transition"
                   title="Hapus User"
-                  onClick={() => onDelete(subject)}
+                  onClick={() => handleDelete(subject)}
                 >
                   <FaTrashAlt />
                 </button>
