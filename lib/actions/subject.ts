@@ -1,6 +1,6 @@
 "use server";
 
-import { InsertSubject } from "../api/subject";
+import { deleteSubject, InsertSubject } from "../api/subject";
 import { InsertTutorSubject } from "../api/tutor_subject";
 
 export async function addTutorSubjectAction(
@@ -41,4 +41,18 @@ export async function addTutorSubjectAction(
   } catch (err) {
     return { success: false };
   }
+}
+
+export async function deleteSubjectAction(id: string) {
+  const { error } = await deleteSubject(id);
+
+  if (error) {
+    const errorMessage = typeof error === "string" ? error : error.message;
+    return { error: errorMessage };
+  }
+
+  console.log(
+    `app/lib/actions/user.ts User with id = ${id} deleted successfully`
+  );
+  return { success: true };
 }

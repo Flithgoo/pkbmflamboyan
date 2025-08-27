@@ -12,7 +12,7 @@ import {
   TableCell,
   TableCaption,
 } from "@/components/ui/table";
-import ConfirmDeleteModal from "@components/LMS/admin/ConfirmDeleteModal";
+import ConfirmDeleteModal from "@/app/components/LMS/admin/ConfirmDeleteUserModal";
 import { FaUserEdit, FaTrashAlt, FaPlus } from "react-icons/fa";
 import Link from "next/link";
 import { deleteUserAction } from "@/lib/actions/user";

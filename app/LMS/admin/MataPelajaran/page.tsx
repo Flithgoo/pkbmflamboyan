@@ -1,6 +1,5 @@
 "use client";
 
-import { getAllSubject } from "@/lib/api/subject";
 import React, { useEffect, useState } from "react";
 import { useFormState } from "react-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import ConfirmDeleteModal from "@components/LMS/admin/ConfirmDeleteModal";
 import { FaPlus } from "react-icons/fa";
 import {
   Select,
@@ -24,17 +22,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { addTutorSubjectAction } from "@/lib/actions/subject";
+import {
+  addTutorSubjectAction,
+  deleteSubjectAction,
+} from "@/lib/actions/subject";
 import SubjectTable from "@/app/components/LMS/admin/SubjectTable";
 import { getAllTutor } from "@/lib/api/tutor";
 import { Label } from "@/components/ui/label";
+import { getAllTutorSubject } from "@/lib/api/tutor_subject";
+import ConfirmDeleteSubjectModal from "@/app/components/LMS/admin/(MataPelajaran)/ConfirmDeleteSubjectModal";
 
 export default function AturKelas() {
-  const [subjects, setSubject] = useState<any[]>([]);
+  const [tutorSubjects, setTutorSubjects] = useState<any[]>([]);
   const [tutors, setTutors] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [selectedTutor, setSelectedTutor] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
+  const [errorTutor, setErrorTutor] = useState<string>("");
 
   // formState = { success: boolean, error?: string }
   const [formState, formAction] = useFormState(addTutorSubjectAction, {
@@ -45,8 +50,8 @@ export default function AturKelas() {
   useEffect(() => {
     if (formState.success) {
       const fetchData = async () => {
-        const { data } = await getAllSubject();
-        setSubject(data ?? []);
+        const { data } = await getAllTutorSubject();
+        setTutorSubjects(data ?? []);
       };
       fetchData();
       setOpen(false);
@@ -56,12 +61,28 @@ export default function AturKelas() {
   useEffect(() => {
     async function fetchData() {
       const { data: tutors } = await getAllTutor();
-      const { data: subject } = await getAllSubject();
-      setSubject(subject ?? []);
+      const { data: subject } = await getAllTutorSubject();
+      setTutorSubjects(subject ?? []);
       setTutors(tutors ?? []);
     }
     fetchData();
   }, []);
+
+  async function handleConfirmDelete() {
+    if (!selectedSubject) return;
+
+    const result = await deleteSubjectAction(selectedSubject.id);
+
+    if (result?.success) {
+      setShowDelete(false); // Tutup modal
+      // Refresh data
+      const { data } = await getAllTutorSubject();
+      setTutorSubjects(data ?? []);
+    } else {
+      alert("Gagal menghapus pengguna. Silakan coba lagi.");
+      console.error("Error deleting subject:", result?.error);
+    }
+  }
 
   function handleDelete(subject: any) {
     setSelectedSubject(subject);
@@ -96,11 +117,25 @@ export default function AturKelas() {
             </div>
 
             {/* tabel daftar mapel */}
-            <SubjectTable subjects={subjects} onDelete={handleDelete} />
+            <SubjectTable
+              tutorSubjects={tutorSubjects}
+              onDelete={handleDelete}
+            />
 
             {/* modal/dialog uintuk tambah mapel */}
             <DialogContent className="sm:max-w-[425px] text-emerald-700">
-              <form action={formAction} method="POST">
+              <form
+                action={formAction}
+                method="POST"
+                onSubmit={(e) => {
+                  if (!selectedTutor) {
+                    e.preventDefault(); // cegah submit
+                    setErrorTutor("Pilih tutor terlebih dahulu");
+                  } else {
+                    setErrorTutor(""); // reset error
+                  }
+                }}
+              >
                 <DialogHeader>
                   <DialogTitle className="text-2xl pb-4">
                     Tambah Mata Pelajaran
@@ -109,11 +144,20 @@ export default function AturKelas() {
                 <div className="grid gap-4">
                   <div className="grid gap-3">
                     <Label htmlFor="name-1">Nama</Label>
-                    <Input id="name-1" name="name" placeholder="Nama Mapel" />
+                    <Input
+                      id="name-1"
+                      name="name"
+                      placeholder="Nama Mapel"
+                      required
+                    />
                   </div>
                   <div className="grid gap-3">
                     <Label htmlFor="tutor-selector">Tutor</Label>
-                    <Select name="tutor">
+                    <Select
+                      name="tutor"
+                      value={selectedTutor}
+                      onValueChange={(value) => setSelectedTutor(value)}
+                    >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Pilih tutor" />
                       </SelectTrigger>
@@ -130,6 +174,9 @@ export default function AturKelas() {
                         </SelectGroup>
                       </SelectContent>
                     </Select>
+                    {errorTutor && (
+                      <p className="text-red-600 text-sm mt-1">{errorTutor}</p>
+                    )}
                   </div>
                 </div>
 
@@ -149,11 +196,11 @@ export default function AturKelas() {
         </section>
       </main>
 
-      <ConfirmDeleteModal
+      <ConfirmDeleteSubjectModal
         open={showDelete}
         onClose={() => setShowDelete(false)}
-        // onConfirm={handleConfirmDelete}
-        user={selectedSubject}
+        onConfirm={handleConfirmDelete}
+        subject={selectedSubject}
       />
     </div>
   );

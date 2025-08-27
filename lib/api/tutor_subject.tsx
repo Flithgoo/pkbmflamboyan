@@ -3,6 +3,26 @@
 import { getAuthContext } from "@/lib/getAuthContext";
 import { isAuthorizedAdmin } from "@/lib/isAuthorized";
 
+export async function getAllTutorSubject() {
+  const { token, supabase } = await getAuthContext();
+  const isAuthorized = await isAuthorizedAdmin(token);
+
+  if (!isAuthorized) {
+    return { data: null, error: "Not authorized" };
+  }
+  const { data, error } = await supabase.from("subjects").select(`
+    *,
+    tutor_subjects(
+      users!user_id(id, name)
+    )
+  `);
+  if (error) {
+    console.error("Error fetching subjects:", error);
+    return { error };
+  }
+  return { data, error: null };
+}
+
 export async function InsertTutorSubject(user_id: string, subject_id: string) {
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);
