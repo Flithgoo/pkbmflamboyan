@@ -3,47 +3,37 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  Home,
-  BookOpen,
-  Users,
-  Settings,
-  LogOut,
-  BarChart2,
-  UserPlus,
-  UserCog,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { HiMenuAlt2 } from "react-icons/hi";
-
-const menuItems = [
-  { name: "Dashboard", icon: Home, href: "/LMS/admin" },
-  { name: "Pengguna", icon: Users, href: "/LMS/admin#daftar-pengguna" },
-  {
-    name: "Tambah Pengguna",
-    icon: UserPlus,
-    href: "/LMS/admin/TambahPengguna",
-  },
-  { name: "Mata Pelajaran", icon: BookOpen, href: "/LMS/admin/MataPelajaran" },
-  { name: "Laporan", icon: BarChart2, href: "/LMS/admin/laporan" },
-  { name: "Pengaturan", icon: Settings, href: "/LMS/admin/settings" },
-];
+import { logoutAction } from "@/lib/actions/logout";
+import { adminDashboardLinks, tutorDashboardLinks } from "@/app/utils/data";
+import Logo from "../../ui/Logo";
 
 export default function AdminSidebar() {
   const { toggleSidebar, isMobile } = useSidebar();
   const pathname = usePathname();
 
+  let menuItems;
+  let path;
+  if (pathname.startsWith("/LMS/admin")) {
+    menuItems = adminDashboardLinks;
+    path = "/LMS/admin";
+  } else {
+    menuItems = tutorDashboardLinks;
+    path = "/LMS/tutor";
+  }
+
   return (
     <>
       <Sidebar>
-        <aside className="relative flex flex-col h-screen bg-emerald-600 text-white shadow-lg">
+        <aside className="relative flex flex-col h-screen bg-slate-50 text-emerald-600 shadow-lg">
           {/* Toggle Button */}
           <HiMenuAlt2
             role="button"
@@ -54,8 +44,10 @@ export default function AdminSidebar() {
           />
 
           {/* Logo */}
-          <SidebarHeader className="border-b border-white/20 text-center pt-3 text-xl font-bold tracking-wide">
-            PKBM Flamboyan
+          <SidebarHeader className="border-b border-emerald-600/20 pt-3 ">
+            <div className="flex items-center justify-start px-4 py-3">
+              <Logo />
+            </div>
           </SidebarHeader>
 
           {/* Menu */}
@@ -64,7 +56,7 @@ export default function AdminSidebar() {
               const Icon = item.icon;
               const isActive =
                 pathname === item.href ||
-                (item.href !== "/LMS/admin" && pathname.startsWith(item.href));
+                (item.href !== path && pathname.startsWith(item.href));
               return (
                 <Link
                   key={item.name}
@@ -77,7 +69,7 @@ export default function AdminSidebar() {
                   className={cn(
                     "flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-amber-400/90 text-white shadow"
+                      ? "bg-amber-500/80 text-white shadow"
                       : "hover:bg-emerald-500 hover:text-white/90"
                   )}
                 >
@@ -89,11 +81,16 @@ export default function AdminSidebar() {
           </SidebarContent>
 
           {/* Logout */}
-          <SidebarFooter className="p-4 border-t border-white/20">
-            <button className="w-full flex items-center gap-3 px-4 py-2 rounded-lg font-semibold text-white bg-emerald-500 hover:bg-red-600 transition">
-              <LogOut size={18} />
-              Logout
-            </button>
+          <SidebarFooter className="p-4 border-t border-emerald-600/20">
+            <form action={logoutAction} method="POST">
+              <button
+                type="submit"
+                className="w-full flex items-center gap-3 px-4 py-2 rounded-lg font-semibold text-white bg-emerald-500 hover:bg-red-600 transition"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </form>
           </SidebarFooter>
         </aside>
       </Sidebar>

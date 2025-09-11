@@ -1,3 +1,17 @@
+import {
+  Home,
+  BookOpen,
+  Users,
+  Settings,
+  BarChart2,
+  UserPlus,
+} from "lucide-react";
+import {
+  UserGroupIcon,
+  HomeIcon,
+  DocumentDuplicateIcon,
+} from "@heroicons/react/24/outline";
+
 const imageData = [
   "/gallery/lab_komputer.jpg", // replace with your image paths
   "/gallery/foto bersama dinas.jpg",
@@ -86,7 +100,7 @@ const listFaq = [
   },
 ];
 
-const links = [
+const tutorDashboardLinks = [
   { name: "Dashboard", href: "/LMS/tutor", icon: "HomeIcon" },
   {
     name: "Materi",
@@ -99,4 +113,23 @@ const links = [
   { name: "Bantuan", href: "/LMS/Bantuan", icon: "Bantuan" },
 ];
 
-export { imageData, listTestimoni, listFaq, links };
+const adminDashboardLinks = [
+  { name: "Dashboard", icon: Home, href: "/LMS/admin" },
+  { name: "Pengguna", icon: Users, href: "/LMS/admin#daftar-pengguna" },
+  {
+    name: "Tambah Pengguna",
+    icon: UserPlus,
+    href: "/LMS/admin/TambahPengguna",
+  },
+  { name: "Mata Pelajaran", icon: BookOpen, href: "/LMS/admin/MataPelajaran" },
+  { name: "Laporan", icon: BarChart2, href: "/LMS/admin/laporan" },
+  { name: "Pengaturan", icon: Settings, href: "/LMS/admin/settings" },
+];
+
+export {
+  imageData,
+  listTestimoni,
+  listFaq,
+  tutorDashboardLinks,
+  adminDashboardLinks,
+};

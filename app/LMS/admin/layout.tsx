@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import Adminsidebar from "@/app/components/LMS/admin/AdminSidebar";
+import AdminSidebar from "@/app/components/LMS/admin/AdminSidebar";
 
 export default function DashboardLayout({
   children,
@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <Adminsidebar />
+      <AdminSidebar />
       <main className="flex flex-grow bg-gradient-to-br py-5 from-emerald-50 to-amber-50">
         {children}
       </main>

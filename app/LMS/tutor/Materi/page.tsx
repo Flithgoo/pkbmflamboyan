@@ -9,7 +9,7 @@ import {
 
 const page = () => {
   return (
-    <div className="flex flex-row">
+    <div className="flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 pt-8 md:p-8 flex flex-row">
       <div className="flex w-full gap-2">
         <Card className="border-gray-200 grow">
           <CardHeader className="pb-2">

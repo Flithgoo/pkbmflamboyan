@@ -12,7 +12,7 @@ const Dashboard = async () => {
   const { profile_picture, name, role } = data;
 
   return (
-    <main className="flex flex-col gap-8 items-center justify-center min-h-[60vh] px-4">
+    <main className=" flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 pt-8 md:p-8 flex flex-col gap-8 items-center justify-center min-h-[60vh] px-4">
       <section className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
         <Avatar className="w-20 h-20 shadow-md">
           <AvatarImage
