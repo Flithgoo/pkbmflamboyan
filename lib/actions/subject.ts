@@ -10,7 +10,7 @@ export async function addTutorSubjectAction(
   try {
     console.log("🚀 ~ addTutorSubjectAction ~ formData:", formData);
     const name = formData.get("name") as string;
-    const tutorId = formData.get("tutor") as string;
+    const tutorId = formData.get("tutor") as unknown as number;
 
     const { data: subject, error: subjectError } = await InsertSubject(name);
     if (subjectError) {
@@ -43,7 +43,7 @@ export async function addTutorSubjectAction(
   }
 }
 
-export async function deleteSubjectAction(id: string) {
+export async function deleteSubjectAction(id: number) {
   const { error } = await deleteSubject(id);
 
   if (error) {

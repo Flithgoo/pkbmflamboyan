@@ -38,7 +38,7 @@ export async function InsertSubject(name: string) {
   return { data, error: null };
 }
 
-export async function deleteSubject(id: string) {
+export async function deleteSubject(id: number) {
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);
 
