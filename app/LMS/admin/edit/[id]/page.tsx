@@ -9,7 +9,7 @@ export default async function EditUserPage({
 }: {
   params: { id: string };
 }) {
-  const { data: user, error } = await getUserById(params.id);
+  const { data: user, error } = await getUserById(Number(params.id));
 
   if (error || !user) {
     return (
@@ -47,7 +47,7 @@ export default async function EditUserPage({
               Foto Profil Saat Ini
             </label>
             <ProfilePicturePreview
-              profilePictureUrl={user.profile_picture}
+              profilePictureUrl={user.profile_picture ?? undefined}
               altText="Foto Profil"
             />
           </div>
