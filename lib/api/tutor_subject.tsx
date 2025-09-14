@@ -23,7 +23,7 @@ export async function getAllTutorSubject() {
   return { data, error: null };
 }
 
-export async function InsertTutorSubject(user_id: string, subject_id: string) {
+export async function InsertTutorSubject(user_id: number, subject_id: number) {
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);
 
@@ -42,6 +42,20 @@ export async function InsertTutorSubject(user_id: string, subject_id: string) {
     .select();
   if (error) {
     console.error("Error inserting subject:", error);
+    return { error };
+  }
+  return { data, error: null };
+}
+
+export async function getTutorSubject(user_id: number) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase
+    .from("tutor_subjects")
+    .select(`subject:subjects ( id, name, created_at, description )`)
+    .eq("user_id", user_id); // ganti dengan id tutor
+  if (error) {
+    console.error("Error fetching subjects:", error);
     return { error };
   }
   return { data, error: null };

@@ -103,8 +103,8 @@ const listFaq = [
 const tutorDashboardLinks = [
   { name: "Dashboard", href: "/LMS/tutor", icon: "HomeIcon" },
   {
-    name: "Materi",
-    href: "/LMS/tutor/Materi",
+    name: "Mata Pelajaran",
+    href: "/LMS/tutor/Mapel",
     icon: "DocumentDuplicateIcon",
   },
   { name: "Tugas", href: "/LMS/Tugas", icon: "UserGroupIcon" },

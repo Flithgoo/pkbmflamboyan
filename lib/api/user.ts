@@ -19,7 +19,7 @@ const getAuthContext = async (): Promise<{
 
 export async function getUser() {
   const { token, supabase } = await getAuthContext();
-  let user = null; // Initialize user as null
+  let user: any = null; // Initialize user as null
   if (token) {
     try {
       user = await verifyJwt(token); // user = { id, username, role }
@@ -31,14 +31,14 @@ export async function getUser() {
 
   const { data, error } = await supabase
     .from("users")
-    .select("profile_picture, name, role")
+    .select("id, profile_picture, name, role")
     .eq("id", user?.id)
     .single();
 
   return { data, error };
 }
 
-export async function getUserById(id: string) {
+export async function getUserById(id: number) {
   const { token, supabase } = await getAuthContext();
   let user = null; // Initialize user as null
   if (token) {
@@ -127,7 +127,7 @@ export async function insertUser(
 }
 
 export async function editUser(
-  id: string,
+  id: number,
   name: string,
   username: string,
   password: string | null, // sudah dalam bentuk hash
@@ -170,7 +170,7 @@ export async function editUser(
   return { data, error: null };
 }
 
-export async function deleteUser(id: string) {
+export async function deleteUser(id: number) {
   const { token, supabase } = await getAuthContext();
 
   let user = null; // Initialize user as null
@@ -201,7 +201,7 @@ export async function deleteUser(id: string) {
         // Contoh: https://xxxx.supabase.co/storage/v1/object/public/profile-picture/folder/file.jpg
         // Ambil bagian setelah "/profile-picture/"
         const match = profile_picture.match(/\/profile-picture\/(.+)$/);
-        profilePicturePath = match ? match[1] : null;
+        profilePicturePath = match ? match[1] : "";
       }
     } catch (e) {
       console.error("Gagal mendapatkan path dari profile_picture:", e);
