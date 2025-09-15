@@ -37,7 +37,7 @@ export default function AdminSidebar() {
           {/* Toggle Button */}
           <HiMenuAlt2
             role="button"
-            className="absolute text-emerald-600 top-3 -right-9 w-8 h-8"
+            className="absolute text-emerald-600 top-2 -right-8 w-8 h-8"
             onClick={() => {
               toggleSidebar();
             }}
