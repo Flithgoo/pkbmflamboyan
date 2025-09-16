@@ -22,68 +22,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
 import {
   addTutorSubjectAction,
   deleteSubjectAction,
 } from "@/lib/actions/subject";
-import SubjectTable from "@/app/components/LMS/admin/SubjectTable";
 import { getAllTutor } from "@/lib/api/tutor";
-import { Label } from "@/components/ui/label";
 import { getAllTutorSubject } from "@/lib/api/tutor_subject";
+
+import SubjectTable from "@/app/components/LMS/admin/SubjectTable";
 import ConfirmDeleteSubjectModal from "@/app/components/LMS/admin/(MataPelajaran)/ConfirmDeleteSubjectModal";
 
 export default function AturKelas() {
-  const [tutorSubjects, setTutorSubjects] = useState<any[]>([]);
-  const [tutors, setTutors] = useState<any[]>([]);
-  const [open, setOpen] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
-  const [selectedTutor, setSelectedTutor] = useState<string>("");
-  const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
-  const [errorTutor, setErrorTutor] = useState<string>("");
+  // state untuk data
+  const [tutorSubjects, setTutorSubjects] = useState<any[]>([]); // daftar mapel + tutor
+  const [tutors, setTutors] = useState<any[]>([]); // daftar tutor
+
+  // state untuk UI/Modal
+  const [open, setOpen] = useState(false); // modal tambah mapel
+  const [showDelete, setShowDelete] = useState(false); // modal konfirmasi hapus
+  const [selectedTutor, setSelectedTutor] = useState<string>(""); // tutor yang dipilih
+  const [selectedSubject, setSelectedSubject] = useState<any | null>(null); // subject/mapel yang dipilih
+  const [errorTutor, setErrorTutor] = useState<string>(""); // validasi jika tutor belum dipilih
 
   // formState = { success: boolean, error?: string }
   const [formState, formAction] = useFormState(addTutorSubjectAction, {
     success: false,
   });
 
-  // kalau success -> tutup dialog
+  // jika form berhasil -> refresh data + tutup modal
   useEffect(() => {
     if (formState.success) {
-      const fetchData = async () => {
+      (async () => {
         const { data } = await getAllTutorSubject();
         setTutorSubjects(data ?? []);
-      };
-      fetchData();
+      })();
       setOpen(false);
     }
   }, [formState.success]);
 
+  // ambil data awal (tutor & mapel)
   useEffect(() => {
-    async function fetchData() {
+    (async () => {
       const { data: tutors } = await getAllTutor();
       const { data: subject } = await getAllTutorSubject();
-      setTutorSubjects(subject ?? []);
       setTutors(tutors ?? []);
-    }
-    fetchData();
+      setTutorSubjects(subject ?? []);
+    })();
   }, []);
 
+  // handle delete subject/mapel
   async function handleConfirmDelete() {
     if (!selectedSubject) return;
 
     const result = await deleteSubjectAction(selectedSubject.id);
 
     if (result?.success) {
-      setShowDelete(false); // Tutup modal
-      // Refresh data
+      setShowDelete(false); // tutup modal delete
+      // refresh data setelah hapus
       const { data } = await getAllTutorSubject();
       setTutorSubjects(data ?? []);
     } else {
-      alert("Gagal menghapus pengguna. Silakan coba lagi.");
+      alert("Gagal menghapus mata pelajaran. Silakan coba lagi.");
       console.error("Error deleting subject:", result?.error);
     }
   }
 
+  // trigger delete modal
   function handleDelete(subject: any) {
     setSelectedSubject(subject);
     setShowDelete(true);
@@ -91,18 +97,19 @@ export default function AturKelas() {
 
   return (
     <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 pt-8 md:p-8">
+      {/* header */}
       <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-emerald-700">
-            Atur Mata Pelajaran
-          </h1>
-        </div>
+        <h1 className="text-3xl font-bold text-emerald-700">
+          Atur Mata Pelajaran
+        </h1>
       </header>
+
       <main>
         <section
           id="daftar-materi"
           className="bg-white rounded-2xl shadow p-6 mt-6 overflow-x-auto"
         >
+          {/* dialog untuk tambah mapel */}
           <Dialog open={open} onOpenChange={setOpen}>
             <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
               <h2 className="text-xl font-semibold text-emerald-700">
@@ -122,16 +129,17 @@ export default function AturKelas() {
               onDelete={handleDelete}
             />
 
-            {/* modal/dialog uintuk tambah mapel */}
+            {/* modal tambah mapel */}
             <DialogContent className="sm:max-w-[425px] text-emerald-700">
               <form
                 action={formAction}
                 onSubmit={(e) => {
+                  // validasi -> tutor wajib dipilih
                   if (!selectedTutor) {
-                    e.preventDefault(); // cegah submit
+                    e.preventDefault();
                     setErrorTutor("Pilih tutor terlebih dahulu");
                   } else {
-                    setErrorTutor(""); // reset error
+                    setErrorTutor("");
                   }
                 }}
               >
@@ -140,7 +148,9 @@ export default function AturKelas() {
                     Tambah Mata Pelajaran
                   </DialogTitle>
                 </DialogHeader>
+
                 <div className="grid gap-4">
+                  {/* input nama mapel */}
                   <div className="grid gap-3">
                     <Label htmlFor="name-1">Nama</Label>
                     <Input
@@ -150,6 +160,8 @@ export default function AturKelas() {
                       required
                     />
                   </div>
+
+                  {/* select tutor */}
                   <div className="grid gap-3">
                     <Label htmlFor="tutor-selector">Tutor</Label>
                     <Select
@@ -177,11 +189,26 @@ export default function AturKelas() {
                       <p className="text-red-600 text-sm mt-1">{errorTutor}</p>
                     )}
                   </div>
+
+                  {/* deskripsi mapel */}
+                  <div className="grid gap-3">
+                    <Label htmlFor="description">Deskripsi</Label>
+                    <textarea
+                      className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent"
+                      id="description"
+                      name="description"
+                      placeholder="Deskripsi singkat mata pelajaran"
+                    />
+                  </div>
                 </div>
 
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button className="my-2" variant="outline">
+                    <Button
+                      onClick={() => setSelectedTutor("")}
+                      className="my-2"
+                      variant="outline"
+                    >
                       Batal
                     </Button>
                   </DialogClose>
@@ -195,6 +222,7 @@ export default function AturKelas() {
         </section>
       </main>
 
+      {/* modal konfirmasi hapus */}
       <ConfirmDeleteSubjectModal
         open={showDelete}
         onClose={() => setShowDelete(false)}

@@ -8,11 +8,15 @@ export async function addTutorSubjectAction(
   formData: FormData
 ) {
   try {
-    console.log("🚀 ~ addTutorSubjectAction ~ formData:", formData);
     const name = formData.get("name") as string;
     const tutorId = formData.get("tutor") as unknown as number;
+    const description = (formData.get("description") as string) || "";
 
-    const { data: subject, error: subjectError } = await InsertSubject(name);
+    const { data: subject, error: subjectError } = await InsertSubject(
+      name,
+      description
+    );
+
     if (subjectError) {
       const errorMessage =
         typeof subjectError === "string" ? subjectError : subjectError.message;

@@ -15,7 +15,7 @@ export async function getAllSubject() {
   return { data, error };
 }
 
-export async function InsertSubject(name: string) {
+export async function InsertSubject(name: string, description: string) {
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);
 
@@ -28,6 +28,7 @@ export async function InsertSubject(name: string) {
     .insert([
       {
         name,
+        description,
       },
     ])
     .select();

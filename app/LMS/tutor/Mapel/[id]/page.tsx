@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
+import { useUserStore } from "@/src/store/useUserStore";
 
 // Dummy data materi, ganti dengan fetch dari API sesuai id mapel
 const material = [
@@ -62,6 +63,7 @@ export default function MateriMapelPage({
   const [open, setOpen] = useState(false); // state untuk mengatur form terbuka/tutup
   const [selected, setSelected] = useState<string[]>([]); // state penyimpan kelas terpilih
   const [value, setValue] = useState(""); // state untuk isi materi menggunakan ReactQuill
+  const { user, clearUser } = useUserStore(); // ambil user dari zustand
 
   const toggleSelect = (kelas: string) => {
     setSelected((prev) =>
@@ -120,8 +122,14 @@ export default function MateriMapelPage({
                 // Tampilan singkat (collapsed)
                 <div className="flex items-center text-gray-600">
                   <Image
-                    src="https://placehold.co/40x40"
+                    src={
+                      user?.profile_picture
+                        ? user?.profile_picture
+                        : "/assets/placeholder_profile/placeholder_avatar.png"
+                    }
                     alt="avatar"
+                    width={30}
+                    height={30}
                     className="w-10 h-10 rounded-full mr-3"
                   />
                   <span className="text-sm text-gray-500">

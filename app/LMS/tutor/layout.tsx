@@ -1,5 +1,5 @@
 import React from "react";
-import AdminSidebar from "@/app/components/LMS/admin/AdminSidebar";
+import AdminSidebar from "@/app/components/LMS/LMSSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Layout = async ({ children }: { children: React.ReactNode }) => {

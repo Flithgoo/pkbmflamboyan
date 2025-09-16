@@ -14,7 +14,7 @@ import {
 import { HiMenuAlt2 } from "react-icons/hi";
 import { logoutAction } from "@/lib/actions/logout";
 import { adminDashboardLinks, tutorDashboardLinks } from "@/app/utils/data";
-import Logo from "../../ui/Logo";
+import Logo from "../ui/Logo";
 
 export default function AdminSidebar() {
   const { toggleSidebar, isMobile } = useSidebar();
