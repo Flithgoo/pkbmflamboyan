@@ -15,7 +15,7 @@ export default function SideNav() {
         <NavLinks />
       </nav>
       {/* Sign Out Button */}
-      <form className="mt-8" action={logoutAction} method="POST">
+      <form className="mt-8" action={logoutAction}>
         <button
           className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-50 text-emerald-700 font-semibold py-2 transition hover:bg-emerald-100 hover:text-emerald-900 shadow-sm"
           type="submit"

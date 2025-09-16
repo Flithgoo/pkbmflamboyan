@@ -126,7 +126,6 @@ export default function AturKelas() {
             <DialogContent className="sm:max-w-[425px] text-emerald-700">
               <form
                 action={formAction}
-                method="POST"
                 onSubmit={(e) => {
                   if (!selectedTutor) {
                     e.preventDefault(); // cegah submit

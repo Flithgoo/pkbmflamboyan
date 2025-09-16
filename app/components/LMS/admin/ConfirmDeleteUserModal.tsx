@@ -28,7 +28,7 @@ export default function ConfirmDeleteModal({
           >
             Batal
           </button>
-          <form action={onConfirm} method="POST">
+          <form action={onConfirm}>
             <input type="hidden" name="id" value={user.id} />
             <button
               type="submit"

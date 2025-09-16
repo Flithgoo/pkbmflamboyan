@@ -5,12 +5,11 @@ import {
   Settings,
   BarChart2,
   UserPlus,
+  ClipboardList,
+  BellRing,
+  ClipboardCheck,
+  Info,
 } from "lucide-react";
-import {
-  UserGroupIcon,
-  HomeIcon,
-  DocumentDuplicateIcon,
-} from "@heroicons/react/24/outline";
 
 const imageData = [
   "/gallery/lab_komputer.jpg", // replace with your image paths
@@ -101,16 +100,16 @@ const listFaq = [
 ];
 
 const tutorDashboardLinks = [
-  { name: "Dashboard", href: "/LMS/tutor", icon: "HomeIcon" },
+  { name: "Dashboard", href: "/LMS/tutor", icon: Home },
   {
     name: "Mata Pelajaran",
     href: "/LMS/tutor/Mapel",
-    icon: "DocumentDuplicateIcon",
+    icon: BookOpen,
   },
-  { name: "Tugas", href: "/LMS/Tugas", icon: "UserGroupIcon" },
-  { name: "Pengumuman", href: "/LMS/Pengumuman", icon: "Pengumuman" },
-  { name: "Ujian", href: "/LMS/Ujian", icon: "Ujian" },
-  { name: "Bantuan", href: "/LMS/Bantuan", icon: "Bantuan" },
+  { name: "Tugas", href: "/LMS/Tugas", icon: ClipboardList },
+  { name: "Pengumuman", href: "/LMS/Pengumuman", icon: BellRing },
+  { name: "Ujian", href: "/LMS/Ujian", icon: ClipboardCheck },
+  { name: "Bantuan", href: "/LMS/Bantuan", icon: Info },
 ];
 
 const adminDashboardLinks = [

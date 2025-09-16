@@ -61,7 +61,6 @@ export default function MateriMapelPage({
   const [open, setOpen] = useState(false); // state untuk mengatur form terbuka/tutup
   const [selected, setSelected] = useState<string[]>([]); // state penyimpan kelas terpilih
   const [value, setValue] = useState(""); // state untuk isi materi menggunakan ReactQuill
-  console.log("🚀 ~ MateriMapelPage ~ value:", value);
 
   const toggleSelect = (kelas: string) => {
     setSelected((prev) =>
