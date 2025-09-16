@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import Image from "next/image";
 
 // Dummy data materi, ganti dengan fetch dari API sesuai id mapel
 const material = [
@@ -118,7 +119,7 @@ export default function MateriMapelPage({
               {!open ? (
                 // Tampilan singkat (collapsed)
                 <div className="flex items-center text-gray-600">
-                  <img
+                  <Image
                     src="https://placehold.co/40x40"
                     alt="avatar"
                     className="w-10 h-10 rounded-full mr-3"
