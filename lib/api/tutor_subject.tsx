@@ -47,6 +47,29 @@ export async function InsertTutorSubject(user_id: number, subject_id: number) {
   return { data, error: null };
 }
 
+export async function EditTutorSubject(user_id: number, subject_id: number) {
+  const { token, supabase } = await getAuthContext();
+  const isAuthorized = await isAuthorizedAdmin(token);
+
+  if (!isAuthorized) {
+    return { data: null, error: "Not authorized" };
+  }
+
+  const { data, error } = await supabase
+    .from("tutor_subjects")
+    .update({
+      user_id,
+    })
+    .eq("subject_id", subject_id) // i want to update based on subject_id
+    .select();
+
+  if (error) {
+    console.error("Error editing subject:", error);
+    return { error };
+  }
+  return { data, error: null };
+}
+
 export async function getTutorSubject(user_id: number) {
   const { supabase } = await getAuthContext();
 

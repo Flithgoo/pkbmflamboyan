@@ -25,15 +25,42 @@ export async function InsertSubject(name: string, description: string) {
 
   const { data, error } = await supabase
     .from("subjects")
-    .insert([
-      {
-        name,
-        description,
-      },
-    ])
+    .insert({
+      name,
+      description,
+    })
     .select();
+
   if (error) {
     console.error("Error inserting subject:", error);
+    return { error };
+  }
+  return { data, error: null };
+}
+
+export async function editSubject(
+  id: number,
+  name: string,
+  description: string
+) {
+  const { token, supabase } = await getAuthContext();
+  const isAuthorized = await isAuthorizedAdmin(token);
+
+  if (!isAuthorized) {
+    return { data: null, error: "Not authorized" };
+  }
+
+  const { data, error } = await supabase
+    .from("subjects")
+    .update({
+      name,
+      description,
+    })
+    .eq("id", id)
+    .select();
+
+  if (error) {
+    console.error("Error editing subject:", error);
     return { error };
   }
   return { data, error: null };

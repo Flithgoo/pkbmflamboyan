@@ -27,11 +27,11 @@ import { Label } from "@/components/ui/label";
 import {
   addTutorSubjectAction,
   deleteSubjectAction,
+  editSubjectAction,
 } from "@/lib/actions/subject";
 import { getAllTutor } from "@/lib/api/tutor";
 import { getAllTutorSubject } from "@/lib/api/tutor_subject";
-
-import SubjectTable from "@/app/components/LMS/admin/SubjectTable";
+import SubjectTable from "@/app/components/LMS/admin/(MataPelajaran)/SubjectTable";
 import ConfirmDeleteSubjectModal from "@/app/components/LMS/admin/(MataPelajaran)/ConfirmDeleteSubjectModal";
 
 export default function AturKelas() {
@@ -41,8 +41,10 @@ export default function AturKelas() {
 
   // state untuk UI/Modal
   const [open, setOpen] = useState(false); // modal tambah mapel
+  const [openEdit, setOpenEdit] = useState(false); // modal edit
+  const [editSubject, setEditSubject] = useState<any | null>(null); // subject yang sedang diedit
   const [showDelete, setShowDelete] = useState(false); // modal konfirmasi hapus
-  const [selectedTutor, setSelectedTutor] = useState<string>(""); // tutor yang dipilih
+  const [selectedTutor, setSelectedTutor] = useState<any | null>(null); // tutor yang dipilih
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null); // subject/mapel yang dipilih
   const [errorTutor, setErrorTutor] = useState<string>(""); // validasi jika tutor belum dipilih
 
@@ -89,6 +91,17 @@ export default function AturKelas() {
     }
   }
 
+  async function handleEdit(subject: any) {
+    console.log("🚀 ~ handleEdit ~ subject:", subject);
+    console.log(
+      "🚀 ~ handleEdit ~ subject:",
+      subject.tutor_subjects[0].users.id
+    );
+    setEditSubject(subject);
+    setSelectedTutor(subject.tutor_subjects[0].users); // set tutor yang dipilih
+    setOpenEdit(true);
+  }
+
   // trigger delete modal
   function handleDelete(subject: any) {
     setSelectedSubject(subject);
@@ -127,6 +140,7 @@ export default function AturKelas() {
             <SubjectTable
               tutorSubjects={tutorSubjects}
               onDelete={handleDelete}
+              onEdit={handleEdit}
             />
 
             {/* modal tambah mapel */}
@@ -221,6 +235,108 @@ export default function AturKelas() {
           </Dialog>
         </section>
       </main>
+
+      {/* modal edit mapel */}
+      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+        <DialogContent className="sm:max-w-[425px] text-emerald-700">
+          <form
+            action={async (formData) => {
+              if (!selectedTutor) {
+                setErrorTutor("Pilih tutor terlebih dahulu");
+                return;
+              }
+              const result = await editSubjectAction(editSubject.id, formData);
+
+              if (result.success) {
+                const { data } = await getAllTutorSubject();
+                setTutorSubjects(data ?? []);
+                setOpenEdit(false);
+                setEditSubject(null);
+                setSelectedTutor("");
+              } else {
+                alert("Gagal update mapel");
+              }
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle className="text-2xl pb-4">
+                Edit Mata Pelajaran
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="grid gap-4">
+              {/* input nama */}
+              <div className="grid gap-3">
+                <Label htmlFor="edit-name">Nama</Label>
+                <Input
+                  id="edit-name"
+                  name="name"
+                  defaultValue={editSubject?.name}
+                  required
+                />
+              </div>
+
+              {/* select tutor */}
+              <div className="grid gap-3">
+                <Label htmlFor="edit-tutor">Tutor</Label>
+                <Select
+                  name="tutor"
+                  defaultValue={selectedTutor?.id}
+                  onValueChange={(value) => setSelectedTutor(value)}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Pilih tutor">
+                      {selectedTutor?.name}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="grid gap-2">
+                    <SelectGroup>
+                      {tutors.map((tutor) => (
+                        <SelectItem key={tutor.id} value={tutor.id.toString()}>
+                          {tutor.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                {errorTutor && (
+                  <p className="text-red-600 text-sm mt-1">{errorTutor}</p>
+                )}
+              </div>
+
+              {/* deskripsi */}
+              <div className="grid gap-3">
+                <Label htmlFor="edit-description">Deskripsi</Label>
+                <textarea
+                  id="edit-description"
+                  name="description"
+                  defaultValue={editSubject?.description}
+                  className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent"
+                  placeholder="Deskripsi singkat mata pelajaran"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  onClick={() => {
+                    setOpenEdit(false);
+                    setSelectedTutor("");
+                  }}
+                  className="my-2"
+                  variant="outline"
+                >
+                  Batal
+                </Button>
+              </DialogClose>
+              <Button className="sm:my-2 mt-5" type="submit">
+                Simpan Perubahan
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* modal konfirmasi hapus */}
       <ConfirmDeleteSubjectModal
