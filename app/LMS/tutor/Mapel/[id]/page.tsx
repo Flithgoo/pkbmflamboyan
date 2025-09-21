@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { BookOpen, FileText, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import { isQuillEmpty } from "@/app/utils/react-quill-helper";
@@ -25,6 +25,11 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { useUserStore } from "@/src/store/useUserStore";
+import { getAllLocation } from "@/lib/api/location";
+import { Location } from "@/lib/types/types";
+import { Input } from "@headlessui/react";
+// Jika sudah punya server action / API, import di sini
+// import { createMaterial } from "@/app/actions/material"; // contoh server action
 
 // Dummy data materi, ganti dengan fetch dari API sesuai id mapel
 const material = [
@@ -42,6 +47,7 @@ const material = [
     created_at: "2025-07-12",
   },
 ];
+
 const classes = [
   "Kelas 7",
   "Kelas 8",
@@ -58,12 +64,25 @@ export default function MateriMapelPage({
 }: {
   params: { id: string };
 }) {
-  // Di production, fetch materi berdasarkan params.id
-  // const materiList = await getMateriByMapelId(params.id);
-  const [open, setOpen] = useState(false); // state untuk mengatur form terbuka/tutup
-  const [selected, setSelected] = useState<string[]>([]); // state penyimpan kelas terpilih
-  const [value, setValue] = useState(""); // state untuk isi materi menggunakan ReactQuill
-  const { user, clearUser } = useUserStore(); // ambil user dari zustand
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [value, setValue] = useState("");
+  const { user } = useUserStore();
+  const [location, setLocation] = useState<Omit<Location, "created_at">[]>([]);
+
+  // ✅ tambahan state untuk form
+  const [jenisUpload, setJenisUpload] = useState("");
+  const [lokasi, setLokasi] = useState("");
+  const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await getAllLocation();
+      setLocation(data ?? []);
+    })();
+  }, []);
 
   const toggleSelect = (kelas: string) => {
     setSelected((prev) =>
@@ -73,19 +92,59 @@ export default function MateriMapelPage({
 
   const toggleSelectAll = () => {
     if (selected.length === classes.length) {
-      // kalau semua sudah terpilih -> kosongkan
       setSelected([]);
     } else {
-      // kalau belum semua -> pilih semua
       setSelected(classes);
     }
   };
 
-  // const handleSubmit = () => {
-  //   // contoh: simpan ke backend atau console.log
-  //   console.log("Kelas terpilih:", selected);
-  //   alert(`Data terkirim: ${selected.join(", ")}`);
-  // };
+  // ✅ handle submit dengan validasi dan loading
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    if (
+      !jenisUpload ||
+      !lokasi ||
+      selected.length === 0 ||
+      !title.trim() ||
+      isQuillEmpty(value)
+    ) {
+      setError("Harap lengkapi semua field sebelum posting.");
+      return;
+    }
+
+    const payload = {
+      jenis_upload: jenisUpload,
+      location_id: lokasi,
+      kelas: selected[0],
+      title,
+      content: value,
+      tutor_id: user?.id,
+      mapel_id: params.id,
+    };
+
+    try {
+      setLoading(true);
+      // 🔹 Jika sudah ada server action/API:
+      // const res = await createMaterial(payload);
+      // if (res.error) throw new Error(res.error.message);
+
+      // sementara hanya log
+      console.log("Data terkirim:", payload);
+      alert("Materi berhasil diposting!");
+      setOpen(false);
+      setSelected([]);
+      setJenisUpload("");
+      setLokasi("");
+      setTitle("");
+      setValue("");
+    } catch (err: any) {
+      setError(err.message || "Terjadi kesalahan saat mengirim data.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8">
@@ -107,19 +166,19 @@ export default function MateriMapelPage({
           Kembali ke Daftar Mapel
         </Link>
       </header>
+
       <main>
-        {/* pembungkus putih2 */}
         <section className="grid grid-cols-1 gap-4 bg-white rounded-2xl shadow p-4 md:p-6">
           <h2 className="text-lg font-semibold text-emerald-700 mb-4">
             Materi
           </h2>
+
           <div className="w-full gap-2">
             <div
               className="bg-white rounded-lg shadow hover:border-emerald-200 border p-4 cursor-text"
               onClick={() => !open && setOpen(true)}
             >
               {!open ? (
-                // Tampilan singkat (collapsed)
                 <div className="flex items-center text-gray-600">
                   <Image
                     src={
@@ -137,11 +196,10 @@ export default function MateriMapelPage({
                   </span>
                 </div>
               ) : (
-                // Tampilan penuh (expanded)
-                <form>
+                <form onSubmit={handleSubmit}>
                   <div className="flex items-center gap-2 mb-3">
-                    {/* dropdown pilih jenis upload/posting */}
-                    <Select>
+                    {/* jenis upload */}
+                    <Select value={jenisUpload} onValueChange={setJenisUpload}>
                       <SelectTrigger className="w-[160px]">
                         <SelectValue placeholder="Pilih jenis upload" />
                       </SelectTrigger>
@@ -154,7 +212,25 @@ export default function MateriMapelPage({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    {/* pilih kelas yang akan menerima materi */}
+
+                    {/* lokasi */}
+                    <Select value={lokasi} onValueChange={setLokasi}>
+                      <SelectTrigger className="w-[170px]">
+                        <SelectValue placeholder="Pilih lokasi" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Pilih lokasi mengajar</SelectLabel>
+                          {location.map((loc) => (
+                            <SelectItem key={loc.id} value={loc.id.toString()}>
+                              {loc.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
+                    {/* pilih kelas */}
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button className="w-[140px]" variant="outline">
@@ -166,42 +242,50 @@ export default function MateriMapelPage({
                       <PopoverContent className="w-64">
                         <div className="space-y-2">
                           <h4 className="font-medium text-sm">Pilih Kelas</h4>
-                          <div className="space-y-2">
-                            <Button
-                              variant={"secondary"}
-                              className="hover:bg-emerald-200 text-xs"
-                              onClick={() => {
-                                selected.length === classes.length;
-                                toggleSelectAll();
-                              }}
+                          <Button
+                            variant="secondary"
+                            className="hover:bg-emerald-200 text-xs"
+                            type="button"
+                            onClick={toggleSelectAll}
+                          >
+                            Pilih Semua
+                          </Button>
+                          {classes.map((kelas) => (
+                            <div
+                              key={kelas}
+                              className="flex items-center space-x-2"
                             >
-                              Pilih Semua
-                            </Button>
-                            {classes.map((kelas) => (
-                              <div
-                                key={kelas}
-                                className="flex items-center space-x-2"
-                              >
-                                <Checkbox
-                                  id={kelas}
-                                  checked={selected.includes(kelas)}
-                                  onCheckedChange={() => toggleSelect(kelas)}
-                                />
-                                <label htmlFor={kelas} className="text-sm">
-                                  {kelas}
-                                </label>
-                              </div>
-                            ))}
-                          </div>
+                              <Checkbox
+                                id={kelas}
+                                checked={selected.includes(kelas)}
+                                onCheckedChange={() => toggleSelect(kelas)}
+                              />
+                              <label htmlFor={kelas} className="text-sm">
+                                {kelas}
+                              </label>
+                            </div>
+                          ))}
                         </div>
                       </PopoverContent>
                     </Popover>
                   </div>
 
-                  {/* Textarea */}
+                  {/* judul */}
+                  <Input
+                    type="text"
+                    placeholder="Judul materi"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="mb-3 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                  />
+
+                  {/* editor */}
                   <ReactQuill theme="snow" value={value} onChange={setValue} />
 
-                  {/* Toolbar bawah */}
+                  {error && (
+                    <p className="text-red-500 text-sm mt-2">{error}</p>
+                  )}
+
                   <div className="flex flex-col xs:flex-row justify-between mt-3">
                     <div className="flex gap-3 text-gray-600">
                       <div className="cursor-pointer rounded-full border hover:bg-emerald-100 border-emerald-100 p-2">
@@ -218,12 +302,13 @@ export default function MateriMapelPage({
                       </div>
                     </div>
 
-                    {/* tombol posting dan cancel */}
                     <div className="flex justify-end gap-2 mt-2 xs:mt-0">
                       <Button
                         variant="ghost"
                         size="sm"
+                        type="button"
                         onClick={() => {
+                          setError("");
                           setOpen(false);
                         }}
                       >
@@ -231,10 +316,11 @@ export default function MateriMapelPage({
                       </Button>
                       <Button
                         size="sm"
-                        disabled={isQuillEmpty(value)}
+                        type="submit"
+                        disabled={loading || !title}
                         className="rounded-full"
                       >
-                        Posting
+                        {loading ? "Mengirim..." : "Posting"}
                       </Button>
                     </div>
                   </div>
@@ -242,6 +328,7 @@ export default function MateriMapelPage({
               )}
             </div>
           </div>
+
           {/* list materi */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {material.length > 0 ? (
