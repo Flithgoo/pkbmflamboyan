@@ -188,19 +188,16 @@ export type Database = {
       classes: {
         Row: {
           created_at: string
-          description: string | null
           id: number
           name: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
           id?: number
           name: string
         }
         Update: {
           created_at?: string
-          description?: string | null
           id?: number
           name?: string
         }
@@ -256,6 +253,78 @@ export type Database = {
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_location: {
+        Row: {
+          created_at: string
+          id: number
+          location_id: number | null
+          material_id: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          location_id?: number | null
+          material_id?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          location_id?: number | null
+          material_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_location_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "location"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_location_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_subjects: {
+        Row: {
+          created_at: string
+          id: number
+          material_id: number
+          subject_id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          material_id: number
+          subject_id: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          material_id?: number
+          subject_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_subjects_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_subjects_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
             referencedColumns: ["id"]
           },
         ]

@@ -26,8 +26,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { useUserStore } from "@/src/store/useUserStore";
 import { getAllLocation } from "@/lib/api/location";
-import { Location } from "@/lib/types/types";
+import { Classes, Location } from "@/lib/types/types";
 import { Input } from "@headlessui/react";
+import { getAllClasses } from "@/lib/api/classes";
 // Jika sudah punya server action / API, import di sini
 // import { createMaterial } from "@/app/actions/material"; // contoh server action
 
@@ -48,15 +49,6 @@ const material = [
   },
 ];
 
-const classes = [
-  "Kelas 7",
-  "Kelas 8",
-  "Kelas 9",
-  "Kelas 10",
-  "Kelas 11",
-  "Kelas 12",
-];
-
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 export default function MateriMapelPage({
@@ -65,10 +57,11 @@ export default function MateriMapelPage({
   params: { id: string };
 }) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<Omit<Classes, "created_at">[]>([]);
   const [value, setValue] = useState("");
   const { user } = useUserStore();
   const [location, setLocation] = useState<Omit<Location, "created_at">[]>([]);
+  const [classes, setClasses] = useState<Omit<Classes, "created_at">[]>([]);
 
   // ✅ tambahan state untuk form
   const [jenisUpload, setJenisUpload] = useState("");
@@ -80,11 +73,13 @@ export default function MateriMapelPage({
   useEffect(() => {
     (async () => {
       const { data } = await getAllLocation();
+      const { data: classes } = await getAllClasses();
       setLocation(data ?? []);
+      setClasses(classes ?? []);
     })();
   }, []);
 
-  const toggleSelect = (kelas: string) => {
+  const toggleSelect = (kelas: Omit<Location, "created_at">) => {
     setSelected((prev) =>
       prev.includes(kelas) ? prev.filter((c) => c !== kelas) : [...prev, kelas]
     );
@@ -117,7 +112,7 @@ export default function MateriMapelPage({
     const payload = {
       jenis_upload: jenisUpload,
       location_id: lokasi,
-      kelas: selected[0],
+      kelas: selected,
       title,
       content: value,
       tutor_id: user?.id,
@@ -252,16 +247,19 @@ export default function MateriMapelPage({
                           </Button>
                           {classes.map((kelas) => (
                             <div
-                              key={kelas}
+                              key={kelas.id}
                               className="flex items-center space-x-2"
                             >
                               <Checkbox
-                                id={kelas}
+                                id={kelas.id.toString()}
                                 checked={selected.includes(kelas)}
                                 onCheckedChange={() => toggleSelect(kelas)}
                               />
-                              <label htmlFor={kelas} className="text-sm">
-                                {kelas}
+                              <label
+                                htmlFor={kelas.id.toString()}
+                                className="text-sm"
+                              >
+                                {kelas.name}
                               </label>
                             </div>
                           ))}
