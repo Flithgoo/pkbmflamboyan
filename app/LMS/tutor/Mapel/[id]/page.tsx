@@ -26,9 +26,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { useUserStore } from "@/src/store/useUserStore";
 import { getAllLocation } from "@/lib/api/location";
-import { Classes, Location } from "@/lib/types/types";
+import { Classes, Location, Subject } from "@/lib/types/types";
 import { Input } from "@headlessui/react";
 import { getAllClasses } from "@/lib/api/classes";
+import { getSubjectById } from "@/lib/api/subject";
+import { create } from "domain";
+import { addMaterialAction } from "@/lib/actions/material";
 // Jika sudah punya server action / API, import di sini
 // import { createMaterial } from "@/app/actions/material"; // contoh server action
 
@@ -60,6 +63,7 @@ export default function MateriMapelPage({
   const [selected, setSelected] = useState<Omit<Classes, "created_at">[]>([]);
   const [value, setValue] = useState("");
   const { user } = useUserStore();
+  const [subject, setSubject] = useState<Subject>({} as Subject);
   const [location, setLocation] = useState<Omit<Location, "created_at">[]>([]);
   const [classes, setClasses] = useState<Omit<Classes, "created_at">[]>([]);
 
@@ -74,10 +78,15 @@ export default function MateriMapelPage({
     (async () => {
       const { data } = await getAllLocation();
       const { data: classes } = await getAllClasses();
+      const { data: subject } = await getSubjectById(
+        params.id as unknown as number
+      );
+
+      setSubject(subject ?? ({} as Subject));
       setLocation(data ?? []);
       setClasses(classes ?? []);
     })();
-  }, []);
+  }, [params.id]);
 
   const toggleSelect = (kelas: Omit<Location, "created_at">) => {
     setSelected((prev) =>
@@ -111,17 +120,21 @@ export default function MateriMapelPage({
 
     const payload = {
       jenis_upload: jenisUpload,
-      location_id: lokasi,
+      location_id: lokasi as unknown as number,
       kelas: selected,
       title,
       content: value,
-      tutor_id: user?.id,
-      mapel_id: params.id,
+      tutor_id: user?.id as number,
+      mapel_id: Number(params.id),
     };
 
     try {
       setLoading(true);
-      // 🔹 Jika sudah ada server action/API:
+
+      (async () => {
+        const { success } = await addMaterialAction(payload);
+        if (!success) throw new Error("Gagal menambahkan materi.");
+      })();
       // const res = await createMaterial(payload);
       // if (res.error) throw new Error(res.error.message);
 
@@ -147,11 +160,8 @@ export default function MateriMapelPage({
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-emerald-700 flex items-center gap-2">
             <BookOpen size={28} />
-            Materi Mapel #{params.id}
+            Materi {subject?.name || "Mapel"}
           </h1>
-          <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">
-            Daftar materi untuk mapel ini.
-          </p>
         </div>
         <Link
           href="/LMS/tutor/Mapel"
@@ -164,10 +174,6 @@ export default function MateriMapelPage({
 
       <main>
         <section className="grid grid-cols-1 gap-4 bg-white rounded-2xl shadow p-4 md:p-6">
-          <h2 className="text-lg font-semibold text-emerald-700 mb-4">
-            Materi
-          </h2>
-
           <div className="w-full gap-2">
             <div
               className="bg-white rounded-lg shadow hover:border-emerald-200 border p-4 cursor-text"

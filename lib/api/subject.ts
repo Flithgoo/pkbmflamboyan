@@ -15,6 +15,17 @@ export async function getAllSubject() {
   return { data, error };
 }
 
+export async function getSubjectById(id: number) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase
+    .from("subjects")
+    .select("*")
+    .eq("id", id)
+    .single();
+  return { data, error };
+}
+
 export async function InsertSubject(name: string, description: string) {
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);
