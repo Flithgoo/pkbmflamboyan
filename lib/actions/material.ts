@@ -56,6 +56,9 @@ interface Payload {
   content: string;
   tutor_id: number;
   mapel_id: number;
+  is_absensi_enabled?: boolean;
+  absensi_start?: string | null;
+  absensi_end?: string | null;
 }
 
 export async function addMaterialAction({
@@ -66,6 +69,9 @@ export async function addMaterialAction({
   content,
   tutor_id,
   mapel_id,
+  is_absensi_enabled,
+  absensi_start,
+  absensi_end,
 }: Payload) {
   try {
     console.log("Material data to be added:", {
@@ -76,6 +82,9 @@ export async function addMaterialAction({
       content,
       tutor_id,
       mapel_id,
+      is_absensi_enabled,
+      absensi_start,
+      absensi_end,
     });
 
     return { success: true };

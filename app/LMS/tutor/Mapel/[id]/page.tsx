@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, FileText, ArrowLeft } from "lucide-react";
+// ✅ BARU: Import ikon Clock
+import {
+  FileText,
+  ArrowLeft,
+  Paperclip,
+  Youtube,
+  Upload,
+  Link as LinkLogo,
+  Clock,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import { isQuillEmpty } from "@/app/utils/react-quill-helper";
-import { Paperclip, Youtube, Upload, Link as LinkLogo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -32,10 +41,11 @@ import { getAllClasses } from "@/lib/api/classes";
 import { getSubjectById } from "@/lib/api/subject";
 import { create } from "domain";
 import { addMaterialAction } from "@/lib/actions/material";
-// Jika sudah punya server action / API, import di sini
-// import { createMaterial } from "@/app/actions/material"; // contoh server action
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Close } from "@radix-ui/react-popover";
 
-// Dummy data materi, ganti dengan fetch dari API sesuai id mapel
+// Dummy data (bisa dihapus jika sudah terhubung API)
 const material = [
   {
     id: 1,
@@ -66,13 +76,14 @@ export default function MateriMapelPage({
   const [subject, setSubject] = useState<Subject>({} as Subject);
   const [location, setLocation] = useState<Omit<Location, "created_at">[]>([]);
   const [classes, setClasses] = useState<Omit<Classes, "created_at">[]>([]);
-
-  // ✅ tambahan state untuk form
   const [jenisUpload, setJenisUpload] = useState("");
   const [lokasi, setLokasi] = useState("");
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isAbsensiEnabled, setIsAbsensiEnabled] = useState(false);
+  const [absensiStart, setAbsensiStart] = useState("");
+  const [absensiEnd, setAbsensiEnd] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -81,12 +92,23 @@ export default function MateriMapelPage({
       const { data: subject } = await getSubjectById(
         params.id as unknown as number
       );
-
       setSubject(subject ?? ({} as Subject));
       setLocation(data ?? []);
       setClasses(classes ?? []);
     })();
   }, [params.id]);
+
+  // ✅ BARU: useEffect untuk mengatur waktu default saat form dibuka
+  useEffect(() => {
+    // Jalankan hanya jika form dibuka dan absensiStart belum diatur
+    if (open && isAbsensiEnabled && !absensiStart) {
+      const now = new Date();
+      // Menyesuaikan dengan zona waktu lokal untuk format input datetime-local
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      const formattedDateTime = now.toISOString().slice(0, 16);
+      setAbsensiStart(formattedDateTime);
+    }
+  }, [open, isAbsensiEnabled, absensiStart]);
 
   const toggleSelect = (kelas: Omit<Location, "created_at">) => {
     setSelected((prev) =>
@@ -102,7 +124,6 @@ export default function MateriMapelPage({
     }
   };
 
-  // ✅ handle submit dengan validasi dan loading
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -117,6 +138,14 @@ export default function MateriMapelPage({
       setError("Harap lengkapi semua field sebelum posting.");
       return;
     }
+    if (isAbsensiEnabled && (!absensiStart || !absensiEnd)) {
+      setError("Harap isi rentang waktu absensi jika fitur diaktifkan.");
+      return;
+    }
+    if (isAbsensiEnabled && new Date(absensiStart) >= new Date(absensiEnd)) {
+      setError("Waktu selesai absensi harus setelah waktu mulai.");
+      return;
+    }
 
     const payload = {
       jenis_upload: jenisUpload,
@@ -126,19 +155,16 @@ export default function MateriMapelPage({
       content: value,
       tutor_id: user?.id as number,
       mapel_id: Number(params.id),
+      is_absensi_enabled: isAbsensiEnabled,
+      absensi_start: isAbsensiEnabled ? absensiStart : null,
+      absensi_end: isAbsensiEnabled ? absensiEnd : null,
     };
 
     try {
       setLoading(true);
+      const { success } = await addMaterialAction(payload);
+      if (!success) throw new Error("Gagal menambahkan materi.");
 
-      (async () => {
-        const { success } = await addMaterialAction(payload);
-        if (!success) throw new Error("Gagal menambahkan materi.");
-      })();
-      // const res = await createMaterial(payload);
-      // if (res.error) throw new Error(res.error.message);
-
-      // sementara hanya log
       console.log("Data terkirim:", payload);
       alert("Materi berhasil diposting!");
       setOpen(false);
@@ -147,6 +173,9 @@ export default function MateriMapelPage({
       setLokasi("");
       setTitle("");
       setValue("");
+      setIsAbsensiEnabled(false);
+      setAbsensiStart("");
+      setAbsensiEnd("");
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan saat mengirim data.");
     } finally {
@@ -159,7 +188,6 @@ export default function MateriMapelPage({
       <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-emerald-700 flex items-center gap-2">
-            <BookOpen size={28} />
             Materi {subject?.name || "Mapel"}
           </h1>
         </div>
@@ -171,7 +199,6 @@ export default function MateriMapelPage({
           Kembali ke Daftar Mapel
         </Link>
       </header>
-
       <main>
         <section className="grid grid-cols-1 gap-4 bg-white rounded-2xl shadow p-4 md:p-6">
           <div className="w-full gap-2">
@@ -188,8 +215,8 @@ export default function MateriMapelPage({
                         : "/assets/placeholder_profile/placeholder_avatar.png"
                     }
                     alt="avatar"
-                    width={30}
-                    height={30}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full mr-3"
                   />
                   <span className="text-sm text-gray-500">
@@ -198,8 +225,7 @@ export default function MateriMapelPage({
                 </div>
               ) : (
                 <form onSubmit={handleSubmit}>
-                  <div className="flex items-center gap-2 mb-3">
-                    {/* jenis upload */}
+                  <div className="flex flex-wrap items-center sm:justify-start gap-4 mb-3">
                     <Select value={jenisUpload} onValueChange={setJenisUpload}>
                       <SelectTrigger className="w-[160px]">
                         <SelectValue placeholder="Pilih jenis upload" />
@@ -213,8 +239,6 @@ export default function MateriMapelPage({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-
-                    {/* lokasi */}
                     <Select value={lokasi} onValueChange={setLokasi}>
                       <SelectTrigger className="w-[170px]">
                         <SelectValue placeholder="Pilih lokasi" />
@@ -230,8 +254,6 @@ export default function MateriMapelPage({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-
-                    {/* pilih kelas */}
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button className="w-[140px]" variant="outline">
@@ -240,41 +262,116 @@ export default function MateriMapelPage({
                             : "Pilih kelas"}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64">
+                      <PopoverContent className="w-64 p-3">
                         <div className="space-y-2">
-                          <h4 className="font-medium text-sm">Pilih Kelas</h4>
+                          {/* ✅ TAMBAHAN: Wrapper untuk header dengan flexbox */}
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-sm">Pilih Kelas</h4>
+                            {/* ✅ TAMBAHAN: Tombol close dengan ikon X */}
+                            <Close asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </Close>
+                          </div>
+
+                          {/* Tombol "Pilih Semua" tetap di bawah header */}
                           <Button
                             variant="secondary"
-                            className="hover:bg-emerald-200 text-xs"
+                            className="hover:bg-emerald-200 text-xs w-full" // Dibuat full-width agar lebih rapi
                             type="button"
                             onClick={toggleSelectAll}
                           >
                             Pilih Semua
                           </Button>
-                          {classes.map((kelas) => (
-                            <div
-                              key={kelas.id}
-                              className="flex items-center space-x-2"
-                            >
-                              <Checkbox
-                                id={kelas.id.toString()}
-                                checked={selected.includes(kelas)}
-                                onCheckedChange={() => toggleSelect(kelas)}
-                              />
-                              <label
-                                htmlFor={kelas.id.toString()}
-                                className="text-sm"
+
+                          <div className="max-h-48 overflow-y-auto pr-2">
+                            {" "}
+                            {/* Optional: Tambahkan scroll jika daftar kelas panjang */}
+                            {classes.map((kelas) => (
+                              <div
+                                key={kelas.id}
+                                className="flex items-center space-x-2 py-1"
                               >
-                                {kelas.name}
-                              </label>
-                            </div>
-                          ))}
+                                <Checkbox
+                                  id={kelas.id.toString()}
+                                  checked={selected.includes(kelas)}
+                                  onCheckedChange={() => toggleSelect(kelas)}
+                                />
+                                <label
+                                  htmlFor={kelas.id.toString()}
+                                  className="text-sm w-full cursor-pointer" // Label bisa diklik
+                                >
+                                  {kelas.name}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </PopoverContent>
                     </Popover>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="absensi-toggle"
+                        checked={isAbsensiEnabled}
+                        disabled={jenisUpload === "Pengumuman"}
+                        onCheckedChange={setIsAbsensiEnabled}
+                      />
+                      <Label
+                        htmlFor="absensi-toggle"
+                        className="cursor-pointer"
+                      >
+                        Aktifkan Absensi
+                      </Label>
+                    </div>
                   </div>
 
-                  {/* judul */}
+                  {/* ✅ DIUBAH: Blok JSX untuk absensi dengan styling baru */}
+                  {isAbsensiEnabled && (
+                    <div className="grid sm:grid-cols-2 gap-4 mb-4 p-4 border rounded-lg bg-emerald-50/50">
+                      <div>
+                        <label
+                          htmlFor="absensiStart"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Waktu Absensi Dibuka
+                        </label>
+                        <div className="relative">
+                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Input
+                            type="datetime-local"
+                            id="absensiStart"
+                            value={absensiStart}
+                            onChange={(e) => setAbsensiStart(e.target.value)}
+                            className="w-full pl-10 pr-3 py-2 bg-white border rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 transition duration-200 hover:border-emerald-300"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="absensiEnd"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Waktu Absensi Ditutup
+                        </label>
+                        <div className="relative">
+                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Input
+                            type="datetime-local"
+                            id="absensiEnd"
+                            value={absensiEnd}
+                            onChange={(e) => setAbsensiEnd(e.target.value)}
+                            className="w-full pl-10 pr-3 py-2 bg-white border rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 transition duration-200 hover:border-emerald-300"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <Input
                     type="text"
                     placeholder="Judul materi"
@@ -282,14 +379,10 @@ export default function MateriMapelPage({
                     onChange={(e) => setTitle(e.target.value)}
                     className="mb-3 w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-400"
                   />
-
-                  {/* editor */}
                   <ReactQuill theme="snow" value={value} onChange={setValue} />
-
                   {error && (
                     <p className="text-red-500 text-sm mt-2">{error}</p>
                   )}
-
                   <div className="flex flex-col xs:flex-row justify-between mt-3">
                     <div className="flex gap-3 text-gray-600">
                       <div className="cursor-pointer rounded-full border hover:bg-emerald-100 border-emerald-100 p-2">
@@ -305,7 +398,6 @@ export default function MateriMapelPage({
                         <LinkLogo className=" w-4 h-4" />
                       </div>
                     </div>
-
                     <div className="flex justify-end gap-2 mt-2 xs:mt-0">
                       <Button
                         variant="ghost"
@@ -332,8 +424,6 @@ export default function MateriMapelPage({
               )}
             </div>
           </div>
-
-          {/* list materi */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {material.length > 0 ? (
               material.map((materi) => (
