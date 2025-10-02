@@ -24,7 +24,7 @@ const Footer = () => {
         <div className="w-full border-t border-slate-700 pt-10">
           <div className="mb-5 flex items-center justify-center">
             <a
-              href="https://youtube.com/webprogrammingunpas"
+              href="https://www.youtube.com/@prassetiyoutomo"
               target="_blank"
               className="mr-3 flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 text-slate-300 hover:border-primary hover:bg-primary hover:text-white"
             >

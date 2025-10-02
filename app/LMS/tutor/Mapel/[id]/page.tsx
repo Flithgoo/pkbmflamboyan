@@ -156,8 +156,8 @@ export default function MateriMapelPage({
       tutor_id: user?.id as number,
       mapel_id: Number(params.id),
       is_absensi_enabled: isAbsensiEnabled,
-      absensi_start: isAbsensiEnabled ? absensiStart : null,
-      absensi_end: isAbsensiEnabled ? absensiEnd : null,
+      absensi_start: isAbsensiEnabled ? absensiStart : undefined,
+      absensi_end: isAbsensiEnabled ? absensiEnd : undefined,
     };
 
     try {

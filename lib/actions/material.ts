@@ -1,5 +1,6 @@
 "use server";
 
+import { getAuthContext } from "@/lib/getAuthContext";
 import { deleteSubject, editSubject, InsertSubject } from "../api/subject";
 import { EditTutorSubject, InsertTutorSubject } from "../api/tutor_subject";
 import { Classes } from "../types/types";
@@ -57,8 +58,8 @@ interface Payload {
   tutor_id: number;
   mapel_id: number;
   is_absensi_enabled?: boolean;
-  absensi_start?: string | null;
-  absensi_end?: string | null;
+  absensi_start?: string;
+  absensi_end?: string;
 }
 
 export async function addMaterialAction({
@@ -73,11 +74,13 @@ export async function addMaterialAction({
   absensi_start,
   absensi_end,
 }: Payload) {
+  const { supabase } = await getAuthContext();
+
   try {
-    console.log("Material data to be added:", {
+    const { error } = await supabase.rpc("add_material_with_attendance", {
       jenis_upload,
-      location_id,
-      kelas,
+      p_location_id: location_id,
+      kelas, // array of object {id, nama}
       title,
       content,
       tutor_id,
@@ -87,8 +90,10 @@ export async function addMaterialAction({
       absensi_end,
     });
 
+    if (error) throw error;
     return { success: true };
   } catch (err) {
+    console.error("Error addMaterialAction:", err);
     return { success: false };
   }
 }
