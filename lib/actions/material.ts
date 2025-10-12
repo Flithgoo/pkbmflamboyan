@@ -4,6 +4,7 @@ import { getAuthContext } from "@/lib/getAuthContext";
 import { deleteSubject, editSubject, InsertSubject } from "../api/subject";
 import { EditTutorSubject, InsertTutorSubject } from "../api/tutor_subject";
 import { Classes } from "../types/types";
+import { revalidatePath } from "next/cache";
 
 export async function addTutorSubjectAction(
   prevState: { success: boolean },
@@ -91,6 +92,8 @@ export async function addMaterialAction({
     });
 
     if (error) throw error;
+    revalidatePath(`/LMS/tutor/Mapel/${mapel_id}`);
+
     return { success: true };
   } catch (err) {
     console.error("Error addMaterialAction:", err);

@@ -12,7 +12,7 @@ import {
   Clock,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import { isQuillEmpty } from "@/app/utils/react-quill-helper";
@@ -35,7 +35,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { useUserStore } from "@/src/store/useUserStore";
 import { getAllLocation } from "@/lib/api/location";
-import { Classes, Location, Subject } from "@/lib/types/types";
+import { Classes, Location, Material, Subject } from "@/lib/types/types";
 import { Input } from "@headlessui/react";
 import { getAllClasses } from "@/lib/api/classes";
 import { getSubjectById } from "@/lib/api/subject";
@@ -44,9 +44,11 @@ import { addMaterialAction } from "@/lib/actions/material";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Close } from "@radix-ui/react-popover";
+import { getMaterialBySubjectId } from "@/lib/api/material";
+import { useRouter } from "next/navigation";
 
 // Dummy data (bisa dihapus jika sudah terhubung API)
-const material = [
+const dummyMaterial = [
   {
     id: 1,
     title: "Operasi Hitung Dasar",
@@ -69,6 +71,7 @@ export default function MateriMapelPage({
 }: {
   params: { id: string };
 }) {
+  const router = useRouter(); // ✅ 2. Inisialisasi router
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Omit<Classes, "created_at">[]>([]);
   const [value, setValue] = useState("");
@@ -84,19 +87,30 @@ export default function MateriMapelPage({
   const [isAbsensiEnabled, setIsAbsensiEnabled] = useState(false);
   const [absensiStart, setAbsensiStart] = useState("");
   const [absensiEnd, setAbsensiEnd] = useState("");
+  const [material, setMaterial] = useState<Material[]>([]);
+
+  const subjectId = params.id as unknown as number;
+
+  // ✅ 1. Ekstrak logika fetching ke dalam fungsi terpisah dengan useCallback
+  const fetchData = useCallback(async () => {
+    // Anda bisa menambahkan state loading di sini jika mau
+    const { data } = await getAllLocation();
+    const { data: classes } = await getAllClasses();
+    const { data: subject } = await getSubjectById(subjectId);
+    const { data: material } = await getMaterialBySubjectId(subjectId);
+
+    setMaterial(
+      Array.isArray(material) ? material : material ? [material] : []
+    );
+    setSubject(subject ?? ({} as Subject));
+    setLocation(data ?? []);
+    setClasses(classes ?? []);
+  }, [subjectId]); // Dependensi tetap subjectId
 
   useEffect(() => {
-    (async () => {
-      const { data } = await getAllLocation();
-      const { data: classes } = await getAllClasses();
-      const { data: subject } = await getSubjectById(
-        params.id as unknown as number
-      );
-      setSubject(subject ?? ({} as Subject));
-      setLocation(data ?? []);
-      setClasses(classes ?? []);
-    })();
-  }, [params.id]);
+    // ✅ 2. Panggil fungsi fetchData saat komponen dimuat
+    fetchData();
+  }, [fetchData]);
 
   // ✅ BARU: useEffect untuk mengatur waktu default saat form dibuka
   useEffect(() => {
@@ -167,6 +181,10 @@ export default function MateriMapelPage({
 
       console.log("Data terkirim:", payload);
       alert("Materi berhasil diposting!");
+      await fetchData();
+
+      router.refresh();
+      // Reset form dan tutup
       setOpen(false);
       setSelected([]);
       setJenisUpload("");
@@ -201,6 +219,7 @@ export default function MateriMapelPage({
       </header>
       <main>
         <section className="grid grid-cols-1 gap-4 bg-white rounded-2xl shadow p-4 md:p-6">
+          {/* bagian upload materi/tugas/pengumuman */}
           <div className="w-full gap-2">
             <div
               className="bg-white rounded-lg shadow hover:border-emerald-200 border p-4 cursor-text"
@@ -424,6 +443,8 @@ export default function MateriMapelPage({
               )}
             </div>
           </div>
+
+          {/* daftar materi yang sudah diupload */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {material.length > 0 ? (
               material.map((materi) => (
@@ -437,7 +458,10 @@ export default function MateriMapelPage({
                       {materi.title}
                     </span>
                   </div>
-                  <p className="text-gray-600 text-sm">{materi.description}</p>
+                  <p
+                    className="text-gray-600 text-sm"
+                    dangerouslySetInnerHTML={{ __html: materi.content ?? "" }}
+                  ></p>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-xs text-gray-400">
                       Dibuat:{" "}
