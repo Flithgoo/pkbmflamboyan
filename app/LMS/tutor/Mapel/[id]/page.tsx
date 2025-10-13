@@ -11,6 +11,10 @@ import {
   Link as LinkLogo,
   Clock,
   X,
+  FileQuestion,
+  FilePen,
+  FileType,
+  FileVolume,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
@@ -110,6 +114,7 @@ export default function MateriMapelPage({
   useEffect(() => {
     // ✅ 2. Panggil fungsi fetchData saat komponen dimuat
     fetchData();
+    console.log(material);
   }, [fetchData]);
 
   // ✅ BARU: useEffect untuk mengatur waktu default saat form dibuka
@@ -452,17 +457,30 @@ export default function MateriMapelPage({
                   key={materi.id}
                   className="border border-emerald-100 rounded-xl p-4 flex flex-col gap-2 shadow hover:shadow-lg transition"
                 >
+                  {/* jenis logo berdasarkan type */}
                   <div className="flex items-center gap-2">
-                    <FileText className="text-amber-500" size={22} />
+                    {materi.upload_type === "Tugas" ? (
+                      <FilePen className="text-red-500" size={22} />
+                    ) : materi.upload_type === "Pengumuman" ? (
+                      <FileVolume className="text-amber-500" size={22} />
+                    ) : (
+                      <FileText className="text-emerald-500" size={22} />
+                    )}
                     <span className="font-bold text-emerald-700 text-base">
                       {materi.title}
                     </span>
                   </div>
+                  {/* materi yang sudah di cut jika kepanjangan */}
                   <p
                     className="text-gray-600 text-sm"
-                    dangerouslySetInnerHTML={{ __html: materi.content ?? "" }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        (materi.content ?? "").length > 200
+                          ? (materi.content ?? "").slice(0, 200) + "..."
+                          : materi.content ?? "",
+                    }}
                   ></p>
-                  <div className="flex justify-between items-center mt-2">
+                  <div className="flex justify-between h-full items-end mt-2">
                     <span className="text-xs text-gray-400">
                       Dibuat:{" "}
                       {new Date(materi.created_at).toLocaleDateString("id-ID")}
