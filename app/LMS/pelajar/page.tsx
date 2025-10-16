@@ -13,9 +13,7 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="flex-1 p-6 bg-gray-50 grid gap-6">
-        <h2 className="text-2xl font-semibold">
-          Selamat datang {(user as { name: string }).name}
-        </h2>
+        <h2 className="text-2xl font-semibold">Selamat datang {user?.name}</h2>
         {/* Mata Pelajaran */}
         <div className="bg-white rounded-2xl shadow p-4">
           <h3 className="text-xl font-semibold mb-2">Mata Pelajaran</h3>
