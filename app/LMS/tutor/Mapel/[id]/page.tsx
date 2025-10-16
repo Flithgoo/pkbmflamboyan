@@ -43,7 +43,6 @@ import { Classes, Location, Material, Subject } from "@/lib/types/types";
 import { Input } from "@headlessui/react";
 import { getAllClasses } from "@/lib/api/classes";
 import { getSubjectById } from "@/lib/api/subject";
-import { create } from "domain";
 import { addMaterialAction } from "@/lib/actions/material";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -114,7 +113,6 @@ export default function MateriMapelPage({
   useEffect(() => {
     // ✅ 2. Panggil fungsi fetchData saat komponen dimuat
     fetchData();
-    console.log(material);
   }, [fetchData]);
 
   // ✅ BARU: useEffect untuk mengatur waktu default saat form dibuka

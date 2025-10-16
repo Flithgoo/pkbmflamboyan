@@ -1,42 +1,15 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { getUserFromCookie } from "@/lib/getUser";
+import { useUserStore } from "@/src/store/useUserStore";
 
-export default async function DashboardPage() {
-  const user = await getUserFromCookie();
+export default function DashboardPage() {
+  const { user } = useUserStore();
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-grow min-h-screen">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white p-4 space-y-4">
-        <h1 className="text-2xl font-bold">E-Learning</h1>
-        <nav className="space-y-2">
-          <Link
-            href="/dashboard"
-            className="block px-2 py-1 rounded hover:bg-gray-700"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/kelas"
-            className="block px-2 py-1 rounded hover:bg-gray-700"
-          >
-            Kelas
-          </Link>
-          <Link
-            href="/tugas"
-            className="block px-2 py-1 rounded hover:bg-gray-700"
-          >
-            Tugas
-          </Link>
-          <Link
-            href="/pengumuman"
-            className="block px-2 py-1 rounded hover:bg-gray-700"
-          >
-            Pengumuman
-          </Link>
-        </nav>
-      </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-6 bg-gray-50 grid gap-6">

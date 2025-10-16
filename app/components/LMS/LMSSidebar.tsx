@@ -13,10 +13,14 @@ import {
 } from "@/components/ui/sidebar";
 import { HiMenuAlt2 } from "react-icons/hi";
 import { logoutAction } from "@/lib/actions/logout";
-import { adminDashboardLinks, tutorDashboardLinks } from "@/app/utils/data";
+import {
+  adminDashboardLinks,
+  tutorDashboardLinks,
+  pelajarDashboardLinks,
+} from "@/app/utils/data";
 import Logo from "../ui/Logo";
 
-export default function AdminSidebar() {
+export default function LMSSidebar() {
   const { toggleSidebar, isMobile } = useSidebar();
   const pathname = usePathname();
 
@@ -25,9 +29,12 @@ export default function AdminSidebar() {
   if (pathname.startsWith("/LMS/admin")) {
     menuItems = adminDashboardLinks;
     path = "/LMS/admin";
-  } else {
+  } else if (pathname.startsWith("/LMS/tutor")) {
     menuItems = tutorDashboardLinks;
     path = "/LMS/tutor";
+  } else {
+    menuItems = pelajarDashboardLinks;
+    path = "/LMS/pelajar";
   }
 
   return (

@@ -99,6 +99,20 @@ const listFaq = [
   },
 ];
 
+const pelajarDashboardLinks = [
+  { name: "Dashboard", href: "/LMS/pelajar", icon: Home },
+  {
+    name: "Mata Pelajaran",
+    href: "/LMS/pelajar/Mapel",
+    icon: BookOpen,
+  },
+  { name: "Tugas", href: "/LMS/pelajar/Tugas", icon: ClipboardList },
+  { name: "Absensi", href: "/LMS/pelajar/Absensi", icon: Users },
+  { name: "Pengumuman", href: "/LMS/pelajar/Pengumuman", icon: BellRing },
+  { name: "Ujian", href: "/LMS/pelajar/Ujian", icon: ClipboardCheck },
+  { name: "Bantuan", href: "/LMS/Bantuan", icon: Info },
+];
+
 const tutorDashboardLinks = [
   { name: "Dashboard", href: "/LMS/tutor", icon: Home },
   {
@@ -106,9 +120,9 @@ const tutorDashboardLinks = [
     href: "/LMS/tutor/Mapel",
     icon: BookOpen,
   },
-  { name: "Tugas", href: "/LMS/Tugas", icon: ClipboardList },
-  { name: "Pengumuman", href: "/LMS/Pengumuman", icon: BellRing },
-  { name: "Ujian", href: "/LMS/Ujian", icon: ClipboardCheck },
+  { name: "Tugas", href: "/LMS//tutor/Tugas", icon: ClipboardList },
+  { name: "Pengumuman", href: "/LMS/tutor/Pengumuman", icon: BellRing },
+  { name: "Ujian", href: "/LMS/tutor/Ujian", icon: ClipboardCheck },
   { name: "Bantuan", href: "/LMS/Bantuan", icon: Info },
 ];
 
@@ -131,4 +145,5 @@ export {
   listFaq,
   tutorDashboardLinks,
   adminDashboardLinks,
+  pelajarDashboardLinks,
 };
