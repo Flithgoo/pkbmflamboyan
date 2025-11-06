@@ -16,6 +16,7 @@ import ConfirmDeleteModal from "@/app/components/LMS/admin/ConfirmDeleteUserModa
 import { FaUserEdit, FaTrashAlt, FaPlus } from "react-icons/fa";
 import Link from "next/link";
 import { deleteUserAction } from "@/lib/actions/user";
+import PenggunaCard from "@/app/components/LMS/admin/(Pengguna)/PenggunaCard";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
@@ -53,6 +54,23 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 pt-8 md:p-8">
+      <PenggunaCard
+        tutors={users}
+        userClass={[]}
+        formAction={function (formData: FormData): Promise<void> {
+          throw new Error("Function not implemented.");
+        }}
+        handleDelete={function (classId: number): void {
+          throw new Error("Function not implemented.");
+        }}
+        handleEdit={function (
+          classId: number,
+          updatedData: { name?: string; tutorId?: number; description?: string }
+        ): void {
+          throw new Error("Function not implemented.");
+        }}
+      />
+
       <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-emerald-700">
