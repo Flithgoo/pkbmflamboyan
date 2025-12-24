@@ -22,34 +22,48 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { AnimatePresence, motion } from "framer-motion";
+import { ClassCombobox } from "@/app/components/LMS/admin/(Pengguna)/ClassCombobox";
+import { ProfilePhotoInput } from "@/app/components/LMS/admin/(Pengguna)/ProfilePhotoInput";
 
 export default function PenggunaCard({
-  userClass,
-  tutors,
+  classes,
+  locations,
   formAction,
   handleDelete,
   handleEdit,
 }: {
-  userClass: any[];
-  tutors: { id: number; name: string }[];
+  classes: { id: number; name: string }[];
+  locations?: { id: number; name: string }[];
   formAction: (formData: FormData) => Promise<void>;
   handleDelete: (classId: number) => void;
   handleEdit: (
     classId: number,
-    updatedData: { name?: string; tutorId?: number; description?: string }
+    updatedData: { name?: string; roleId?: number; description?: string }
   ) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [selectedTutor, setSelectedTutor] = useState<string>("");
-  const [errorTutor, setErrorTutor] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [errorRole, setErrorRole] = useState<string>("");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const roles = [
+    { id: 1, name: "Admin" },
+    { id: 2, name: "Tutor" },
+    { id: 3, name: "Pelajar" },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
-        <h2 className="text-xl font-semibold text-emerald-700">Daftar Kelas</h2>
+        <h2 className="text-xl font-semibold text-emerald-700">
+          Daftar Pengguna
+        </h2>
         <DialogTrigger asChild>
           <Button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold shadow transition">
             <FaPlus />
-            Tambah Mapel
+            Tambah Pengguna
           </Button>
         </DialogTrigger>
       </div>
@@ -66,12 +80,12 @@ export default function PenggunaCard({
         <form
           action={formAction}
           onSubmit={(e) => {
-            // validasi -> tutor wajib dipilih
-            if (!selectedTutor) {
+            // validasi -> role wajib dipilih
+            if (!selectedRole) {
               e.preventDefault();
-              setErrorTutor("Pilih tutor terlebih dahulu");
+              setErrorRole("Pilih role terlebih dahulu");
             } else {
-              setErrorTutor("");
+              setErrorRole("");
             }
           }}
         >
@@ -88,27 +102,48 @@ export default function PenggunaCard({
               <Input
                 id="name-1"
                 name="name"
-                placeholder="Nama Mapel"
+                placeholder="Nama Lengkap"
                 required
               />
             </div>
 
-            {/* select tutor */}
             <div className="grid gap-3">
-              <Label htmlFor="tutor-selector">Tutor</Label>
+              <Label htmlFor="username">Username / NIPD</Label>
+              <Input
+                id="username"
+                name="username"
+                placeholder="Username / NIPD"
+                required
+              />
+            </div>
+
+            <div className="grid gap-3">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Password"
+                required
+              />
+            </div>
+
+            {/* select role */}
+            <div className="grid gap-3">
+              <Label htmlFor="role-selector">Role</Label>
               <Select
-                name="tutor"
-                value={selectedTutor}
-                onValueChange={(value) => setSelectedTutor(value)}
+                name="role"
+                value={selectedRole}
+                onValueChange={(value) => setSelectedRole(value)}
               >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Pilih tutor" />
+                <SelectTrigger id="role-selector" className="w-[180px]">
+                  <SelectValue placeholder="Pilih Peran" />
                 </SelectTrigger>
                 <SelectContent className="grid gap-2">
                   <SelectGroup>
-                    {tutors.map((tutor) => (
-                      <SelectItem key={tutor.id} value={tutor.id.toString()}>
-                        {tutor.name}
+                    {roles.map((role) => (
+                      <SelectItem key={role.id} value={role.id.toString()}>
+                        {role.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -119,22 +154,61 @@ export default function PenggunaCard({
                     )} */}
             </div>
 
-            {/* deskripsi mapel */}
-            <div className="grid gap-3">
-              <Label htmlFor="description">Deskripsi</Label>
-              <textarea
-                className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent"
-                id="description"
-                name="description"
-                placeholder="Deskripsi singkat mata pelajaran"
-              />
-            </div>
+            {/* input kelas & lokasi jika role == pelajar */}
+            <AnimatePresence>
+              {selectedRole === "3" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="flex justify-between gap-4"
+                >
+                  <ClassCombobox
+                    value={selectedClass}
+                    onChange={setSelectedClass}
+                    classes={classes}
+                  />
+
+                  <div className="grid gap-3">
+                    <Label htmlFor="location-selector">Lokasi</Label>
+                    <Select
+                      name="location"
+                      value={selectedLocation}
+                      onValueChange={(value) => setSelectedLocation(value)}
+                    >
+                      <SelectTrigger
+                        id="location-selector"
+                        className="w-[180px]"
+                      >
+                        <SelectValue placeholder="Lokasi" />
+                      </SelectTrigger>
+                      <SelectContent className="grid gap-2">
+                        <SelectGroup>
+                          {(locations || []).map((location) => (
+                            <SelectItem
+                              key={location.id}
+                              value={location.id.toString()}
+                            >
+                              {location.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* foto profil */}
+            <ProfilePhotoInput value={photo} onChange={setPhoto} />
           </div>
 
           <DialogFooter>
             <DialogClose asChild>
               <Button
-                // onClick={() => setSelectedTutor("")}
+                // onClick={() => setSelectedRole("")}
                 className="my-2"
                 variant="outline"
               >

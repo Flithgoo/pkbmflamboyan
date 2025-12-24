@@ -17,16 +17,24 @@ import { FaUserEdit, FaTrashAlt, FaPlus } from "react-icons/fa";
 import Link from "next/link";
 import { deleteUserAction } from "@/lib/actions/user";
 import PenggunaCard from "@/app/components/LMS/admin/(Pengguna)/PenggunaCard";
+import { getAllClasses } from "@/lib/api/classes";
+import { getAllLocation } from "@/lib/api/location";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [locations, setLocations] = useState<any[]>([]);
   const [showDelete, setShowDelete] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
   useEffect(() => {
     async function fetchData() {
-      const { data } = await getAllUser();
-      setUsers(data ?? []);
+      const { data: userData } = await getAllUser();
+      const { data: classData } = await getAllClasses();
+      const { data: locationData } = await getAllLocation();
+      setUsers(userData ?? []);
+      setClasses(classData ?? []);
+      setLocations(locationData ?? []);
     }
     fetchData();
   }, []);
@@ -55,9 +63,11 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 pt-8 md:p-8">
       <PenggunaCard
-        tutors={users}
-        userClass={[]}
+        classes={classes}
+        locations={locations}
         formAction={function (formData: FormData): Promise<void> {
+          console.log("🚀 ~ AdminDashboard ~ formData:", formData);
+
           throw new Error("Function not implemented.");
         }}
         handleDelete={function (classId: number): void {
