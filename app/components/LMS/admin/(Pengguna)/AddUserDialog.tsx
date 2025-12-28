@@ -76,7 +76,7 @@ export default function PenggunaCard({
       /> */}
 
       {/* modal tambah mapel */}
-      <DialogContent className="sm:max-w-[425px] text-emerald-700">
+      <DialogContent className="max-w-80 sm:max-w-[425px] max-h-[95vh] overflow-y-auto text-emerald-700">
         <form
           action={formAction}
           onSubmit={(e) => {
@@ -97,7 +97,7 @@ export default function PenggunaCard({
 
           <div className="grid gap-4">
             {/* input nama mapel */}
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="name-1">Nama</Label>
               <Input
                 id="name-1"
@@ -107,7 +107,7 @@ export default function PenggunaCard({
               />
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="username">Username / NIPD</Label>
               <Input
                 id="username"
@@ -117,7 +117,7 @@ export default function PenggunaCard({
               />
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
@@ -129,7 +129,7 @@ export default function PenggunaCard({
             </div>
 
             {/* select role */}
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="role-selector">Role</Label>
               <Select
                 name="role"
@@ -170,7 +170,7 @@ export default function PenggunaCard({
                     classes={classes}
                   />
 
-                  <div className="grid gap-3">
+                  <div className="grid gap-2">
                     <Label htmlFor="location-selector">Lokasi</Label>
                     <Select
                       name="location"
@@ -208,7 +208,7 @@ export default function PenggunaCard({
           <DialogFooter>
             <DialogClose asChild>
               <Button
-                // onClick={() => setSelectedRole("")}
+                onClick={() => setSelectedRole("")}
                 className="my-2"
                 variant="outline"
               >

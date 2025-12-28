@@ -1,22 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { getAllUser } from "@/lib/api/user";
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-  TableCaption,
-} from "@/components/ui/table";
+import UserTable from "@/app/components/LMS/admin/(Pengguna)/UserTable";
 import ConfirmDeleteModal from "@/app/components/LMS/admin/ConfirmDeleteUserModal";
-import { FaUserEdit, FaTrashAlt, FaPlus } from "react-icons/fa";
 import Link from "next/link";
 import { deleteUserAction } from "@/lib/actions/user";
-import PenggunaCard from "@/app/components/LMS/admin/(Pengguna)/PenggunaCard";
+import PenggunaCard from "@/app/components/LMS/admin/(Pengguna)/AddUserDialog";
 import { getAllClasses } from "@/lib/api/classes";
 import { getAllLocation } from "@/lib/api/location";
 
@@ -62,25 +52,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 pt-8 md:p-8">
-      <PenggunaCard
-        classes={classes}
-        locations={locations}
-        formAction={function (formData: FormData): Promise<void> {
-          console.log("🚀 ~ AdminDashboard ~ formData:", formData);
-
-          throw new Error("Function not implemented.");
-        }}
-        handleDelete={function (classId: number): void {
-          throw new Error("Function not implemented.");
-        }}
-        handleEdit={function (
-          classId: number,
-          updatedData: { name?: string; tutorId?: number; description?: string }
-        ): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-
       <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-emerald-700">
@@ -135,102 +106,29 @@ export default function AdminDashboard() {
           id="daftar-pengguna"
           className="bg-white rounded-2xl shadow p-6 mt-6 overflow-x-auto"
         >
-          <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
-            <h2 className="text-xl font-semibold text-emerald-700">
-              Daftar Pengguna
-            </h2>
-            <Link
-              href="/LMS/admin/TambahPengguna"
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold shadow transition"
-            >
-              <FaPlus />
-              Tambah Pengguna
-            </Link>
-          </div>
-          <Table className="text-xs">
-            <TableCaption>Data seluruh pengguna sistem</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>No</TableHead>
-                <TableHead>Nama</TableHead>
-                <TableHead>Username / NIPD</TableHead>
-                <TableHead className="ps-6">Role</TableHead>
-                <TableHead>Dibuat tgl</TableHead>
-                <TableHead className="text-right pe-7">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users && users.length > 0 ? (
-                users.map((user, idx) => (
-                  <TableRow
-                    key={user.id}
-                    className="hover:bg-emerald-50 transition"
-                  >
-                    <TableCell>{idx + 1}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 w-10 h-10">
-                          <Image
-                            width={"40"}
-                            height={"40"}
-                            className="w-full h-full object-cover rounded-full"
-                            src={
-                              user.profile_picture ||
-                              "/assets/placeholder_profile/placeholder_avatar.png"
-                            }
-                            alt=""
-                          />
-                        </div>
-                        <p className="ml-3">{user.name}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>
-                      <div
-                        className={`px-2 py-1 w-16 text-center rounded text-xs font-semibold ${
-                          user.role === "admin"
-                            ? "bg-gray-100 text-gray-700"
-                            : user.role === "tutor"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-emerald-100 text-emerald-700"
-                        }`}
-                      >
-                        {user.role}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {user.created_at
-                        ? new Date(user.created_at).toLocaleDateString("id-ID")
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="flex text-base gap-2 justify-end">
-                      <Link
-                        href={`/LMS/admin/edit/${user.id}`}
-                        className="p-2 rounded hover:bg-emerald-100 text-emerald-700 transition"
-                        title="Edit User"
-                      >
-                        <FaUserEdit />
-                      </Link>
-                      <button
-                        type="button"
-                        className="p-2 rounded hover:bg-red-100 text-red-600 transition"
-                        title="Hapus User"
-                        onClick={() => handleDelete(user)}
-                      >
-                        <FaTrashAlt />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center">
-                    Tidak ada data pengguna.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <PenggunaCard
+            classes={classes}
+            locations={locations}
+            formAction={function (formData: FormData): Promise<void> {
+              console.log("🚀 ~ AdminDashboard ~ formData:", formData);
+
+              throw new Error("Function not implemented.");
+            }}
+            handleDelete={function (classId: number): void {
+              throw new Error("Function not implemented.");
+            }}
+            handleEdit={function (
+              classId: number,
+              updatedData: {
+                name?: string;
+                tutorId?: number;
+                description?: string;
+              }
+            ): void {
+              throw new Error("Function not implemented.");
+            }}
+          />
+          <UserTable users={users} handleDelete={handleDelete} />
         </section>
       </main>
 
