@@ -72,7 +72,7 @@ export default function PelajarDashboard() {
               Halo, {user?.name ?? "Peserta"}
             </h1>
             <p className="text-sm text-gray-600">
-              Semangat belajar di PKBM Flamboyan
+              Semangat belajar di PKBM Flamboyan 🚀
             </p>
           </div>
 
