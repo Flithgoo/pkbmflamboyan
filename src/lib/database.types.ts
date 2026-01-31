@@ -608,6 +608,28 @@ export type Database = {
         }
         Returns: undefined
       }
+      delete_user: { Args: { p_user_id: number }; Returns: boolean }
+      get_active_session_with_attendance: {
+        Args: { p_material_id: number; p_user_id: number }
+        Returns: {
+          has_attended: boolean
+          session_end: string
+          session_id: number
+          session_start: string
+        }[]
+      }
+      insert_user: {
+        Args: {
+          p_class_id?: number
+          p_location_id?: number
+          p_name: string
+          p_password: string
+          p_profile_picture?: string
+          p_role: string
+          p_username: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

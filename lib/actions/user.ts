@@ -11,6 +11,8 @@ export async function addUserAction(formData: FormData) {
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
   const role = formData.get("role") as string;
+  const studentClass = formData.get("studentClass") as string;
+  const location = formData.get("location") as string;
   const file = formData.get("profile_picture") as File | null;
 
   // Hash password di sini
@@ -26,7 +28,9 @@ export async function addUserAction(formData: FormData) {
     username,
     hashedPassword,
     role,
-    profilePictureUrl
+    profilePictureUrl,
+    studentClass ? Number(studentClass) : null,
+    location ? Number(location) : null,
   );
   if (error) {
     throw new Error(`Error inserting user: ${error.message}`);
@@ -85,7 +89,7 @@ export async function editUserAction(formData: FormData) {
     username,
     hashedPassword,
     role,
-    profilePictureUrl
+    profilePictureUrl,
   );
   if (error) {
     throw new Error(`Error editing user: ${error.message}`);
@@ -100,7 +104,7 @@ export async function deleteUserAction(id: number) {
   if (error) return { error: error.message };
 
   console.log(
-    `app/lib/actions/user.ts User with id = ${id} deleted successfully`
+    `app/lib/actions/user.ts User with id = ${id} deleted successfully`,
   );
   return { success: true };
 }

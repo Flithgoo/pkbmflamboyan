@@ -89,11 +89,14 @@ export async function logout() {
 }
 
 export async function insertUser(
+  // tambahkan kondisional jika user.role == 'pelajar' maka insert ke tabel kelas dan lokasi
   name: string,
   username: string,
   password: string, // sudah dalam bentuk hash
   role: string,
-  profile_picture?: string | null
+  profile_picture?: string | null,
+  studentClass?: number | null,
+  location?: number | null,
 ) {
   const { token, supabase } = await getAuthContext();
 
@@ -107,23 +110,22 @@ export async function insertUser(
     }
   }
 
-  const { data, error } = await supabase
-    .from("users")
-    .insert([
-      {
-        name,
-        username,
-        password,
-        role,
-        profile_picture: profile_picture || null,
-      },
-    ])
-    .select();
+  const { data, error } = await supabase.rpc("insert_user", {
+    p_name: name,
+    p_username: username,
+    p_password: password,
+    p_role: role,
+    p_profile_picture: profile_picture || undefined,
+    p_class_id: studentClass || undefined,
+    p_location_id: location || undefined,
+  });
+
   if (error) {
-    console.error("Error inserting user:", error);
-    return { error };
+    console.error(error.message);
+  } else {
+    console.log("User berhasil dibuat, ID:", data);
   }
-  return { data, error: null };
+  return { data, error };
 }
 
 export async function editUser(
@@ -132,7 +134,7 @@ export async function editUser(
   username: string,
   password: string | null, // sudah dalam bentuk hash
   role: string,
-  profile_picture?: string | null
+  profile_picture?: string | null,
 ) {
   const { token, supabase } = await getAuthContext();
 
@@ -209,11 +211,9 @@ export async function deleteUser(id: number) {
     }
   }
 
-  const { data, error } = await supabase
-    .from("users")
-    .delete()
-    .eq("id", id)
-    .select();
+  const { data, error } = await supabase.rpc("delete_user", {
+    p_user_id: id,
+  });
 
   if (profile_picture) {
     const { error: errorDeleteBucket } = await supabase.storage

@@ -30,17 +30,12 @@ export default function PenggunaCard({
   classes,
   locations,
   formAction,
-  handleDelete,
-  handleEdit,
+  isLoading,
 }: {
   classes: { id: number; name: string }[];
   locations?: { id: number; name: string }[];
   formAction: (formData: FormData) => Promise<void>;
-  handleDelete: (classId: number) => void;
-  handleEdit: (
-    classId: number,
-    updatedData: { name?: string; roleId?: number; description?: string }
-  ) => void;
+  isLoading?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("");
@@ -54,6 +49,7 @@ export default function PenggunaCard({
     { id: 3, name: "Pelajar" },
   ];
 
+  console.log("🚀 ~ PenggunaCard ~ selectedClass:", selectedClass);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
@@ -86,17 +82,23 @@ export default function PenggunaCard({
               setErrorRole("Pilih role terlebih dahulu");
             } else {
               setErrorRole("");
+              // Reset form setelah submit
+              setTimeout(() => {
+                setOpen(false);
+                setSelectedRole("");
+                setSelectedClass("");
+                setSelectedLocation("");
+                setPhoto(null);
+              }, 500);
             }
           }}
         >
           <DialogHeader>
-            <DialogTitle className="text-2xl pb-4">
-              Tambah Mata Pelajaran
-            </DialogTitle>
+            <DialogTitle className="text-2xl pb-4">Tambah Pengguna</DialogTitle>
           </DialogHeader>
 
           <div className="grid gap-4">
-            {/* input nama mapel */}
+            {/* input nama */}
             <div className="grid gap-2">
               <Label htmlFor="name-1">Nama</Label>
               <Input
@@ -142,21 +144,21 @@ export default function PenggunaCard({
                 <SelectContent className="grid gap-2">
                   <SelectGroup>
                     {roles.map((role) => (
-                      <SelectItem key={role.id} value={role.id.toString()}>
+                      <SelectItem key={role.id} value={role.name.toLowerCase()}>
                         {role.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              {/* {errorTutor && (
-                      <p className="text-red-600 text-sm mt-1">{errorTutor}</p>
-                    )} */}
+              {errorRole && (
+                <p className="text-red-600 text-sm mt-1">{errorRole}</p>
+              )}
             </div>
 
             {/* input kelas & lokasi jika role == pelajar */}
             <AnimatePresence>
-              {selectedRole === "3" && (
+              {selectedRole === "pelajar" && (
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -168,6 +170,12 @@ export default function PenggunaCard({
                     value={selectedClass}
                     onChange={setSelectedClass}
                     classes={classes}
+                  />
+                  {/* input hidden untuk menyertakan selectedClass agar masuk formData */}
+                  <input
+                    type="hidden"
+                    name="studentClass"
+                    value={selectedClass}
                   />
 
                   <div className="grid gap-2">
@@ -211,12 +219,13 @@ export default function PenggunaCard({
                 onClick={() => setSelectedRole("")}
                 className="my-2"
                 variant="outline"
+                disabled={isLoading}
               >
                 Batal
               </Button>
             </DialogClose>
-            <Button className="sm:my-2 mt-5" type="submit">
-              Simpan
+            <Button className="sm:my-2 mt-5" type="submit" disabled={isLoading}>
+              {isLoading ? "Menyimpan..." : "Simpan"}
             </Button>
           </DialogFooter>
         </form>

@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import UserTable from "@/app/components/LMS/admin/(Pengguna)/UserTable";
 import ConfirmDeleteModal from "@/app/components/LMS/admin/ConfirmDeleteUserModal";
 import Link from "next/link";
-import { deleteUserAction } from "@/lib/actions/user";
+import { deleteUserAction, addUserAction } from "@/lib/actions/user";
 import PenggunaCard from "@/app/components/LMS/admin/(Pengguna)/AddUserDialog";
 import { getAllClasses } from "@/lib/api/classes";
 import { getAllLocation } from "@/lib/api/location";
@@ -16,6 +16,12 @@ export default function AdminDashboard() {
   const [locations, setLocations] = useState<any[]>([]);
   const [showDelete, setShowDelete] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchUsers = async () => {
+    const { data: userData } = await getAllUser();
+    setUsers(userData ?? []);
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -42,13 +48,26 @@ export default function AdminDashboard() {
     if (result?.success) {
       setShowDelete(false); // Tutup modal
       // Refresh data
-      const { data } = await getAllUser();
-      setUsers(data ?? []);
+      await fetchUsers();
     } else {
       alert("Gagal menghapus pengguna. Silakan coba lagi.");
       console.error("Error deleting user:", result?.error);
     }
   }
+
+  const handleAddUserFormAction = async (formData: FormData) => {
+    setIsLoading(true);
+    try {
+      await addUserAction(formData);
+      // Refresh data setelah berhasil tambah
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error adding user:", error);
+      alert("Gagal menambah pengguna. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 pt-8 md:p-8">
@@ -109,24 +128,8 @@ export default function AdminDashboard() {
           <PenggunaCard
             classes={classes}
             locations={locations}
-            formAction={function (formData: FormData): Promise<void> {
-              console.log("🚀 ~ AdminDashboard ~ formData:", formData);
-
-              throw new Error("Function not implemented.");
-            }}
-            handleDelete={function (classId: number): void {
-              throw new Error("Function not implemented.");
-            }}
-            handleEdit={function (
-              classId: number,
-              updatedData: {
-                name?: string;
-                tutorId?: number;
-                description?: string;
-              }
-            ): void {
-              throw new Error("Function not implemented.");
-            }}
+            formAction={handleAddUserFormAction}
+            isLoading={isLoading}
           />
           <UserTable users={users} handleDelete={handleDelete} />
         </section>
