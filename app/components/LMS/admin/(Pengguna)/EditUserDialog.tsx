@@ -54,14 +54,48 @@ export default function EditPenggunaCard({
   // NOTE: EditUserDialog is mounted per-row, safe to use defaultValue
 
   useEffect(() => {
+    // Fetch user's class & location when the edit dialog is opened
     async function fetchUserDetails() {
-      if (selectedUser) {
+      if (selectedUser && open) {
         const { data } = await getUserLocationAndClass(selectedUser.id);
-        console.log("🚀 ~ fetchUserDetails ~ data:", data);
+        if (data) {
+          // set selected values as strings (Select expects string values)
+          if (
+            data.user_class &&
+            data.user_class.length > 0 &&
+            data.user_class[0]?.class_id
+          ) {
+            setSelectedClass(String(data.user_class[0].class_id));
+          } else {
+            setSelectedClass("");
+          }
+          if (
+            data.user_location &&
+            data.user_location.length > 0 &&
+            data.user_location[0]?.location_id
+          ) {
+            setSelectedLocation(String(data.user_location[0].location_id));
+          } else {
+            setSelectedLocation("");
+          }
+          // keep role from selectedUser (select is disabled now)
+          setSelectedRole(selectedUser.role || "");
+          console.log(selectedUser);
+        }
       }
     }
     fetchUserDetails();
-  }, [selectedUser]);
+  }, [selectedUser, open]);
+
+  // Clear temporary state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedRole("");
+      setSelectedClass("");
+      setSelectedLocation("");
+      setPhoto(null);
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -79,26 +113,30 @@ export default function EditPenggunaCard({
         <form
           action={formAction}
           onSubmit={(e) => {
-            // validasi -> role wajib dipilih
-            if (!selectedUser?.role) {
+            // validasi -> role wajib dipilih (gunakan nilai terpilih atau nilai user saat ini)
+            const roleToSubmit = selectedRole || selectedUser?.role;
+            if (!roleToSubmit) {
               e.preventDefault();
               setErrorRole("Pilih role terlebih dahulu");
-            } else {
-              setErrorRole("");
-              // Reset form setelah submit
-              setTimeout(() => {
-                setOpen(false);
-                setSelectedRole("");
-                setSelectedClass("");
-                setSelectedLocation("");
-                setPhoto(null);
-              }, 500);
+              return;
             }
+            setErrorRole("");
+            // Reset form setelah submit
+            setTimeout(() => {
+              setOpen(false);
+              setSelectedRole("");
+              setSelectedClass("");
+              setSelectedLocation("");
+              setPhoto(null);
+            }, 500);
           }}
         >
           <DialogHeader>
             <DialogTitle className="text-2xl pb-4">Edit Pengguna</DialogTitle>
           </DialogHeader>
+
+          {/* untuk mengisi id pada formData */}
+          <input type="hidden" name="id" value={selectedUser?.id || ""} />
 
           <div className="grid gap-4">
             {/* input nama */}
@@ -155,7 +193,7 @@ export default function EditPenggunaCard({
               <input
                 type="hidden"
                 name="role"
-                value={selectedUser?.role || ""}
+                value={selectedRole || selectedUser?.role || ""}
               />
             </div>
 
@@ -171,11 +209,6 @@ export default function EditPenggunaCard({
                 >
                   <ClassCombobox
                     value={selectedClass}
-                    defaultValue={
-                      selectedUser?.user_class?.class_id
-                        ? selectedUser.user_class.class_id.toString()
-                        : ""
-                    }
                     onChange={setSelectedClass}
                     classes={classes}
                   />
@@ -218,7 +251,17 @@ export default function EditPenggunaCard({
             </AnimatePresence>
 
             {/* foto profil */}
-            <ProfilePhotoInput value={photo} onChange={setPhoto} />
+            <ProfilePhotoInput
+              value={photo}
+              onChange={setPhoto}
+              defaultImageUrl={selectedUser?.profile_picture || null}
+            />
+            {/* input hidden untuk menyertakan current_profile_picture agar masuk formData */}
+            <input
+              type="hidden"
+              name="current_profile_picture"
+              value={selectedUser?.profile_picture || null}
+            />
           </div>
 
           <DialogFooter>

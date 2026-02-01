@@ -13,28 +13,33 @@ const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 type Props = {
   label?: string;
   value?: File | null;
+  defaultImageUrl?: string;
   onChange: (file: File | null) => void;
 };
 
 export function ProfilePhotoInput({
   label = "Foto Profil",
   value,
+  defaultImageUrl,
   onChange,
 }: Props) {
-  const [preview, setPreview] = React.useState<string | null>(null);
+  const [preview, setPreview] = React.useState<string | null>(
+    defaultImageUrl ?? null,
+  );
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    if (!value) {
-      setPreview(null);
-      return;
+    // CASE 1: user upload file baru
+    if (value instanceof File) {
+      const url = URL.createObjectURL(value);
+      setPreview(url);
+
+      return () => URL.revokeObjectURL(url);
     }
 
-    const url = URL.createObjectURL(value);
-    setPreview(url);
-
-    return () => URL.revokeObjectURL(url);
-  }, [value]);
+    // CASE 2: tidak ada file baru → pakai foto lama
+    setPreview(defaultImageUrl ?? null);
+  }, [value, defaultImageUrl]);
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -55,10 +60,7 @@ export function ProfilePhotoInput({
       <Label>{label}</Label>
 
       <div
-        className={cn(
-          "relative flex h-32 cursor-pointer items-center justify-center rounded-md border border-dashed",
-          "bg-background text-sm text-muted-foreground hover:bg-muted/40"
-        )}
+        className="relative flex h-32 cursor-pointer items-center justify-center rounded-md border border-dashed"
         onClick={() => inputRef.current?.click()}
       >
         {preview ? (
@@ -69,7 +71,6 @@ export function ProfilePhotoInput({
               fill
               className="rounded-md object-cover"
             />
-
             <Button
               type="button"
               variant="secondary"
@@ -78,6 +79,7 @@ export function ProfilePhotoInput({
               onClick={(e) => {
                 e.stopPropagation();
                 onChange(null);
+                setPreview(defaultImageUrl ?? null);
               }}
             >
               <X className="h-4 w-4" />

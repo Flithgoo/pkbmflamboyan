@@ -2,7 +2,7 @@ import { supabase } from "./supabase";
 
 export async function editProfilePicture(
   file: File,
-  oldFilePath?: string // contoh: "profile_pictures/1690831098231.jpg"
+  oldFilePath?: string, // contoh: "profile_pictures/1690831098231.jpg"
 ): Promise<string | null> {
   // 1. Hapus file lama jika ada
   if (oldFilePath) {
