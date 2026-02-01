@@ -5,18 +5,21 @@ import React, { useEffect, useState } from "react";
 import UserTable from "@/app/components/LMS/admin/(Pengguna)/UserTable";
 import ConfirmDeleteModal from "@/app/components/LMS/admin/ConfirmDeleteUserModal";
 import Link from "next/link";
-import { deleteUserAction, addUserAction } from "@/lib/actions/user";
-import PenggunaCard from "@/app/components/LMS/admin/(Pengguna)/AddUserDialog";
-import { getAllClasses } from "@/lib/api/classes";
-import { getAllLocation } from "@/lib/api/location";
+import {
+  deleteUserAction,
+  addUserAction,
+  editUserAction,
+} from "@/lib/actions/user";
+import AddUserDialog from "@/app/components/LMS/admin/(Pengguna)/AddUserDialog";
+import { useClassLocationStore } from "@/src/store/useClassLocationStore";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
-  const [classes, setClasses] = useState<any[]>([]);
-  const [locations, setLocations] = useState<any[]>([]);
   const [showDelete, setShowDelete] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const fetchAll = useClassLocationStore((s) => s.fetchAll);
 
   const fetchUsers = async () => {
     const { data: userData } = await getAllUser();
@@ -26,14 +29,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchData() {
       const { data: userData } = await getAllUser();
-      const { data: classData } = await getAllClasses();
-      const { data: locationData } = await getAllLocation();
       setUsers(userData ?? []);
-      setClasses(classData ?? []);
-      setLocations(locationData ?? []);
+      await fetchAll();
     }
     fetchData();
-  }, []);
+  }, [fetchAll]);
 
   function handleDelete(user: any) {
     setSelectedUser(user);
@@ -67,6 +67,22 @@ export default function AdminDashboard() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEditUserFormAction = async (formData: FormData) => {
+    console.log("🚀 ~ handleEditUserFormAction ~ formData:", formData);
+    setIsLoading(true);
+
+    // try {
+    //   await editUserAction(formData);
+    //   // Refresh data setelah berhasil edit
+    //   await fetchUsers();
+    // } catch (error) {
+    //   console.error("Error editing user:", error);
+    //   alert("Gagal mengedit pengguna. Silakan coba lagi.");
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   return (
@@ -125,13 +141,16 @@ export default function AdminDashboard() {
           id="daftar-pengguna"
           className="bg-white rounded-2xl shadow p-6 mt-6 overflow-x-auto"
         >
-          <PenggunaCard
-            classes={classes}
-            locations={locations}
+          <AddUserDialog
             formAction={handleAddUserFormAction}
             isLoading={isLoading}
           />
-          <UserTable users={users} handleDelete={handleDelete} />
+          <UserTable
+            users={users}
+            selectedUser={selectedUser}
+            handleEdit={handleEditUserFormAction}
+            handleDelete={handleDelete}
+          />
         </section>
       </main>
 

@@ -83,6 +83,37 @@ export async function getAllUser() {
   return { data, error };
 }
 
+export async function getUserLocationAndClass(id: number) {
+  const { token, supabase } = await getAuthContext();
+  let user: any = null; // Initialize user as null
+  if (token) {
+    try {
+      user = await verifyJwt(token); // user = { id, username, role }
+    } catch (error) {
+      console.error("JWT verification failed:", error);
+      user = null;
+    }
+  }
+
+  if (!user || user.role !== "admin") {
+    return { data: null, error: "Not authorized" };
+  }
+
+  const { data, error } = await supabase
+    .from("users")
+    .select(
+      `
+    id,
+    user_class ( class_id ),
+    user_location ( location_id )
+  `,
+    )
+    .eq("id", id)
+    .single();
+
+  return { data, error };
+}
+
 export async function logout() {
   // Hapus cookie token
   cookies().set("token", "", { path: "/", maxAge: 0 });

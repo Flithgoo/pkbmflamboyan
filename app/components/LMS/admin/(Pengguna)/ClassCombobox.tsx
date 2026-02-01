@@ -23,11 +23,13 @@ import {
 type Props = {
   label?: string;
   value?: string;
+  defaultValue?: string;
   onChange: (value: string) => void;
   classes: { id: number; name: string }[];
 };
 
 export function ClassCombobox({
+  defaultValue,
   label = "Kelas",
   value,
   onChange,
@@ -36,7 +38,7 @@ export function ClassCombobox({
   const [open, setOpen] = React.useState(false);
 
   const selectedLabel = classes.find(
-    (cls) => cls.id.toString() === value
+    (cls) => cls.id.toString() === value,
   )?.name;
 
   return (
@@ -58,7 +60,7 @@ export function ClassCombobox({
         </PopoverTrigger>
 
         <PopoverContent className="w-[180px] p-0" align="start">
-          <Command>
+          <Command defaultValue={defaultValue}>
             <CommandInput placeholder="Cari kelas..." />
 
             <CommandList className="max-h-40 overflow-y-auto overscroll-contain">
@@ -80,7 +82,7 @@ export function ClassCombobox({
                         "mr-2 h-4 w-4",
                         value === cls.id.toString()
                           ? "opacity-100"
-                          : "opacity-0"
+                          : "opacity-0",
                       )}
                     />
                     {cls.name}

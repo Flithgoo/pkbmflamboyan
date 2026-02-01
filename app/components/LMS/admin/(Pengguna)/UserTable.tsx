@@ -8,15 +8,21 @@ import {
   TableCaption,
 } from "@/components/ui/table";
 import Image from "next/image";
-import Link from "next/link";
-import { FaUserEdit, FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
+import EditUserDialog from "./EditUserDialog";
 
 type UserTableProps = {
   users: any[];
+  selectedUser: any | null;
+  handleEdit: (formData: FormData) => Promise<void>;
   handleDelete: (user: any) => void;
 };
 
-export default function UserTable({ users, handleDelete }: UserTableProps) {
+export default function UserTable({
+  users,
+  handleEdit,
+  handleDelete,
+}: UserTableProps) {
   return (
     <Table className="text-xs">
       <TableCaption>Data seluruh pengguna sistem</TableCaption>
@@ -59,8 +65,8 @@ export default function UserTable({ users, handleDelete }: UserTableProps) {
                     user.role === "admin"
                       ? "bg-gray-100 text-gray-700"
                       : user.role === "tutor"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-emerald-100 text-emerald-700"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-emerald-100 text-emerald-700"
                   }`}
                 >
                   {user.role}
@@ -72,13 +78,11 @@ export default function UserTable({ users, handleDelete }: UserTableProps) {
                   : "-"}
               </TableCell>
               <TableCell className="flex text-base gap-2 justify-end">
-                <Link
-                  href={`/LMS/admin/edit/${user.id}`}
-                  className="p-2 rounded hover:bg-emerald-100 text-emerald-700 transition"
-                  title="Edit User"
-                >
-                  <FaUserEdit />
-                </Link>
+                <EditUserDialog
+                  selectedUser={user}
+                  formAction={handleEdit}
+                  isLoading={false}
+                />
                 <button
                   type="button"
                   className="p-2 rounded hover:bg-red-100 text-red-600 transition"

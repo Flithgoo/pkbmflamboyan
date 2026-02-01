@@ -20,17 +20,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { FaUserEdit } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
 import { ClassCombobox } from "@/app/components/LMS/admin/(Pengguna)/ClassCombobox";
 import { ProfilePhotoInput } from "@/app/components/LMS/admin/(Pengguna)/ProfilePhotoInput";
 import { useClassLocationStore } from "@/src/store/useClassLocationStore";
+import { getUserLocationAndClass } from "@/lib/api/user";
 
-export default function TambahPenggunaCard({
+export default function EditPenggunaCard({
+  selectedUser,
   formAction,
   isLoading,
 }: {
+  selectedUser: any | null;
   formAction: (formData: FormData) => Promise<void>;
   isLoading?: boolean;
 }) {
@@ -48,34 +51,36 @@ export default function TambahPenggunaCard({
     { id: 3, name: "Pelajar" },
   ];
 
+  // NOTE: EditUserDialog is mounted per-row, safe to use defaultValue
+
+  useEffect(() => {
+    async function fetchUserDetails() {
+      if (selectedUser) {
+        const { data } = await getUserLocationAndClass(selectedUser.id);
+        console.log("🚀 ~ fetchUserDetails ~ data:", data);
+      }
+    }
+    fetchUserDetails();
+  }, [selectedUser]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
-        <h2 className="text-xl font-semibold text-emerald-700">
-          Daftar Pengguna
-        </h2>
-        <DialogTrigger asChild>
-          <Button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold shadow transition">
-            <FaPlus />
-            Tambah Pengguna
-          </Button>
-        </DialogTrigger>
-      </div>
+      <DialogTrigger asChild>
+        <button
+          className="p-2 rounded hover:bg-emerald-100 text-emerald-700 transition"
+          title="Edit User"
+        >
+          <FaUserEdit />
+        </button>
+      </DialogTrigger>
 
-      {/* tabel daftar mapel */}
-      {/* <UserTable
-        userClass={userClass}
-        onDelete={handleDelete}
-        onEdit={handleEdit}
-      /> */}
-
-      {/* modal tambah mapel */}
+      {/* modal edit user */}
       <DialogContent className="max-w-80 sm:max-w-[425px] max-h-[95vh] overflow-y-auto text-emerald-700">
         <form
           action={formAction}
           onSubmit={(e) => {
             // validasi -> role wajib dipilih
-            if (!selectedRole) {
+            if (!selectedUser?.role) {
               e.preventDefault();
               setErrorRole("Pilih role terlebih dahulu");
             } else {
@@ -92,7 +97,7 @@ export default function TambahPenggunaCard({
           }}
         >
           <DialogHeader>
-            <DialogTitle className="text-2xl pb-4">Tambah Pengguna</DialogTitle>
+            <DialogTitle className="text-2xl pb-4">Edit Pengguna</DialogTitle>
           </DialogHeader>
 
           <div className="grid gap-4">
@@ -103,6 +108,7 @@ export default function TambahPenggunaCard({
                 id="name-1"
                 name="name"
                 placeholder="Nama Lengkap"
+                defaultValue={selectedUser?.name || ""}
                 required
               />
             </div>
@@ -113,6 +119,7 @@ export default function TambahPenggunaCard({
                 id="username"
                 name="username"
                 placeholder="Username / NIPD"
+                defaultValue={selectedUser?.username || ""}
                 required
               />
             </div>
@@ -123,19 +130,15 @@ export default function TambahPenggunaCard({
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Password"
-                required
+                placeholder="Kosongi jika tidak ingin mengubah password"
               />
             </div>
 
             {/* select role */}
             <div className="grid gap-2">
               <Label htmlFor="role-selector">Role</Label>
-              <Select
-                name="role"
-                value={selectedRole}
-                onValueChange={(value) => setSelectedRole(value)}
-              >
+              {/* select disini dimatikan dan tidak berfungsi, hanya menampung nilai role user sebelumnya */}
+              <Select disabled defaultValue={selectedUser?.role || ""}>
                 <SelectTrigger id="role-selector" className="w-[180px]">
                   <SelectValue placeholder="Pilih Peran" />
                 </SelectTrigger>
@@ -149,14 +152,16 @@ export default function TambahPenggunaCard({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              {errorRole && (
-                <p className="text-red-600 text-sm mt-1">{errorRole}</p>
-              )}
+              <input
+                type="hidden"
+                name="role"
+                value={selectedUser?.role || ""}
+              />
             </div>
 
             {/* input kelas & lokasi jika role == pelajar */}
             <AnimatePresence>
-              {selectedRole === "pelajar" && (
+              {selectedUser?.role === "pelajar" && (
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -166,6 +171,11 @@ export default function TambahPenggunaCard({
                 >
                   <ClassCombobox
                     value={selectedClass}
+                    defaultValue={
+                      selectedUser?.user_class?.class_id
+                        ? selectedUser.user_class.class_id.toString()
+                        : ""
+                    }
                     onChange={setSelectedClass}
                     classes={classes}
                   />
