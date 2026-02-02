@@ -492,16 +492,19 @@ export type Database = {
       user_class: {
         Row: {
           class_id: number
+          created_at: string
           id: number
           user_id: number
         }
         Insert: {
           class_id: number
+          created_at?: string
           id?: number
           user_id: number
         }
         Update: {
           class_id?: number
+          created_at?: string
           id?: number
           user_id?: number
         }
@@ -516,7 +519,7 @@ export type Database = {
           {
             foreignKeyName: "user_class_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -527,19 +530,19 @@ export type Database = {
           created_at: string
           id: number
           location_id: number | null
-          user_id: number | null
+          user_id: number
         }
         Insert: {
           created_at?: string
           id?: number
           location_id?: number | null
-          user_id?: number | null
+          user_id: number
         }
         Update: {
           created_at?: string
           id?: number
           location_id?: number | null
-          user_id?: number | null
+          user_id?: number
         }
         Relationships: [
           {
@@ -552,7 +555,7 @@ export type Database = {
           {
             foreignKeyName: "user_location_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -629,6 +632,19 @@ export type Database = {
           p_username: string
         }
         Returns: number
+      }
+      update_user_full: {
+        Args: {
+          p_class_id?: number
+          p_location_id?: number
+          p_name: string
+          p_password?: string
+          p_profile_picture?: string
+          p_role: string
+          p_user_id: number
+          p_username: string
+        }
+        Returns: boolean
       }
     }
     Enums: {

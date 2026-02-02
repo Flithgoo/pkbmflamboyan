@@ -60,27 +60,18 @@ export default function EditPenggunaCard({
         const { data } = await getUserLocationAndClass(selectedUser.id);
         if (data) {
           // set selected values as strings (Select expects string values)
-          if (
-            data.user_class &&
-            data.user_class.length > 0 &&
-            data.user_class[0]?.class_id
-          ) {
-            setSelectedClass(String(data.user_class[0].class_id));
+          if (data.user_class && data.user_class.class_id) {
+            setSelectedClass(String(data.user_class.class_id));
           } else {
             setSelectedClass("");
           }
-          if (
-            data.user_location &&
-            data.user_location.length > 0 &&
-            data.user_location[0]?.location_id
-          ) {
-            setSelectedLocation(String(data.user_location[0].location_id));
+          if (data.user_location && data.user_location.location_id) {
+            setSelectedLocation(String(data.user_location.location_id));
           } else {
             setSelectedLocation("");
           }
           // keep role from selectedUser (select is disabled now)
           setSelectedRole(selectedUser.role || "");
-          console.log(selectedUser);
         }
       }
     }

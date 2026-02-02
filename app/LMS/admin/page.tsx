@@ -70,19 +70,18 @@ export default function AdminDashboard() {
   };
 
   const handleEditUserFormAction = async (formData: FormData) => {
-    console.log("🚀 ~ handleEditUserFormAction ~ formData:", formData);
     setIsLoading(true);
 
-    // try {
-    //   await editUserAction(formData);
-    //   // Refresh data setelah berhasil edit
-    //   await fetchUsers();
-    // } catch (error) {
-    //   console.error("Error editing user:", error);
-    //   alert("Gagal mengedit pengguna. Silakan coba lagi.");
-    // } finally {
-    //   setIsLoading(false);
-    // }
+    try {
+      await editUserAction(formData);
+      // Refresh data setelah berhasil edit
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error editing user:", error);
+      alert("Gagal mengedit pengguna. Silakan coba lagi.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

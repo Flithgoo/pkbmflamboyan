@@ -3,6 +3,7 @@
 import { createSupabaseServerClient } from "@/app/utils/supabase-server";
 import { cookies } from "next/headers";
 import { verifyJwt } from "@/lib/jwt";
+import { isAuthorizedAdmin } from "../isAuthorized";
 
 const getAuthContext = async (): Promise<{
   token: string;
@@ -166,35 +167,26 @@ export async function editUser(
   password: string | null, // sudah dalam bentuk hash
   role: string,
   profile_picture?: string | null,
+  studentClass?: number | null,
+  location?: number | null,
 ) {
   const { token, supabase } = await getAuthContext();
+  const isAuthorized = await isAuthorizedAdmin(token);
 
-  let user = null; // Initialize user as null
-  if (token) {
-    try {
-      user = await verifyJwt(token); // user = { id, username, role }
-    } catch (error) {
-      console.error("JWT verification failed:", error);
-      user = null;
-    }
+  if (!isAuthorized) {
+    return { data: null, error: "Not authorized" };
   }
 
-  const updateData: any = {
-    name,
-    username,
-    role,
-    profile_picture: profile_picture || null,
-  };
-
-  if (password) {
-    updateData.password = password;
-  }
-
-  const { data, error } = await supabase
-    .from("users")
-    .update(updateData)
-    .eq("id", id)
-    .select();
+  const { data, error } = await supabase.rpc("update_user_full", {
+    p_user_id: id,
+    p_name: name,
+    p_username: username,
+    p_password: password === null ? undefined : password,
+    p_profile_picture: profile_picture || undefined,
+    p_role: role,
+    p_class_id: role === "pelajar" ? (studentClass ?? undefined) : undefined,
+    p_location_id: role === "pelajar" ? (location ?? undefined) : undefined,
+  });
 
   if (error) {
     console.error("Error editing user:", error);
@@ -205,20 +197,12 @@ export async function editUser(
 
 export async function deleteUser(id: number) {
   const { token, supabase } = await getAuthContext();
+  const isAuthorized = await isAuthorizedAdmin(token);
 
-  let user = null; // Initialize user as null
-  if (token) {
-    try {
-      user = await verifyJwt(token); // user = { id, username, role }
-    } catch (error) {
-      console.error("JWT verification failed:", error);
-      user = null;
-    }
+  if (!isAuthorized) {
+    return { data: null, error: "Not authorized" };
   }
 
-  if (user?.role !== "admin") {
-    throw new Error("Forbidden: Not authorized to delete this user.");
-  }
   const { data: userData, error: userError } = await getUserById(id);
   const profile_picture = userData?.profile_picture;
 
