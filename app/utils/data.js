@@ -130,9 +130,9 @@ const adminDashboardLinks = [
   { name: "Dashboard", icon: Home, href: "/LMS/admin" },
   { name: "Pengguna", icon: Users, href: "/LMS/admin#daftar-pengguna" },
   {
-    name: "Tambah Pengguna",
+    name: "Sinkronisasi Dapodik",
     icon: UserPlus,
-    href: "/LMS/admin/TambahPengguna",
+    href: "/LMS/admin/SinkronDapodik",
   },
   { name: "Mata Pelajaran", icon: BookOpen, href: "/LMS/admin/MataPelajaran" },
   { name: "Laporan", icon: BarChart2, href: "/LMS/admin/laporan" },

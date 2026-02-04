@@ -48,7 +48,7 @@ export function ProfilePhotoInput({
     }
 
     if (file.size > MAX_SIZE) {
-      alert("Ukuran maksimal foto adalah 2 MB.");
+      alert(`Ukuran file maksimal adalah ${MAX_SIZE / (1024 * 1024)} MB.`);
       return;
     }
 
