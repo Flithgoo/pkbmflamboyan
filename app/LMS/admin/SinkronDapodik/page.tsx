@@ -20,7 +20,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-type RowObject = Record<string, any>;
+type RowObject = Record<string, string | number | null>;
 
 export default function SinkronDapodikPage() {
   const [fileName, setFileName] = useState<string | null>(null);
@@ -29,6 +29,12 @@ export default function SinkronDapodikPage() {
   const [analyzeResult, setAnalyzeResult] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // tambahan untuk pencarian dan pagination
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState<number | "Semua">(10);
+  const rowsPerPageOptions = [10, 25, 50, 100, "Semua"];
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -51,10 +57,75 @@ export default function SinkronDapodikPage() {
       }
 
       const workbook = XLSX.read(buffer, { type: "array" });
+      if (!workbook.SheetNames.length) {
+        throw new Error("Sheet tidak ditemukan");
+      }
+
+      // ambil sheet pertama untuk diparse, bisa ditambah opsi pilih sheet jika diperlukan
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      const rows: RowObject[] = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      // Ambil sebagai array 2D (bukan langsung object)
+      const raw: any[][] = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        defval: "",
+      });
+      // Validasi minimal struktur file
+      if (raw.length < 7) {
+        throw new Error("Format file tidak sesuai (header tidak ditemukan).");
+      }
+      // Baris 5 & 6 Excel (index 4 dan 5)
+      const headerMainRaw = raw[4] ?? [];
+      const headerChild = raw[5] ?? [];
+
+      // STEP 1: forward fill parent header (untuk merge cell)
+      const headerMain: string[] = [];
+      let lastParent = "";
+
+      for (let i = 0; i < headerMainRaw.length; i++) {
+        const current = String(headerMainRaw[i] ?? "").trim();
+
+        if (current !== "") {
+          lastParent = current;
+          headerMain.push(current);
+        } else {
+          headerMain.push(lastParent);
+        }
+      }
+
+      // STEP 2: gabungkan parent + child
+      const usedKeys = new Set<string>();
+
+      const mergedHeaders: string[] = headerMain.map((main, i) => {
+        const child = String(headerChild[i] ?? "").trim();
+
+        let key = child !== "" ? `${main}_${child}` : main;
+
+        key = key.replace(/\s+/g, "_").toLowerCase();
+
+        let finalKey = key;
+        let counter = 1;
+
+        while (usedKeys.has(finalKey)) {
+          finalKey = `${key}_${counter++}`;
+        }
+
+        usedKeys.add(finalKey);
+        return finalKey;
+      });
+
+      // Data mulai baris ke-7 (index 6)
+      const dataRows = raw.slice(6);
+      // Konversi ke object
+      const rows: RowObject[] = dataRows.map((row) => {
+        const obj: RowObject = {};
+        mergedHeaders.forEach((key, i) => {
+          obj[key] = row[i] ?? "";
+        });
+        return obj;
+      });
       setParsedRows(rows);
+      console.log("Parsed rows sample:", rows[0]);
+
       if (rows.length === 0) {
         setError(
           "File kosong atau tidak dapat dibaca. Pastikan format Excel benar.",
@@ -149,7 +220,7 @@ export default function SinkronDapodikPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-2">
                 Pilih file Excel (.xlsx)
@@ -193,34 +264,125 @@ export default function SinkronDapodikPage() {
             <h3 className="font-semibold mb-2">
               Preview data ({parsedRows.length})
             </h3>
-            <div className="rounded-lg border bg-background p-2">
+            {parsedRows.length > 0 && (
+              <div className="mb-2">
+                <Input
+                  placeholder="Cari nama (PD, ortu, wali), nisn atau nipd..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+            )}
+            <div className="rounded-lg border bg-background p-2 overflow-x-auto">
               {parsedRows.length === 0 ? (
                 <div className="text-sm text-muted-foreground">
                   Belum ada data yang diparse.
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {Object.keys(parsedRows[0])
-                        .slice(0, parsedRows[0].length)
-                        .map((h) => (
-                          <TableHead key={h}>{h}</TableHead>
-                        ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {parsedRows.slice(0, parsedRows[0].length).map((r, i) => (
-                      <TableRow key={i}>
-                        {Object.values(r)
-                          .slice(0, parsedRows[0].length)
-                          .map((v, j) => (
-                            <TableCell key={j}>{String(v)}</TableCell>
+                (() => {
+                  // cari field yang relevan
+                  const lower = searchQuery.toLowerCase();
+                  const filtered = parsedRows.filter((row) => {
+                    if (!lower) return true; // show all when query empty
+                    return Object.entries(row).some(([k, v]) => {
+                      const key = k.toLowerCase();
+                      if (
+                        key.includes("nama") ||
+                        key.includes("nisn") ||
+                        key.includes("nipd")
+                      ) {
+                        return String(v).toLowerCase().includes(lower);
+                      }
+                      return false;
+                    });
+                  });
+
+                  const total = filtered.length;
+                  let pageCount = 1;
+                  if (rowsPerPage !== "Semua") {
+                    pageCount = Math.max(1, Math.ceil(total / rowsPerPage));
+                  }
+
+                  const displayRows = (() => {
+                    if (rowsPerPage === "Semua") return filtered;
+                    const start = (currentPage - 1) * rowsPerPage;
+                    return filtered.slice(start, start + rowsPerPage);
+                  })();
+
+                  return (
+                    <div className="max-w-screen-lg">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            {Object.keys(parsedRows[0]).map((h) => (
+                              <TableHead className="font-semibold" key={h}>
+                                {h}
+                              </TableHead>
+                            ))}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {displayRows.map((r, i) => (
+                            <TableRow
+                              className={i % 2 === 0 ? "bg-muted" : ""}
+                              key={i}
+                            >
+                              {Object.values(r).map((v, j) => (
+                                <TableCell key={j}>{String(v)}</TableCell>
+                              ))}
+                            </TableRow>
                           ))}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                        </TableBody>
+                      </Table>
+
+                      {/* pagination controls */}
+                      <div className="flex items-center justify-end gap-4 mt-2 text-sm">
+                        <div className="flex items-center gap-1">
+                          <span>Rows per page:</span>
+                          <select
+                            className="border rounded p-1"
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setRowsPerPage(
+                                val === "Semua" ? "Semua" : parseInt(val, 10),
+                              );
+                              setCurrentPage(1);
+                            }}
+                          >
+                            {rowsPerPageOptions.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        {rowsPerPage !== "Semua" && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              disabled={currentPage === 1}
+                              onClick={() => setCurrentPage((p) => p - 1)}
+                            >
+                              ‹
+                            </button>
+                            <span>
+                              {currentPage} of {pageCount}
+                            </span>
+                            <button
+                              disabled={currentPage === pageCount}
+                              onClick={() => setCurrentPage((p) => p + 1)}
+                            >
+                              ›
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()
               )}
             </div>
           </div>
@@ -239,7 +401,7 @@ export default function SinkronDapodikPage() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <h4 className="font-medium mb-2">Tidak dimasukkan</h4>
-                  <div className="rounded-lg border bg-background p-2">
+                  <div className="rounded-lg border bg-background p-2 overflow-x-auto">
                     {analyzeResult.notInserted?.length === 0 ? (
                       <div className="text-sm text-muted-foreground">
                         Semua baris dapat diproses.
@@ -273,7 +435,7 @@ export default function SinkronDapodikPage() {
                   <h4 className="font-medium mb-2">
                     Perubahan yang terdeteksi
                   </h4>
-                  <div className="rounded-lg border bg-background p-2">
+                  <div className="rounded-lg border bg-background p-2 overflow-x-auto">
                     {analyzeResult.changed?.length === 0 ? (
                       <div className="text-sm text-muted-foreground">
                         Tidak ada perubahan.
