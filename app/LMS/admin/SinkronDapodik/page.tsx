@@ -41,13 +41,14 @@ export default function SinkronDapodikPage() {
     setSuccess(null);
     setAnalyzeResult(null);
 
+    // ambil file pertama dari input semisal user input lebih dari 1 file
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
 
     try {
       const buffer = await file.arrayBuffer();
-      // dynamic import so project still builds if xlsx not installed
+      // dynamic import agar tidak error di lingkungan yang tidak support (misal build tanpa xlsx)
       const XLSX = await import("xlsx").catch(() => null);
       if (!XLSX) {
         setError(
@@ -61,7 +62,7 @@ export default function SinkronDapodikPage() {
         throw new Error("Sheet tidak ditemukan");
       }
 
-      // ambil sheet pertama untuk diparse, bisa ditambah opsi pilih sheet jika diperlukan
+      // ambil sheet pertama untuk diparse, (bisa ditambah opsi pilih sheet jika diperlukan)
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       // Ambil sebagai array 2D (bukan langsung object)
@@ -73,11 +74,11 @@ export default function SinkronDapodikPage() {
       if (raw.length < 7) {
         throw new Error("Format file tidak sesuai (header tidak ditemukan).");
       }
-      // Baris 5 & 6 Excel (index 4 dan 5)
+      // Baris 5 & 6 Excel (index 4 dan 5), karena dapodik ada metadata spt nama pengunduh, tgl dll
       const headerMainRaw = raw[4] ?? [];
       const headerChild = raw[5] ?? [];
 
-      // STEP 1: forward fill parent header (untuk merge cell)
+      // STEP 1: forward fill parent header (untuk merge cell), intine kalau ada cell kosong, isi dengan value parent sebelumnya
       const headerMain: string[] = [];
       let lastParent = "";
 
@@ -124,7 +125,7 @@ export default function SinkronDapodikPage() {
         return obj;
       });
       setParsedRows(rows);
-      console.log("Parsed rows sample:", rows[0]);
+      console.log("Parsed rows:", parsedRows);
 
       if (rows.length === 0) {
         setError(
@@ -444,7 +445,7 @@ export default function SinkronDapodikPage() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Email/Username</TableHead>
+                            <TableHead>NIPD/Username</TableHead>
                             <TableHead>Field</TableHead>
                             <TableHead>Sebelum → Sesudah</TableHead>
                           </TableRow>
@@ -483,8 +484,8 @@ export default function SinkronDapodikPage() {
       </Card>
 
       <div className="text-sm text-muted-foreground">
-        Catatan: sistem akan mencocokkan entri berdasarkan{" "}
-        <strong>email</strong> atau <strong>username</strong> jika tersedia.
+        Catatan: sistem akan mencocokkan entri berdasarkan <strong>NIPD</strong>
+        atau <strong>username</strong> jika tersedia.
       </div>
     </div>
   );

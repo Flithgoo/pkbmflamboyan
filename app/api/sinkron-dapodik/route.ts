@@ -31,11 +31,13 @@ export async function POST(request: NextRequest) {
     const { data: existingUsers, error } = await getAllUser();
     const users: any[] = existingUsers ?? [];
 
-    const byEmail = new Map<string, any>();
+    // const byEmail = new Map<string, any>();
     const byUsername = new Map<string, any>();
+    // index by email & username (case-insensitive)
     for (const u of users) {
       if (u.username) byUsername.set(String(u.username).toLowerCase(), u);
-      if (u.email) byEmail.set(String(u.email).toLowerCase(), u);
+      // tidak ada record emial sbnrnya cmn jika mau tambah email, kode dibwh diisi
+      // if (u.email) byEmail.set(String(u.email).toLowerCase(), u);
     }
 
     const notInserted: any[] = [];
@@ -46,30 +48,22 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const email = getVal(row, ["email", "Email", "EMAIL"]);
-      const username = getVal(row, [
-        "username",
-        "username",
-        "user",
-        "nis",
-        "nisn",
-      ]);
+      const username = getVal(row, ["NIPD", "NIS", "nis", "nipd"]);
       const name = getVal(row, ["name", "nama", "Nama", "NAMA"]);
       const role = getVal(row, ["role"]) ?? "pelajar";
 
-      const ident = email ?? username ?? null;
+      const ident = username ?? null;
       if (!ident) {
         notInserted.push({
           rowIndex: i,
-          reason: "Tidak ada identifier (email/username)",
+          reason: "Tidak ada identifier (NIPD/username)",
           row,
         });
         continue;
       }
 
       // try find
-      const found =
-        (email && byEmail.get(email.toLowerCase())) ||
-        (username && byUsername.get(username.toLowerCase()));
+      const found = username && byUsername.get(username.toLowerCase());
 
       if (!found) {
         // new user
