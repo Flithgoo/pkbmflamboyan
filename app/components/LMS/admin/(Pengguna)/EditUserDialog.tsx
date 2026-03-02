@@ -225,14 +225,16 @@ export default function EditPenggunaCard({
                       </SelectTrigger>
                       <SelectContent className="grid gap-2">
                         <SelectGroup>
-                          {(locations || []).map((location) => (
-                            <SelectItem
-                              key={location.id}
-                              value={location.id.toString()}
-                            >
-                              {location.name}
-                            </SelectItem>
-                          ))}
+                          {(locations || [])
+                            .filter((location) => location.id !== 4)
+                            .map((location) => (
+                              <SelectItem
+                                key={location.id}
+                                value={location.id.toString()}
+                              >
+                                {location.name}
+                              </SelectItem>
+                            ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>

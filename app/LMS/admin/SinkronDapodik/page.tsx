@@ -125,7 +125,6 @@ export default function SinkronDapodikPage() {
         return obj;
       });
       setParsedRows(rows);
-      console.log("Parsed rows:", parsedRows);
 
       if (rows.length === 0) {
         setError(

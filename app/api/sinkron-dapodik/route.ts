@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getAllUser, insertUser, editUser } from "@/lib/api/user";
+import { getAllClasses } from "@/lib/api/classes";
 
+// untuk mempercepat proses pencarian value dari berbagai kemungkinan nama kolom (misal: email, Email, EMAIL)
 function getVal(row: any, keys: string[]) {
   for (const k of keys) {
     if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== "")
@@ -29,6 +31,7 @@ export async function POST(request: NextRequest) {
 
     // ambil semua user
     const { data: existingUsers, error } = await getAllUser();
+    const { data: allClasses, error: classesError } = await getAllClasses();
     const users: any[] = existingUsers ?? [];
 
     // const byEmail = new Map<string, any>();
@@ -50,7 +53,17 @@ export async function POST(request: NextRequest) {
       const email = getVal(row, ["email", "Email", "EMAIL"]);
       const username = getVal(row, ["NIPD", "NIS", "nis", "nipd"]);
       const name = getVal(row, ["name", "nama", "Nama", "NAMA"]);
-      const role = getVal(row, ["role"]) ?? "pelajar";
+      const userClass = getVal(row, [
+        "kelas",
+        "Kelas",
+        "KELAS",
+        "rombel_saat_ini",
+        "Rombel_saat_ini",
+        "rombelsaatini",
+        "Rombel Saat Ini",
+        "ROMBEL_SAAT_INI",
+      ]);
+      const role = "pelajar";
 
       const ident = username ?? null;
       if (!ident) {
@@ -64,18 +77,30 @@ export async function POST(request: NextRequest) {
 
       // try find
       const found = username && byUsername.get(username.toLowerCase());
+      const classRecord = allClasses?.find(
+        (c) => String(c.name).toLowerCase() === String(userClass).toLowerCase(),
+      );
 
       if (!found) {
         // new user
         if (sync) {
           try {
             // default password 'password' (admin should force reset)
-            await insertUser(
-              name ?? username ?? email ?? "",
-              username ?? email ?? "user_" + Date.now(),
-              "password",
-              role,
-            );
+            if (name && username && userClass) {
+              console.log(
+                "🚀 ~ POST ~ insertUser with classRecord.id:",
+                classRecord?.id,
+              );
+              await insertUser(
+                name ?? "",
+                username ?? "",
+                username ?? "",
+                role,
+                null,
+                classRecord ? classRecord.id : null,
+                4, // default location id (belum ditentukan)
+              );
+            }
             insertedCount++;
           } catch (e) {
             notInserted.push({
