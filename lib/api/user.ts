@@ -162,10 +162,10 @@ export async function insertUser(
 
 export async function editUser(
   id: number,
-  name: string,
-  username: string,
-  password: string | null, // sudah dalam bentuk hash
-  role: string,
+  name?: string | null,
+  username?: string | null,
+  password?: string | null, // sudah dalam bentuk hash
+  role?: string | null,
   profile_picture?: string | null,
   studentClass?: number | null,
   location?: number | null,
@@ -177,16 +177,28 @@ export async function editUser(
     return { data: null, error: "Not authorized" };
   }
 
-  const { data, error } = await supabase.rpc("update_user_full", {
+  const payload: any = {
     p_user_id: id,
-    p_name: name,
-    p_username: username,
-    p_password: password === null ? undefined : password,
-    p_profile_picture: profile_picture || undefined,
-    p_role: role,
-    p_class_id: role === "pelajar" ? (studentClass ?? undefined) : undefined,
-    p_location_id: role === "pelajar" ? (location ?? undefined) : undefined,
-  });
+  };
+
+  if (name !== undefined && name !== null) payload.p_name = name;
+  if (username !== undefined && username !== null)
+    payload.p_username = username;
+  if (password !== undefined && password !== null)
+    payload.p_password = password;
+  if (profile_picture !== undefined)
+    payload.p_profile_picture = profile_picture;
+  if (role !== undefined && role !== null) payload.p_role = role;
+  if (role === "pelajar") {
+    if (!studentClass) {
+      throw new Error("Pelajar wajib punya kelas");
+    }
+    payload.p_class_id = studentClass;
+    if (location !== undefined && location !== null)
+      payload.p_location_id = location;
+  }
+
+  const { data, error } = await supabase.rpc("update_user_full", payload);
 
   if (error) {
     console.error("Error editing user:", error);

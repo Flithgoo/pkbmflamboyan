@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getAllUser, insertUser, editUser } from "@/lib/api/user";
 import { getAllClasses } from "@/lib/api/classes";
+import bcrypt from "bcryptjs";
 
 // untuk mempercepat proses pencarian value dari berbagai kemungkinan nama kolom (misal: email, Email, EMAIL)
 function getVal(row: any, keys: string[]) {
@@ -47,12 +48,21 @@ export async function POST(request: NextRequest) {
     const changed: any[] = [];
     let insertedCount = 0;
     let updatedCount = 0;
+    const toTitleCaseSimple = (str: string) => {
+      return str
+        .toLowerCase()
+        .split(" ")
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    };
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const email = getVal(row, ["email", "Email", "EMAIL"]);
       const username = getVal(row, ["NIPD", "NIS", "nis", "nipd"]);
-      const name = getVal(row, ["name", "nama", "Nama", "NAMA"]);
+      const rawName = getVal(row, ["name", "nama"]);
+      const name = rawName ? toTitleCaseSimple(rawName) : null;
       const userClass = getVal(row, [
         "kelas",
         "Kelas",
@@ -87,14 +97,11 @@ export async function POST(request: NextRequest) {
           try {
             // default password 'password' (admin should force reset)
             if (name && username && userClass) {
-              console.log(
-                "🚀 ~ POST ~ insertUser with classRecord.id:",
-                classRecord?.id,
-              );
+              const hashedPassword = await bcrypt.hash(username, 10);
               await insertUser(
                 name ?? "",
                 username ?? "",
-                username ?? "",
+                hashedPassword,
                 role,
                 null,
                 classRecord ? classRecord.id : null,
@@ -135,6 +142,9 @@ export async function POST(request: NextRequest) {
                 username ?? found.username,
                 null,
                 role ?? found.role,
+                null,
+                classRecord ? classRecord.id : found.class_id,
+                null,
               );
               updatedCount++;
             } catch (e) {
