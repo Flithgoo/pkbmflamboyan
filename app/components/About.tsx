@@ -32,7 +32,15 @@ const About = () => {
       </svg>
 
       {/* Konten Section */}
-      <h1 className="text-center bg-emerald-600 font-semibold text-slate-100 text-4xl py-5">
+      <h1
+        className="text-center bg-emerald-600 font-semibold text-slate-100 text-4xl py-5"
+        onClick={() =>
+          window.open(
+            "https://docs.google.com/spreadsheets/d/1H4yWDSECBcHVCs_aoogc8vruzKmT9YwXR05umj-s0cg/edit?usp=sharing",
+            "_blank",
+          )
+        }
+      >
         Tentang Kami
       </h1>
 
