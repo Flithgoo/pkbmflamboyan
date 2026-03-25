@@ -9,7 +9,10 @@ const Contact = () => {
 
       <div className="flex justify-center">
         <div className="container text-slate-700 justify-center flex flex-col">
-          <form>
+          <form
+            action="https://formsubmit.co/da8f33fd7942ca1f2c0aac6ee1745356"
+            method="POST"
+          >
             <div className="w-full lg:mx-auto lg:w-2/3">
               <div className="mb-8 w-full px-4">
                 <label htmlFor="name" className="text-base font-medium">
@@ -18,7 +21,9 @@ const Contact = () => {
                 <input
                   type="text"
                   id="name"
+                  name="name"
                   className="w-full rounded-md bg-emerald-200 p-3 text-dark focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
                 />
               </div>
               <div className="mb-8 w-full px-4">
@@ -28,7 +33,9 @@ const Contact = () => {
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   className="w-full rounded-md bg-emerald-200 p-3 text-dark focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
                 />
               </div>
               <div className="mb-8 w-full px-4">
@@ -36,12 +43,17 @@ const Contact = () => {
                   Pesan
                 </label>
                 <textarea
-                  id="email"
+                  id="message"
+                  name="message"
                   className="h-32 w-full rounded-md bg-emerald-200 p-3 text-dark focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
                 ></textarea>
               </div>
               <div className="w-full px-4">
-                <button className="w-full rounded-full bg-emerald-600 py-3 px-8 text-base font-semibold text-white transition duration-500 hover:opacity-80 hover:shadow-lg">
+                <button
+                  type="submit"
+                  className="w-full rounded-full bg-emerald-600 py-3 px-8 text-base font-semibold text-white transition duration-500 hover:opacity-80 hover:shadow-lg"
+                >
                   Kirim
                 </button>
               </div>

@@ -12,12 +12,12 @@ import {
 } from "lucide-react";
 
 const imageData = [
-  "/gallery/lab_komputer.jpg", // replace with your image paths
-  "/gallery/foto bersama dinas.jpg",
+  "/gallery/lab_komputer.jpg",
+  "/gallery/ecoprint.jpg",
   "/gallery/pelepasan_bersama.jpg",
-  "/gallery/ujian_formulatif.jpg",
+  "/gallery/pembelajaran.jpg",
   "/gallery/UPK.jpg",
-  "/gallery/pondok.jpg",
+  "/gallery/bukber.jpg",
 ];
 
 const listTestimoni = [
