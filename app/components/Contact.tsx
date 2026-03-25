@@ -10,7 +10,7 @@ const Contact = () => {
       <div className="flex justify-center">
         <div className="container text-slate-700 justify-center flex flex-col">
           <form
-            action="https://formsubmit.co/da8f33fd7942ca1f2c0aac6ee1745356"
+            action="https://formsubmit.co/pkbmflamboyan017@gmail.com"
             method="POST"
           >
             <div className="w-full lg:mx-auto lg:w-2/3">
