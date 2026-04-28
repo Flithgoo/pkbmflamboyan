@@ -76,10 +76,8 @@ const About = () => {
               <motion.div variants={scrollAnimation}>
                 <h2 className="text-3xl font-bold mb-6">Visi</h2>
                 <p className="text-xl italic mb-8">
-                  "Menjadi pusat kegiatan belajar yang inovatif dan inklusif,
-                  memberdayakan masyarakat melalui pendidikan yang berkualitas,
-                  untuk menciptakan komunitas yang mandiri, berpengetahuan luas,
-                  dan berdaya saing tinggi."
+                  "Memberikan pendidikan dan pelatihan ketrampilan untuk bekal
+                  hidup bagi masyarakat."
                 </p>
               </motion.div>
             </ScrollAnimationContainer>
