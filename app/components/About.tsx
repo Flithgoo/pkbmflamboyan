@@ -53,14 +53,14 @@ const About = () => {
               variants={scrollAnimation}
             >
               <Image
-                src="/Drs. Casmadi.jpg"
-                alt="Drs. Casmadi"
+                src="/Ammi Aflakhi, S.Pd..jpeg"
+                alt="Ammi Aflakhi, S.Pd."
                 width={300}
                 height={300}
                 className="rounded-full shadow-lg"
               />
               <p className="text-lg font-semibold mt-3 text-white">
-                Drs. Casmadi
+                Ammi Aflakhi, S.Pd.
               </p>
               <p className="text-sm text-slate-200">
                 Kepala PKBM Flamboyan Comal
