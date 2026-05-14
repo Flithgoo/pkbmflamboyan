@@ -103,7 +103,7 @@ export default function MateriMapelPage({
     const { data: material } = await getMaterialBySubjectId(subjectId);
 
     setMaterial(
-      Array.isArray(material) ? material : material ? [material] : []
+      Array.isArray(material) ? material : material ? [material] : [],
     );
     setSubject(subject ?? ({} as Subject));
     setLocation(data ?? []);
@@ -129,7 +129,7 @@ export default function MateriMapelPage({
 
   const toggleSelect = (kelas: Omit<Location, "created_at">) => {
     setSelected((prev) =>
-      prev.includes(kelas) ? prev.filter((c) => c !== kelas) : [...prev, kelas]
+      prev.includes(kelas) ? prev.filter((c) => c !== kelas) : [...prev, kelas],
     );
   };
 
@@ -475,7 +475,7 @@ export default function MateriMapelPage({
                       __html:
                         (materi.content ?? "").length > 200
                           ? (materi.content ?? "").slice(0, 200) + "..."
-                          : materi.content ?? "",
+                          : (materi.content ?? ""),
                     }}
                   ></p>
                   <div className="flex justify-between h-full items-end mt-2">

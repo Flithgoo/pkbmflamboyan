@@ -22,6 +22,7 @@ export default function MapelDetailPage({
   const router = useRouter();
   const subjectId = Number(params.id);
   const { user } = useUserStore();
+  console.log("🚀 ~ MapelDetailPage ~ user:", user);
 
   // ===== STATE =====
   const [subject, setSubject] = useState<any>(null);
@@ -37,7 +38,7 @@ export default function MapelDetailPage({
 
       // Ambil data mapel & materi
       const [{ data: subjectData }, { data: materialData }] = await Promise.all(
-        [getSubjectById(subjectId), getMaterialBySubjectId(subjectId)]
+        [getSubjectById(subjectId), getMaterialBySubjectId(subjectId)],
       );
 
       setSubject(subjectData ?? null);
@@ -46,8 +47,8 @@ export default function MapelDetailPage({
       const mats = Array.isArray(materialData)
         ? materialData
         : materialData
-        ? [materialData]
-        : [];
+          ? [materialData]
+          : [];
 
       setMaterials(mats);
 
@@ -80,7 +81,7 @@ export default function MapelDetailPage({
         const { data: attendance } = await getAttendanceForUser(session.id);
         attendanceStatus[session.id] =
           Array.isArray(attendance) && attendance.length > 0;
-      })
+      }),
     );
 
     setActiveSessions(sessions);

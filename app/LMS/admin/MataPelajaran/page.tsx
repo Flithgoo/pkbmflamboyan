@@ -33,6 +33,16 @@ import { getAllTutor } from "@/lib/api/tutor";
 import { getAllTutorSubject } from "@/lib/api/tutor_subject";
 import SubjectTable from "@/app/components/LMS/admin/(MataPelajaran)/SubjectTable";
 import ConfirmDeleteSubjectModal from "@/app/components/LMS/admin/(MataPelajaran)/ConfirmDeleteSubjectModal";
+import { getAllClasses } from "@/lib/api/classes";
+import { Classes } from "@/lib/types/types";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Close } from "@radix-ui/react-popover";
+import { X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AturKelas() {
   // state untuk data
@@ -47,6 +57,9 @@ export default function AturKelas() {
   const [selectedTutor, setSelectedTutor] = useState<any | null>(null); // tutor yang dipilih
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null); // subject/mapel yang dipilih
   const [errorTutor, setErrorTutor] = useState<string>(""); // validasi jika tutor belum dipilih
+  const [classes, setClasses] = useState<any[]>([]); // daftar kelas
+  const [selected, setSelected] = useState<Omit<Classes, "created_at">[]>([]);
+  const [openPopover, setOpenPopover] = useState(false);
 
   // formState = { success: boolean, error?: string }
   const [formState, formAction] = useFormState(addTutorSubjectAction, {
@@ -64,15 +77,33 @@ export default function AturKelas() {
     }
   }, [formState.success]);
 
-  // ambil data awal (tutor & mapel)
+  // ambil data awal (tutor, mapel, kelas)
   useEffect(() => {
     (async () => {
       const { data: tutors } = await getAllTutor();
       const { data: subject } = await getAllTutorSubject();
+      const { data: classes } = await getAllClasses();
       setTutors(tutors ?? []);
       setTutorSubjects(subject ?? []);
+      setClasses(classes ?? []);
     })();
   }, []);
+
+  const toggleSelect = (kelas: Omit<Classes, "created_at">) => {
+    setSelected((prev) =>
+      prev.some((c) => c.id === kelas.id)
+        ? prev.filter((c) => c.id !== kelas.id)
+        : [...prev, kelas],
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.length === classes.length) {
+      setSelected([]);
+    } else {
+      setSelected(classes);
+    }
+  };
 
   // handle delete subject/mapel
   async function handleConfirmDelete() {
@@ -95,7 +126,7 @@ export default function AturKelas() {
     console.log("🚀 ~ handleEdit ~ subject:", subject);
     console.log(
       "🚀 ~ handleEdit ~ subject:",
-      subject.tutor_subjects[0].users.id
+      subject.tutor_subjects[0].users.id,
     );
     setEditSubject(subject);
     setSelectedTutor(subject.tutor_subjects[0].users); // set tutor yang dipilih
@@ -203,6 +234,81 @@ export default function AturKelas() {
                       <p className="text-red-600 text-sm mt-1">{errorTutor}</p>
                     )}
                   </div>
+
+                  {/* pilih kelas */}
+                  <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        className="w-[180px]"
+                        variant="outline"
+                      >
+                        {selected.length > 0
+                          ? `Terpilih: ${selected.length} kelas`
+                          : "Pilih kelas"}
+                      </Button>
+                    </PopoverTrigger>
+
+                    <PopoverContent
+                      align="start"
+                      className="w-64 p-3"
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
+                      <div className="space-y-3">
+                        {/* Header */}
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium">Pilih Kelas</h4>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => setOpenPopover(false)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {/* Tombol pilih semua */}
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="w-full text-xs"
+                          onClick={toggleSelectAll}
+                        >
+                          {selected.length === classes.length
+                            ? "Batalkan Semua"
+                            : "Pilih Semua"}
+                        </Button>
+
+                        {/* List kelas */}
+                        <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
+                          {classes.map((kelas) => (
+                            <div
+                              key={kelas.id}
+                              className="flex items-center gap-2 rounded-md px-1 py-1 hover:bg-muted"
+                            >
+                              <Checkbox
+                                id={`kelas-${kelas.id}`}
+                                checked={selected.some(
+                                  (s) => s.id === kelas.id,
+                                )}
+                                onCheckedChange={() => toggleSelect(kelas)}
+                              />
+
+                              <label
+                                htmlFor={`kelas-${kelas.id}`}
+                                className="cursor-pointer text-sm w-full"
+                              >
+                                {kelas.name}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
 
                   {/* deskripsi mapel */}
                   <div className="grid gap-3">
