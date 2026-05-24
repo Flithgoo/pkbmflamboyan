@@ -37,10 +37,9 @@ import { getAllClasses } from "@/lib/api/classes";
 import { Classes } from "@/lib/types/types";
 import {
   Popover,
-  PopoverContent,
   PopoverTrigger,
+  NonPortalPopoverContent,
 } from "@/components/ui/popover";
-import { Close } from "@radix-ui/react-popover";
 import { X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -205,7 +204,6 @@ export default function AturKelas() {
                       required
                     />
                   </div>
-
                   {/* select tutor */}
                   <div className="grid gap-3">
                     <Label htmlFor="tutor-selector">Tutor</Label>
@@ -236,79 +234,83 @@ export default function AturKelas() {
                   </div>
 
                   {/* pilih kelas */}
-                  <Popover open={openPopover} onOpenChange={setOpenPopover}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        className="w-[180px]"
-                        variant="outline"
-                      >
-                        {selected.length > 0
-                          ? `Terpilih: ${selected.length} kelas`
-                          : "Pilih kelas"}
-                      </Button>
-                    </PopoverTrigger>
-
-                    <PopoverContent
-                      align="start"
-                      className="w-64 p-3"
-                      onOpenAutoFocus={(e) => e.preventDefault()}
-                    >
-                      <div className="space-y-3">
-                        {/* Header */}
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-medium">Pilih Kelas</h4>
-
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => setOpenPopover(false)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-
-                        {/* Tombol pilih semua */}
+                  <div className="grid gap-3">
+                    <Label htmlFor="kelas-selector">Kelas</Label>
+                    <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                      <PopoverTrigger asChild>
                         <Button
                           type="button"
-                          variant="secondary"
-                          className="w-full text-xs"
-                          onClick={toggleSelectAll}
+                          className="w-[180px]"
+                          variant="outline"
                         >
-                          {selected.length === classes.length
-                            ? "Batalkan Semua"
-                            : "Pilih Semua"}
+                          {selected.length > 0
+                            ? `Terpilih: ${selected.length} kelas`
+                            : "Pilih kelas"}
                         </Button>
+                      </PopoverTrigger>
 
-                        {/* List kelas */}
-                        <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
-                          {classes.map((kelas) => (
-                            <div
-                              key={kelas.id}
-                              className="flex items-center gap-2 rounded-md px-1 py-1 hover:bg-muted"
+                      <NonPortalPopoverContent
+                        align="start"
+                        className="w-64 p-3"
+                        onOpenAutoFocus={(e) => e.preventDefault()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
+                        <div className="space-y-3">
+                          {/* Header */}
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-medium">Pilih Kelas</h4>
+
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => setOpenPopover(false)}
                             >
-                              <Checkbox
-                                id={`kelas-${kelas.id}`}
-                                checked={selected.some(
-                                  (s) => s.id === kelas.id,
-                                )}
-                                onCheckedChange={() => toggleSelect(kelas)}
-                              />
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
 
-                              <label
-                                htmlFor={`kelas-${kelas.id}`}
-                                className="cursor-pointer text-sm w-full"
+                          {/* Tombol pilih semua */}
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="w-full text-xs"
+                            onClick={toggleSelectAll}
+                          >
+                            {selected.length === classes.length
+                              ? "Batalkan Semua"
+                              : "Pilih Semua"}
+                          </Button>
+
+                          {/* List kelas */}
+                          <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
+                            {classes.map((kelas) => (
+                              <div
+                                key={kelas.id}
+                                className="flex items-center gap-2 rounded-md px-1 py-1 hover:bg-muted"
                               >
-                                {kelas.name}
-                              </label>
-                            </div>
-                          ))}
+                                <Checkbox
+                                  id={`kelas-${kelas.id}`}
+                                  checked={selected.some(
+                                    (s) => s.id === kelas.id,
+                                  )}
+                                  onCheckedChange={() => toggleSelect(kelas)}
+                                />
+
+                                <label
+                                  htmlFor={`kelas-${kelas.id}`}
+                                  className="cursor-pointer text-sm w-full"
+                                >
+                                  {kelas.name}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                      </NonPortalPopoverContent>
+                    </Popover>
+                  </div>
 
                   {/* deskripsi mapel */}
                   <div className="grid gap-3">
@@ -410,7 +412,84 @@ export default function AturKelas() {
                 )}
               </div>
 
-              {/* deskripsi */}
+              {/* pilih kelas */}
+              <div className="grid gap-3">
+                <Label htmlFor="kelas-selector">Kelas</Label>
+                <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      className="w-[180px]"
+                      variant="outline"
+                    >
+                      {selected.length > 0
+                        ? `Terpilih: ${selected.length} kelas`
+                        : "Pilih kelas"}
+                    </Button>
+                  </PopoverTrigger>
+
+                  <NonPortalPopoverContent
+                    align="start"
+                    className="w-64 p-3"
+                    onOpenAutoFocus={(e) => e.preventDefault()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                  >
+                    <div className="space-y-3">
+                      {/* Header */}
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium">Pilih Kelas</h4>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => setOpenPopover(false)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      {/* Tombol pilih semua */}
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="w-full text-xs"
+                        onClick={toggleSelectAll}
+                      >
+                        {selected.length === classes.length
+                          ? "Batalkan Semua"
+                          : "Pilih Semua"}
+                      </Button>
+
+                      {/* List kelas */}
+                      <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
+                        {classes.map((kelas) => (
+                          <div
+                            key={kelas.id}
+                            className="flex items-center gap-2 rounded-md px-1 py-1 hover:bg-muted"
+                          >
+                            <Checkbox
+                              id={`kelas-${kelas.id}`}
+                              checked={selected.some((s) => s.id === kelas.id)}
+                              onCheckedChange={() => toggleSelect(kelas)}
+                            />
+
+                            <label
+                              htmlFor={`kelas-${kelas.id}`}
+                              className="cursor-pointer text-sm w-full"
+                            >
+                              {kelas.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </NonPortalPopoverContent>
+                </Popover>
+              </div>
+
+              {/* deskripsi mapel*/}
               <div className="grid gap-3">
                 <Label htmlFor="edit-description">Deskripsi</Label>
                 <textarea
