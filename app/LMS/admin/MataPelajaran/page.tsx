@@ -185,6 +185,18 @@ export default function AturKelas() {
                   } else {
                     setErrorTutor("");
                   }
+                  if (!selected || selected.length === 0) {
+                    e.preventDefault();
+                    setErrorTutor("Pilih kelas terlebih dahulu");
+                  } else {
+                    setErrorTutor("");
+                  }
+                  // Reset form setelah submit
+                  setTimeout(() => {
+                    setOpen(false);
+                    setSelectedTutor("");
+                    setSelected([]);
+                  }, 500);
                 }}
               >
                 <DialogHeader>
@@ -214,6 +226,193 @@ export default function AturKelas() {
                     >
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Pilih tutor" />
+                      </SelectTrigger>
+                      <SelectContent className="grid gap-2">
+                        <SelectGroup>
+                          {tutors.map((tutor) => (
+                            <SelectItem
+                              key={tutor.id}
+                              value={tutor.id.toString()}
+                            >
+                              {tutor.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {errorTutor && (
+                      <p className="text-red-600 text-sm mt-1">{errorTutor}</p>
+                    )}
+                  </div>
+
+                  {/* pilih kelas */}
+                  <div className="grid gap-3">
+                    <Label htmlFor="kelas-selector">Kelas</Label>
+                    <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          className="w-[180px]"
+                          variant="outline"
+                        >
+                          {selected.length > 0
+                            ? `Terpilih: ${selected.length} kelas`
+                            : "Pilih kelas"}
+                        </Button>
+                      </PopoverTrigger>
+
+                      <NonPortalPopoverContent
+                        align="start"
+                        className="w-64 p-3"
+                      >
+                        <div className="space-y-3">
+                          {/* Header */}
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-medium">Pilih Kelas</h4>
+
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => setOpenPopover(false)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          {/* Tombol pilih semua */}
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="w-full text-xs"
+                            onClick={toggleSelectAll}
+                          >
+                            {selected.length === classes.length
+                              ? "Batalkan Semua"
+                              : "Pilih Semua"}
+                          </Button>
+
+                          {/* List kelas */}
+                          <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
+                            {classes.map((kelas) => (
+                              <div
+                                key={kelas.id}
+                                className="flex items-center gap-2 rounded-md px-1 py-1 hover:bg-muted"
+                              >
+                                <Checkbox
+                                  id={`kelas-${kelas.id}`}
+                                  checked={selected.some(
+                                    (s) => s.id === kelas.id,
+                                  )}
+                                  onCheckedChange={() => toggleSelect(kelas)}
+                                />
+
+                                <label
+                                  htmlFor={`kelas-${kelas.id}`}
+                                  className="cursor-pointer text-sm w-full"
+                                >
+                                  {kelas.name}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </NonPortalPopoverContent>
+                    </Popover>
+                    {/* input tersembunyi untuk kelas yang dipilih */}
+                    <input
+                      type="hidden"
+                      name="classes"
+                      value={JSON.stringify(selected.map((s) => s.id))} // kirim sebagai array id kelas bertipe number
+                    />
+                  </div>
+
+                  {/* deskripsi mapel */}
+                  <div className="grid gap-3">
+                    <Label htmlFor="description">Deskripsi</Label>
+                    <textarea
+                      className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent"
+                      id="description"
+                      name="description"
+                      placeholder="Deskripsi singkat mata pelajaran"
+                    />
+                  </div>
+                </div>
+
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button
+                      onClick={() => setSelectedTutor("")}
+                      className="my-2"
+                      variant="outline"
+                    >
+                      Batal
+                    </Button>
+                  </DialogClose>
+                  <Button className="sm:my-2 mt-5" type="submit">
+                    Simpan
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          {/* dialog untuk edit mapel */}
+          <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+            <DialogContent className="sm:max-w-[425px] text-emerald-700">
+              <form
+                action={async (formData) => {
+                  if (!selectedTutor) {
+                    setErrorTutor("Pilih tutor terlebih dahulu");
+                    return;
+                  }
+                  const result = await editSubjectAction(
+                    editSubject.id,
+                    formData,
+                  );
+
+                  if (result.success) {
+                    const { data } = await getAllTutorSubject();
+                    setTutorSubjects(data ?? []);
+                    setOpenEdit(false);
+                    setEditSubject(null);
+                    setSelectedTutor("");
+                  } else {
+                    alert("Gagal update mapel");
+                  }
+                }}
+              >
+                <DialogHeader>
+                  <DialogTitle className="text-2xl pb-4">
+                    Edit Mata Pelajaran
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="grid gap-4">
+                  {/* input nama */}
+                  <div className="grid gap-3">
+                    <Label htmlFor="edit-name">Nama</Label>
+                    <Input
+                      id="edit-name"
+                      name="name"
+                      defaultValue={editSubject?.name}
+                      required
+                    />
+                  </div>
+
+                  {/* select tutor */}
+                  <div className="grid gap-3">
+                    <Label htmlFor="edit-tutor">Tutor</Label>
+                    <Select
+                      name="tutor"
+                      defaultValue={selectedTutor?.id}
+                      onValueChange={(value) => setSelectedTutor(value)}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Pilih tutor">
+                          {selectedTutor?.name}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="grid gap-2">
                         <SelectGroup>
@@ -312,13 +511,14 @@ export default function AturKelas() {
                     </Popover>
                   </div>
 
-                  {/* deskripsi mapel */}
+                  {/* deskripsi mapel*/}
                   <div className="grid gap-3">
-                    <Label htmlFor="description">Deskripsi</Label>
+                    <Label htmlFor="edit-description">Deskripsi</Label>
                     <textarea
-                      className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent"
-                      id="description"
+                      id="edit-description"
                       name="description"
+                      defaultValue={editSubject?.description}
+                      className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent"
                       placeholder="Deskripsi singkat mata pelajaran"
                     />
                   </div>
@@ -327,7 +527,10 @@ export default function AturKelas() {
                 <DialogFooter>
                   <DialogClose asChild>
                     <Button
-                      onClick={() => setSelectedTutor("")}
+                      onClick={() => {
+                        setOpenEdit(false);
+                        setSelectedTutor("");
+                      }}
                       className="my-2"
                       variant="outline"
                     >
@@ -335,7 +538,7 @@ export default function AturKelas() {
                     </Button>
                   </DialogClose>
                   <Button className="sm:my-2 mt-5" type="submit">
-                    Simpan
+                    Simpan Perubahan
                   </Button>
                 </DialogFooter>
               </form>
@@ -343,185 +546,6 @@ export default function AturKelas() {
           </Dialog>
         </section>
       </main>
-
-      {/* modal edit mapel */}
-      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent className="sm:max-w-[425px] text-emerald-700">
-          <form
-            action={async (formData) => {
-              if (!selectedTutor) {
-                setErrorTutor("Pilih tutor terlebih dahulu");
-                return;
-              }
-              const result = await editSubjectAction(editSubject.id, formData);
-
-              if (result.success) {
-                const { data } = await getAllTutorSubject();
-                setTutorSubjects(data ?? []);
-                setOpenEdit(false);
-                setEditSubject(null);
-                setSelectedTutor("");
-              } else {
-                alert("Gagal update mapel");
-              }
-            }}
-          >
-            <DialogHeader>
-              <DialogTitle className="text-2xl pb-4">
-                Edit Mata Pelajaran
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="grid gap-4">
-              {/* input nama */}
-              <div className="grid gap-3">
-                <Label htmlFor="edit-name">Nama</Label>
-                <Input
-                  id="edit-name"
-                  name="name"
-                  defaultValue={editSubject?.name}
-                  required
-                />
-              </div>
-
-              {/* select tutor */}
-              <div className="grid gap-3">
-                <Label htmlFor="edit-tutor">Tutor</Label>
-                <Select
-                  name="tutor"
-                  defaultValue={selectedTutor?.id}
-                  onValueChange={(value) => setSelectedTutor(value)}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Pilih tutor">
-                      {selectedTutor?.name}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="grid gap-2">
-                    <SelectGroup>
-                      {tutors.map((tutor) => (
-                        <SelectItem key={tutor.id} value={tutor.id.toString()}>
-                          {tutor.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                {errorTutor && (
-                  <p className="text-red-600 text-sm mt-1">{errorTutor}</p>
-                )}
-              </div>
-
-              {/* pilih kelas */}
-              <div className="grid gap-3">
-                <Label htmlFor="kelas-selector">Kelas</Label>
-                <Popover open={openPopover} onOpenChange={setOpenPopover}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      className="w-[180px]"
-                      variant="outline"
-                    >
-                      {selected.length > 0
-                        ? `Terpilih: ${selected.length} kelas`
-                        : "Pilih kelas"}
-                    </Button>
-                  </PopoverTrigger>
-
-                  <NonPortalPopoverContent
-                    align="start"
-                    className="w-64 p-3"
-                    onOpenAutoFocus={(e) => e.preventDefault()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    <div className="space-y-3">
-                      {/* Header */}
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium">Pilih Kelas</h4>
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => setOpenPopover(false)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      {/* Tombol pilih semua */}
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        className="w-full text-xs"
-                        onClick={toggleSelectAll}
-                      >
-                        {selected.length === classes.length
-                          ? "Batalkan Semua"
-                          : "Pilih Semua"}
-                      </Button>
-
-                      {/* List kelas */}
-                      <div className="max-h-52 overflow-y-auto space-y-2 pr-1">
-                        {classes.map((kelas) => (
-                          <div
-                            key={kelas.id}
-                            className="flex items-center gap-2 rounded-md px-1 py-1 hover:bg-muted"
-                          >
-                            <Checkbox
-                              id={`kelas-${kelas.id}`}
-                              checked={selected.some((s) => s.id === kelas.id)}
-                              onCheckedChange={() => toggleSelect(kelas)}
-                            />
-
-                            <label
-                              htmlFor={`kelas-${kelas.id}`}
-                              className="cursor-pointer text-sm w-full"
-                            >
-                              {kelas.name}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </NonPortalPopoverContent>
-                </Popover>
-              </div>
-
-              {/* deskripsi mapel*/}
-              <div className="grid gap-3">
-                <Label htmlFor="edit-description">Deskripsi</Label>
-                <textarea
-                  id="edit-description"
-                  name="description"
-                  defaultValue={editSubject?.description}
-                  className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent"
-                  placeholder="Deskripsi singkat mata pelajaran"
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button
-                  onClick={() => {
-                    setOpenEdit(false);
-                    setSelectedTutor("");
-                  }}
-                  className="my-2"
-                  variant="outline"
-                >
-                  Batal
-                </Button>
-              </DialogClose>
-              <Button className="sm:my-2 mt-5" type="submit">
-                Simpan Perubahan
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       {/* modal konfirmasi hapus */}
       <ConfirmDeleteSubjectModal
