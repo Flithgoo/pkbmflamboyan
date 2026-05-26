@@ -432,6 +432,42 @@ export type Database = {
           },
         ]
       }
+      subject_classes: {
+        Row: {
+          class_id: number
+          created_at: string
+          id: number
+          subject_id: number
+        }
+        Insert: {
+          class_id: number
+          created_at?: string
+          id?: number
+          subject_id: number
+        }
+        Update: {
+          class_id?: number
+          created_at?: string
+          id?: number
+          subject_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_classes_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_classes_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subjects: {
         Row: {
           created_at: string
@@ -621,6 +657,15 @@ export type Database = {
           session_start: string
         }[]
       }
+      insert_subject_with_tutor_and_class_relation: {
+        Args: {
+          p_class_ids: number[]
+          p_subject_description?: string
+          p_subject_name: string
+          p_tutor_id: number
+        }
+        Returns: number
+      }
       insert_user: {
         Args: {
           p_class_id?: number
@@ -637,12 +682,12 @@ export type Database = {
         Args: {
           p_class_id?: number
           p_location_id?: number
-          p_name: string
+          p_name?: string
           p_password?: string
           p_profile_picture?: string
-          p_role: string
+          p_role?: string
           p_user_id: number
-          p_username: string
+          p_username?: string
         }
         Returns: boolean
       }

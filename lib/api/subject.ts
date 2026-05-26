@@ -45,10 +45,41 @@ export async function InsertSubject(name: string, description: string) {
   return { data, error: null };
 }
 
+export async function InsertSubjectTutorAndClassRelations(
+  subjectName: string,
+  tutorId: number,
+  classIds: number[],
+  subjectDescription: string = "",
+) {
+  console.log("🚀 ~ InsertSubjectTutorAndClassRelations ~ classIds:", classIds);
+  const { token, supabase } = await getAuthContext();
+  const isAuthorized = await isAuthorizedAdmin(token);
+
+  if (!isAuthorized) {
+    return { data: null, error: "Not authorized" };
+  }
+
+  const { data, error } = await supabase.rpc(
+    "insert_subject_with_tutor_and_class_relation",
+    {
+      p_subject_name: subjectName,
+      p_subject_description: subjectDescription,
+      p_tutor_id: tutorId,
+      p_class_ids: classIds,
+    },
+  );
+
+  if (error) {
+    console.error("Error inserting subject:", error);
+    return { error };
+  }
+  return { data, error: null };
+}
+
 export async function editSubject(
   id: number,
   name: string,
-  description: string
+  description: string,
 ) {
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);
