@@ -30,7 +30,7 @@ import {
   editSubjectAction,
 } from "@/lib/actions/subject";
 import { getAllTutor } from "@/lib/api/tutor";
-import { getAllTutorSubject } from "@/lib/api/tutor_subject";
+import { getAllTutorSubjectClasses } from "@/lib/api/tutor_subject";
 import SubjectTable from "@/app/components/LMS/admin/(MataPelajaran)/SubjectTable";
 import ConfirmDeleteSubjectModal from "@/app/components/LMS/admin/(MataPelajaran)/ConfirmDeleteSubjectModal";
 import { getAllClasses } from "@/lib/api/classes";
@@ -69,9 +69,12 @@ export default function AturKelas() {
   useEffect(() => {
     if (formState.success) {
       (async () => {
-        const { data } = await getAllTutorSubject();
+        const { data } = await getAllTutorSubjectClasses();
         setTutorSubjects(data ?? []);
       })();
+      setOpen(false);
+      setSelectedTutor("");
+      setSelected([]);
       setOpen(false);
     }
   }, [formState.success]);
@@ -80,10 +83,11 @@ export default function AturKelas() {
   useEffect(() => {
     (async () => {
       const { data: tutors } = await getAllTutor();
-      const { data: subject } = await getAllTutorSubject();
+      const { data: subjects } = await getAllTutorSubjectClasses();
       const { data: classes } = await getAllClasses();
+
       setTutors(tutors ?? []);
-      setTutorSubjects(subject ?? []);
+      setTutorSubjects(subjects ?? []);
       setClasses(classes ?? []);
     })();
   }, []);
@@ -113,7 +117,7 @@ export default function AturKelas() {
     if (result?.success) {
       setShowDelete(false); // tutup modal delete
       // refresh data setelah hapus
-      const { data } = await getAllTutorSubject();
+      const { data } = await getAllTutorSubjectClasses();
       setTutorSubjects(data ?? []);
     } else {
       alert("Gagal menghapus mata pelajaran. Silakan coba lagi.");
@@ -122,13 +126,17 @@ export default function AturKelas() {
   }
 
   async function handleEdit(subject: any) {
-    console.log("🚀 ~ handleEdit ~ subject:", subject);
-    console.log(
-      "🚀 ~ handleEdit ~ subject:",
-      subject.tutor_subjects[0].users.id,
-    );
     setEditSubject(subject);
-    setSelectedTutor(subject.tutor_subjects[0].users); // set tutor yang dipilih
+
+    setSelectedTutor(subject.tutor_subjects[0].users);
+
+    // default checked classes
+    const defaultClasses = subject.subject_classes.map(
+      (item: any) => item.classes,
+    );
+
+    setSelected(defaultClasses);
+
     setOpenEdit(true);
   }
 
@@ -191,12 +199,6 @@ export default function AturKelas() {
                   } else {
                     setErrorTutor("");
                   }
-                  // Reset form setelah submit
-                  setTimeout(() => {
-                    setOpen(false);
-                    setSelectedTutor("");
-                    setSelected([]);
-                  }, 500);
                 }}
               >
                 <DialogHeader>
@@ -373,7 +375,7 @@ export default function AturKelas() {
                   );
 
                   if (result.success) {
-                    const { data } = await getAllTutorSubject();
+                    const { data } = await getAllTutorSubjectClasses();
                     setTutorSubjects(data ?? []);
                     setOpenEdit(false);
                     setEditSubject(null);
@@ -451,8 +453,6 @@ export default function AturKelas() {
                       <NonPortalPopoverContent
                         align="start"
                         className="w-64 p-3"
-                        onOpenAutoFocus={(e) => e.preventDefault()}
-                        onPointerDown={(e) => e.stopPropagation()}
                       >
                         <div className="space-y-3">
                           {/* Header */}

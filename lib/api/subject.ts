@@ -51,7 +51,6 @@ export async function InsertSubjectTutorAndClassRelations(
   classIds: number[],
   subjectDescription: string = "",
 ) {
-  console.log("🚀 ~ InsertSubjectTutorAndClassRelations ~ classIds:", classIds);
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);
 

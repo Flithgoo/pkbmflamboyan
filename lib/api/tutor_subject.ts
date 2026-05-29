@@ -3,7 +3,7 @@
 import { getAuthContext } from "@/lib/getAuthContext";
 import { isAuthorizedAdmin } from "@/lib/isAuthorized";
 
-export async function getAllTutorSubject() {
+export async function getAllTutorSubjectClasses() {
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);
 
@@ -14,6 +14,13 @@ export async function getAllTutorSubject() {
     *,
     tutor_subjects(
       users!user_id(id, name)
+    ),
+
+    subject_classes(
+      classes!class_id(
+        id,
+        name
+      )
     )
   `);
   if (error) {
