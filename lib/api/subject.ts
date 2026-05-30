@@ -45,7 +45,7 @@ export async function InsertSubject(name: string, description: string) {
   return { data, error: null };
 }
 
-export async function InsertSubjectTutorAndClassRelations(
+export async function insertSubjectTutorAndClassRelations(
   subjectName: string,
   tutorId: number,
   classIds: number[],
@@ -75,9 +75,11 @@ export async function InsertSubjectTutorAndClassRelations(
   return { data, error: null };
 }
 
-export async function editSubject(
+export async function editSubjectTutorAndClassRelations(
   id: number,
   name: string,
+  tutorId: number,
+  classIds: number[],
   description: string,
 ) {
   const { token, supabase } = await getAuthContext();
@@ -87,14 +89,16 @@ export async function editSubject(
     return { data: null, error: "Not authorized" };
   }
 
-  const { data, error } = await supabase
-    .from("subjects")
-    .update({
-      name,
-      description,
-    })
-    .eq("id", id)
-    .select();
+  const { data, error } = await supabase.rpc(
+    "update_subject_with_tutor_and_classes",
+    {
+      p_subject_id: id,
+      p_subject_name: name,
+      p_tutor_id: tutorId,
+      p_class_ids: classIds,
+      p_description: description,
+    },
+  );
 
   if (error) {
     console.error("Error editing subject:", error);

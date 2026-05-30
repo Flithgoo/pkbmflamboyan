@@ -301,7 +301,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "material_class_class_id_fkey"
+            foreignKeyName: "material_classes_class_id_fkey"
             columns: ["class_id"]
             isOneToOne: false
             referencedRelation: "classes"
@@ -493,20 +493,20 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          subject_id: number | null
-          user_id: number | null
+          subject_id: number
+          user_id: number
         }
         Insert: {
           created_at?: string
           id?: number
-          subject_id?: number | null
-          user_id?: number | null
+          subject_id: number
+          user_id: number
         }
         Update: {
           created_at?: string
           id?: number
-          subject_id?: number | null
-          user_id?: number | null
+          subject_id?: number
+          user_id?: number
         }
         Relationships: [
           {
@@ -677,6 +677,16 @@ export type Database = {
           p_username: string
         }
         Returns: number
+      }
+      update_subject_with_tutor_and_classes: {
+        Args: {
+          p_class_ids: number[]
+          p_description?: string
+          p_subject_id: number
+          p_subject_name: string
+          p_tutor_id: number
+        }
+        Returns: undefined
       }
       update_user_full: {
         Args: {

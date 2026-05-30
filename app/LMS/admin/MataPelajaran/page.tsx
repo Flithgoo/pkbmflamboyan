@@ -126,8 +126,6 @@ export default function AturKelas() {
   }
 
   async function handleEdit(subject: any) {
-    //tambahkan logika handle edit action di sini
-
     setEditSubject(subject);
 
     if (subject.tutor_subjects.length > 0) {
@@ -379,6 +377,10 @@ export default function AturKelas() {
                     setErrorTutor("Pilih tutor terlebih dahulu");
                     return;
                   }
+                  if (!selected || selected.length === 0) {
+                    setErrorTutor("Pilih kelas terlebih dahulu");
+                    return;
+                  }
                   const result = await editSubjectAction(
                     editSubject.id,
                     formData,
@@ -519,6 +521,12 @@ export default function AturKelas() {
                         </div>
                       </NonPortalPopoverContent>
                     </Popover>
+                    {/* input tersembunyi untuk kelas yang dipilih */}
+                    <input
+                      type="hidden"
+                      name="classes"
+                      value={JSON.stringify(selected.map((s) => s.id))} // kirim sebagai array id kelas bertipe number
+                    />
                   </div>
 
                   {/* deskripsi mapel*/}
