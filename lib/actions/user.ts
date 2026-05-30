@@ -81,7 +81,7 @@ export async function editUserAction(formData: FormData) {
   );
 
   if (error) {
-    throw new Error(typeof error === 'string' ? error : error.message);
+    throw new Error(typeof error === "string" ? error : error.message);
   }
 
   redirect("/LMS/admin");
@@ -89,7 +89,8 @@ export async function editUserAction(formData: FormData) {
 
 export async function deleteUserAction(id: number) {
   const { error } = await deleteUser(id);
-  if (error) return { error: typeof error === 'string' ? error : error.message };
+  if (error)
+    return { error: typeof error === "string" ? error : error.message };
 
   console.log(
     `app/lib/actions/user.ts User with id = ${id} deleted successfully`,

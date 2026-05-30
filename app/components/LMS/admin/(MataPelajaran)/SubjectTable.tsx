@@ -35,6 +35,7 @@ export default function SubjectTable({
       <TableBody>
         {tutorSubjects && tutorSubjects.length > 0 ? (
           tutorSubjects.map((subject, idx) => {
+            console.log("🚀 ~ SubjectTable ~ subject:", subject);
             // kalau tidak ada tutor
             if (subject.tutor_subjects.length === 0) {
               return (
@@ -51,18 +52,19 @@ export default function SubjectTable({
                       : "-"}
                   </TableCell>
                   <TableCell className="flex gap-2 justify-end">
-                    <Link
-                      href={`/LMS/admin/MataPelajaran/edit/${subject.id}`}
+                    <button
+                      type="button"
                       className="p-2 rounded hover:bg-emerald-100 text-emerald-700 transition"
                       title="Edit Mapel"
+                      onClick={() => onEdit(subject)}
                     >
                       <FaUserEdit />
-                    </Link>
+                    </button>
                     <button
                       type="button"
                       className="p-2 rounded hover:bg-red-100 text-red-600 transition"
                       title="Hapus Mapel"
-                      onClick={() => onDelete(tutorSubjects)}
+                      onClick={() => onDelete(subject)}
                     >
                       <FaTrashAlt />
                     </button>
@@ -105,7 +107,7 @@ export default function SubjectTable({
                     </button>
                   </TableCell>
                 </TableRow>
-              )
+              ),
             );
           })
         ) : (

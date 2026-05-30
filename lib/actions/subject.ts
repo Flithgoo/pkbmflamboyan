@@ -91,7 +91,7 @@ export async function deleteSubjectAction(id: number) {
   }
 
   console.log(
-    `app/lib/actions/user.ts User with id = ${id} deleted successfully`,
+    `app/lib/actions/subject.ts Subject with id = ${id} deleted successfully`,
   );
   return { success: true };
 }

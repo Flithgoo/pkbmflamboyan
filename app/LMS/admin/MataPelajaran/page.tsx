@@ -128,14 +128,22 @@ export default function AturKelas() {
   async function handleEdit(subject: any) {
     setEditSubject(subject);
 
-    setSelectedTutor(subject.tutor_subjects[0].users);
+    if (subject.tutor_subjects.length > 0) {
+      setSelectedTutor(subject.tutor_subjects[0].users);
+    } else {
+      setSelectedTutor(null);
+    }
 
     // default checked classes
     const defaultClasses = subject.subject_classes.map(
       (item: any) => item.classes,
     );
 
-    setSelected(defaultClasses);
+    if (defaultClasses.length > 0) {
+      setSelected(defaultClasses);
+    } else {
+      setSelected([]);
+    }
 
     setOpenEdit(true);
   }
