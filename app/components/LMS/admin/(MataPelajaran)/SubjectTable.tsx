@@ -35,7 +35,6 @@ export default function SubjectTable({
       <TableBody>
         {tutorSubjects && tutorSubjects.length > 0 ? (
           tutorSubjects.map((subject, idx) => {
-            console.log("🚀 ~ SubjectTable ~ subject:", subject);
             // kalau tidak ada tutor
             if (subject.tutor_subjects.length === 0) {
               return (

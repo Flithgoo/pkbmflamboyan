@@ -126,6 +126,8 @@ export default function AturKelas() {
   }
 
   async function handleEdit(subject: any) {
+    //tambahkan logika handle edit action di sini
+
     setEditSubject(subject);
 
     if (subject.tutor_subjects.length > 0) {
