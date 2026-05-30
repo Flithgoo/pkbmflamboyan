@@ -1,14 +1,14 @@
 "use server";
 
 import { getAuthContext } from "@/lib/getAuthContext";
-import { deleteSubject, editSubject, InsertSubject } from "../api/subject";
-import { EditTutorSubject, InsertTutorSubject } from "../api/tutor_subject";
+import { InsertSubject } from "../api/subject";
+import { InsertTutorSubject } from "../api/tutor_subject";
 import { Classes } from "../types/types";
 import { revalidatePath } from "next/cache";
 
 export async function addTutorSubjectAction(
   prevState: { success: boolean },
-  formData: FormData
+  formData: FormData,
 ) {
   try {
     const name = formData.get("name") as string;
@@ -17,7 +17,7 @@ export async function addTutorSubjectAction(
 
     const { data: subject, error: subjectError } = await InsertSubject(
       name,
-      description
+      description,
     );
 
     if (subjectError) {
@@ -32,7 +32,7 @@ export async function addTutorSubjectAction(
 
     const { data: tutor_subject, error: tutorError } = await InsertTutorSubject(
       tutorId,
-      subject[0].id
+      subject[0].id,
     );
     if (tutorError) {
       const errorMessage =
@@ -42,7 +42,7 @@ export async function addTutorSubjectAction(
 
     console.log(
       "app/lib/actions/subject.ts Subject added successfully:",
-      tutor_subject
+      tutor_subject,
     );
     return { success: true };
   } catch (err) {
