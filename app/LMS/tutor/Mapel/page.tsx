@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlusCircle, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { getTutorSubject } from "@/lib/api/tutor_subject";
 import { getUser } from "@/lib/api/user";
 
@@ -21,13 +21,6 @@ export default async function MapelPage() {
             Daftar mata pelajaran yang diampu
           </p>
         </div>
-        {/* <Link
-          href="/LMS/tutor/materi/tambah"
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold shadow transition"
-        >
-          <PlusCircle size={20} />
-          Tambah Materi
-        </Link> */}
       </header>
       <main>
         <section className="bg-white rounded-2xl shadow p-4 md:p-6">

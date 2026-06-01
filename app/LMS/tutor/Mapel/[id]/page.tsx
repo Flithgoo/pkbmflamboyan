@@ -209,7 +209,7 @@ export default function MateriMapelPage({
       <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-emerald-700 flex items-center gap-2">
-            Materi {subject?.name || "Mapel"}
+            Mapel {subject?.name || "Mapel"}
           </h1>
         </div>
         <Link
@@ -458,7 +458,7 @@ export default function MateriMapelPage({
                   {/* jenis logo berdasarkan type */}
                   <div className="flex items-center gap-2">
                     {materi.upload_type === "Tugas" ? (
-                      <FilePen className="text-red-500" size={22} />
+                      <FilePen className="text-cyan-500" size={22} />
                     ) : materi.upload_type === "Pengumuman" ? (
                       <FileVolume className="text-amber-500" size={22} />
                     ) : (
@@ -484,7 +484,7 @@ export default function MateriMapelPage({
                       {new Date(materi.created_at).toLocaleDateString("id-ID")}
                     </span>
                     <Link
-                      href={`/LMS/tutor/materi/${materi.id}`}
+                      href={`/LMS/tutor/Mapel/${params.id}/Materi/${materi.id}`}
                       className="text-emerald-600 hover:text-amber-600 font-semibold text-sm"
                     >
                       Detail

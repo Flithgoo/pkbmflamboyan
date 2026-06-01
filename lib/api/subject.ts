@@ -4,8 +4,7 @@ import { getAuthContext } from "@/lib/getAuthContext";
 import { isAuthorizedAdmin } from "@/lib/isAuthorized";
 
 export async function getAllSubject() {
-  const { token, supabase } = await getAuthContext();
-  const isAuthorized = await isAuthorizedAdmin(token);
+  const { supabase } = await getAuthContext();
 
   const { data, error } = await supabase.from("subjects").select("*");
   return { data, error };

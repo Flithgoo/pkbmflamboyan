@@ -12,3 +12,15 @@ export async function getMaterialBySubjectId(subjectId: number) {
 
   return { data, error };
 }
+
+export async function getMaterialById(id: number) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase
+    .from("materials")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  return { data, error };
+}
