@@ -1,60 +1,173 @@
 "use client";
 
-import React, { useState } from "react";
-import { CheckCircle, Trash2, Save, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { CheckCircle, Trash2, Save, X, Clock, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  getMaterialWithRelations,
+  updateMaterial,
+  deleteMaterial,
+} from "@/lib/api/material";
+import dynamic from "next/dynamic";
+import "react-quill/dist/quill.snow.css";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
+// Dynamic import ReactQuill to avoid SSR issues
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 type MateriDetail = {
-  judul: string;
-  deskripsi: string;
+  id: number;
+  title: string;
+  content: string | null;
   mapel: string;
-  tanggal: string;
   pengajar: string;
+  created_at: string;
 };
 
 interface PageProps {
   params: {
+    id: string;
     materiId: string;
   };
 }
 
-const defaultMateri: MateriDetail = {
-  judul: "Judul Materi Contoh",
-  deskripsi:
-    "Deskripsi detail materi pembelajaran. Tambahkan ringkasan, tujuan, dan catatan penting di sini.",
-  mapel: "Matematika",
-  tanggal: "2026-06-01",
-  pengajar: "Budi Santoso",
-};
-
 export default function MateriDetailPage({ params }: PageProps) {
-  const materiId = params?.materiId ?? "tidak-diketahui";
-  const [materi, setMateri] = useState<MateriDetail>(defaultMateri);
+  const materiId = params?.materiId ? parseInt(params.materiId) : null;
+  const subjectId = params?.id ? parseInt(params.id) : null;
+  const [materi, setMateri] = useState<MateriDetail | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
-  const [form, setForm] = useState<MateriDetail>(defaultMateri);
+  const [form, setForm] = useState<Partial<MateriDetail>>({});
   const [message, setMessage] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [absensiStart, setAbsensiStart] = useState<string>("");
+  const [absensiEnd, setAbsensiEnd] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleSave = () => {
-    setMateri(form);
-    setMessage("Perubahan materi berhasil disimpan.");
-    setTimeout(() => setMessage(""), 4000);
+  // Fetch material data from database
+  useEffect(() => {
+    const fetchMaterial = async () => {
+      if (!materiId) {
+        setError("ID Materi tidak valid");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+        const { data, error: fetchError } =
+          await getMaterialWithRelations(materiId);
+
+        if (fetchError) {
+          setError("Gagal memuat data materi: " + fetchError.message);
+          return;
+        }
+
+        if (!data) {
+          setError("Data materi tidak ditemukan");
+          return;
+        }
+
+        // Transform data dari database ke format form
+        const materiData: MateriDetail = {
+          id: data.id,
+          title: data.title || "",
+          content: data.content || "",
+          mapel: data.subjects?.name || "-",
+          pengajar: data.users?.name || "-",
+          created_at: data.created_at || "",
+        };
+
+        setMateri(materiData);
+        setForm(materiData);
+      } catch (err) {
+        setError(
+          "Terjadi kesalahan saat memuat data: " +
+            (err instanceof Error ? err.message : "Unknown error"),
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMaterial();
+  }, [materiId]);
+
+  const handleSave = async () => {
+    try {
+      setMessage("");
+      setError("");
+      setIsSaving(true);
+
+      if (!materiId) {
+        setError("ID Materi tidak valid");
+        return;
+      }
+
+      // Call updateMaterial API
+      const { error: updateError } = await updateMaterial(materiId, {
+        title: form.title,
+        content: form.content || "",
+      });
+
+      if (updateError) {
+        setError("Gagal menyimpan data: " + updateError.message);
+        return;
+      }
+
+      setMateri(form as MateriDetail);
+      setHasChanges(false);
+      setMessage("Perubahan materi berhasil disimpan.");
+      setTimeout(() => setMessage(""), 4000);
+    } catch (err) {
+      setError(
+        "Gagal menyimpan data: " +
+          (err instanceof Error ? err.message : "Unknown error"),
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     const confirmed = confirm("Yakin ingin menghapus materi ini?");
     if (!confirmed) {
       return;
     }
 
-    setMateri({
-      judul: "-",
-      deskripsi: "Materi telah dihapus.",
-      mapel: "-",
-      tanggal: "-",
-      pengajar: "-",
-    });
-    setMessage("Materi telah dihapus.");
-    setTimeout(() => setMessage(""), 4000);
+    try {
+      setError("");
+      setMessage("");
+      setIsDeleting(true);
+
+      if (!materiId) {
+        setError("ID Materi tidak valid");
+        return;
+      }
+
+      // Call deleteMaterial API
+      const { error: deleteError } = await deleteMaterial(materiId);
+
+      if (deleteError) {
+        setError("Gagal menghapus materi: " + deleteError.message);
+        return;
+      }
+
+      setMessage("Materi telah dihapus. Mengarahkan ke halaman sebelumnya...");
+      setTimeout(() => {
+        window.history.back();
+      }, 2000);
+    } catch (err) {
+      setError(
+        "Gagal menghapus materi: " +
+          (err instanceof Error ? err.message : "Unknown error"),
+      );
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleChange = (field: keyof MateriDetail, value: string) => {
@@ -62,20 +175,63 @@ export default function MateriDetailPage({ params }: PageProps) {
     setHasChanges(true);
   };
 
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat data materi...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !materi) {
+    return (
+      <div className="w-full min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8">
+        <div className="inline-flex items-center gap-2 mb-4">
+          <h1 className="text-4xl font-bold text-emerald-700">
+            Detail Materi Pembelajaran
+          </h1>
+        </div>
+        <div className="flex items-center gap-3 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-xl">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+          <p className="text-red-800 font-medium">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="wfull min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8">
       {/* Header Section */}
-
-      <div className="inline-flex items-center gap-2 mb-4">
+      <div className="w-full inline-flex items-stretch justify-between gap-2 mb-4">
         <h1 className="text-4xl font-bold text-emerald-700">
           Detail Materi Pembelajaran
         </h1>
+        <Link
+          href={`/LMS/tutor/Mapel/${subjectId}`}
+          className="text-sm flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold shadow transition"
+        >
+          <ArrowLeft size={20} />
+          Kembali ke Daftar Mapel
+        </Link>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-3 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-xl">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-800 font-medium">{error}</p>
+          </div>
+        </div>
+      )}
 
       {/* Success/Delete Message */}
       {message && (
         <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border-l-4 border-emerald-500 p-4 rounded-lg shadow-md">
+          <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border-l-4 border-emerald-500 p-4 rounded-lg shadow-xl">
             <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
             <p className="text-emerald-800 font-medium">{message}</p>
           </div>
@@ -101,8 +257,8 @@ export default function MateriDetailPage({ params }: PageProps) {
 
               <input
                 type="text"
-                value={form.judul}
-                onChange={(e) => handleChange("judul", e.target.value)}
+                value={form.title || ""}
+                onChange={(e) => handleChange("title", e.target.value)}
                 className="w-full rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               />
             </div>
@@ -115,24 +271,48 @@ export default function MateriDetailPage({ params }: PageProps) {
 
               <input
                 type="text"
-                value={form.pengajar}
-                onChange={(e) => handleChange("pengajar", e.target.value)}
-                className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                value={form.pengajar || ""}
+                readOnly
+                className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-not-allowed"
               />
             </div>
 
             {/* TANGGAL */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Tanggal
+              <label
+                htmlFor="absensiStart"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Waktu Absensi Dibuka
               </label>
-
-              <input
-                type="date"
-                value={form.tanggal}
-                onChange={(e) => handleChange("tanggal", e.target.value)}
-                className="w-full rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
-              />
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  type="datetime-local"
+                  id="absensiStart"
+                  value={absensiStart}
+                  onChange={(e) => setAbsensiStart(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 bg-white border rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 transition duration-200 hover:border-emerald-300"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="absensiEnd"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Waktu Absensi Ditutup
+              </label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  type="datetime-local"
+                  id="absensiEnd"
+                  value={absensiEnd}
+                  onChange={(e) => setAbsensiEnd(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 bg-white border rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 transition duration-200 hover:border-emerald-300"
+                />
+              </div>
             </div>
           </div>
 
@@ -142,12 +322,26 @@ export default function MateriDetailPage({ params }: PageProps) {
               Deskripsi Materi
             </label>
 
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
-              <textarea
-                value={form.deskripsi}
-                onChange={(e) => handleChange("deskripsi", e.target.value)}
-                rows={10}
-                className="w-full resize-none bg-transparent outline-none text-gray-700"
+            <div className="bg-white border border-gray-300 rounded-xl overflow-hidden shadow-sm">
+              <ReactQuill
+                value={form.content || ""}
+                onChange={(value) => {
+                  handleChange("content", value);
+                }}
+                modules={{
+                  toolbar: [
+                    [{ header: [1, 2, 3, false] }],
+                    ["bold", "italic", "underline", "strike"],
+                    ["blockquote", "code-block"],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    [{ color: [] }, { background: [] }],
+                    [{ align: [] }],
+                    ["link", "image"],
+                    ["clean"],
+                  ],
+                }}
+                theme="snow"
+                className="bg-white"
               />
             </div>
           </div>
@@ -157,11 +351,12 @@ export default function MateriDetailPage({ params }: PageProps) {
         <div className="bg-gray-50 px-8 py-6 border-t border-gray-200 flex flex-col sm:flex-row gap-3 justify-end">
           <button
             onClick={() => {
-              setForm(materi);
+              setForm(materi || {});
               setHasChanges(false);
+              setError("");
             }}
-            disabled={!hasChanges}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-50"
+            disabled={!hasChanges || isSaving || isDeleting}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             <X className="w-4 h-4" />
             Batal
@@ -172,19 +367,41 @@ export default function MateriDetailPage({ params }: PageProps) {
               handleSave();
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            disabled={!hasChanges}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg disabled:opacity-50"
+            disabled={!hasChanges || isSaving || isDeleting}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            <Save className="w-4 h-4" />
-            Simpan
+            {isSaving ? (
+              <>
+                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                Menyimpan...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                Simpan
+              </>
+            )}
           </button>
 
           <button
-            onClick={handleDelete}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-red-300 text-red-600 hover:bg-red-50 rounded-lg"
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              handleDelete();
+            }}
+            disabled={isSaving || isDeleting}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-red-300 text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            <Trash2 className="w-4 h-4" />
-            Hapus
+            {isDeleting ? (
+              <>
+                <div className="animate-spin h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full"></div>
+                Menghapus...
+              </>
+            ) : (
+              <>
+                <Trash2 className="w-4 h-4" />
+                Hapus
+              </>
+            )}
           </button>
         </div>
       </section>

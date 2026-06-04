@@ -88,82 +88,46 @@ export type Database = {
           },
         ]
       }
-      attendance_session_classes: {
-        Row: {
-          attendance_session_id: number
-          class_id: number
-          created_at: string
-          id: number
-        }
-        Insert: {
-          attendance_session_id: number
-          class_id: number
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          attendance_session_id?: number
-          class_id?: number
-          created_at?: string
-          id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "attendance_session_classes_attendance_session_id_fkey"
-            columns: ["attendance_session_id"]
-            isOneToOne: false
-            referencedRelation: "attendance_sessions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "attendance_session_classes_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "classes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       attendance_sessions: {
         Row: {
-          class_id: number | null
           created_at: string
+          created_by: number | null
           id: number
+          is_active: boolean | null
           location_id: number
           material_id: number
           reason: string | null
           session_end: string
           session_start: string
-          user_id: number | null
         }
         Insert: {
-          class_id?: number | null
           created_at?: string
+          created_by?: number | null
           id?: number
+          is_active?: boolean | null
           location_id: number
           material_id: number
           reason?: string | null
           session_end: string
           session_start: string
-          user_id?: number | null
         }
         Update: {
-          class_id?: number | null
           created_at?: string
+          created_by?: number | null
           id?: number
+          is_active?: boolean | null
           location_id?: number
           material_id?: number
           reason?: string | null
           session_end?: string
           session_start?: string
-          user_id?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "attendance_sessions_class_id_fkey"
-            columns: ["class_id"]
+            foreignKeyName: "attendance_sessions_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: "classes"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -180,17 +144,11 @@ export type Database = {
             referencedRelation: "materials"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "attendance_sessions_tutor_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       attendances: {
         Row: {
+          "attendance time": string | null
           created_at: string
           id: number
           note: string | null
@@ -201,6 +159,7 @@ export type Database = {
           user_id: number
         }
         Insert: {
+          "attendance time"?: string | null
           created_at?: string
           id?: number
           note?: string | null
@@ -211,6 +170,7 @@ export type Database = {
           user_id: number
         }
         Update: {
+          "attendance time"?: string | null
           created_at?: string
           id?: number
           note?: string | null
@@ -686,7 +646,7 @@ export type Database = {
           p_subject_name: string
           p_tutor_id: number
         }
-        Returns: undefined
+        Returns: number
       }
       update_user_full: {
         Args: {
