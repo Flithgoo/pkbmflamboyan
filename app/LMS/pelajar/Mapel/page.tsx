@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { getUser } from "@/lib/api/user";
-import { getAllSubject } from "@/lib/api/subject";
+import { getSubjectsByPelajarId } from "@/lib/api/subject";
 import { Subject } from "@/lib/types/types";
 
 export default async function MapelPage() {
-  const { data: tutor } = await getUser();
-  if (!tutor) {
+  const { data: pelajar } = await getUser();
+  if (!pelajar) {
     return <div className="text-red-500">Gagal memuat data siswa.</div>;
   }
-  const { data: subjects } = await getAllSubject();
+  const { data: subjects } = await getSubjectsByPelajarId(pelajar.id);
 
   return (
     <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8">

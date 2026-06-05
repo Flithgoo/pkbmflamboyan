@@ -22,7 +22,7 @@ const sampleCourses = [
     progress: 48,
     lessons: 12,
     updated_at: "2025-07-10",
-    cover: "/assets/course_cover/math.jpg",
+    cover: "/assets/placeholder_profile/placeholder_avatar.png",
   },
   {
     id: "2",
@@ -31,7 +31,43 @@ const sampleCourses = [
     progress: 78,
     lessons: 8,
     updated_at: "2025-07-05",
-    cover: "/assets/course_cover/indo.jpg",
+    cover: "/assets/placeholder_profile/placeholder_avatar.png",
+  },
+  {
+    id: "3",
+    title: "Bahasa Inggris",
+    description: "Pemahaman dasar bahasa Inggris untuk komunikasi sehari-hari.",
+    progress: 30,
+    lessons: 10,
+    updated_at: "2025-07-08",
+    cover: "/assets/placeholder_profile/placeholder_avatar.png",
+  },
+  {
+    id: "4",
+    title: "Matematika Lanjutan",
+    description: "Pemahaman konsep matematika yang lebih kompleks.",
+    progress: 60,
+    lessons: 15,
+    updated_at: "2025-07-12",
+    cover: "/assets/placeholder_profile/placeholder_avatar.png",
+  },
+  {
+    id: "5",
+    title: "Geografi",
+    description: "Pemahaman konsep geografi yang lebih kompleks.",
+    progress: 60,
+    lessons: 15,
+    updated_at: "2025-07-12",
+    cover: "/assets/placeholder_profile/placeholder_avatar.png",
+  },
+  {
+    id: "6",
+    title: "Sejarah",
+    description: "Pemahaman konsep sejarah yang lebih kompleks.",
+    progress: 60,
+    lessons: 15,
+    updated_at: "2025-07-12",
+    cover: "/assets/placeholder_profile/placeholder_avatar.png",
   },
 ];
 
@@ -39,7 +75,7 @@ export default function PelajarDashboard() {
   const { user } = useUserStore();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "in-progress" | "completed">(
-    "all"
+    "all",
   );
 
   const courses = useMemo(() => {
@@ -58,7 +94,7 @@ export default function PelajarDashboard() {
     sampleCourses.length > 0
       ? Math.round(
           sampleCourses.reduce((s, c) => s + c.progress, 0) /
-            sampleCourses.length
+            sampleCourses.length,
         )
       : 0;
 
@@ -91,8 +127,8 @@ export default function PelajarDashboard() {
                     f === "all"
                       ? "in-progress"
                       : f === "in-progress"
-                      ? "completed"
-                      : "all"
+                        ? "completed"
+                        : "all",
                   )
                 }
                 className="inline-flex items-center gap-2 bg-emerald-600 text-white px-3 py-1 rounded-md text-sm hover:bg-emerald-700 transition"

@@ -21,6 +21,36 @@ export async function getSubjectById(id: number) {
   return { data, error };
 }
 
+export async function getSubjectByIdJoinTutorName(id: number) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase
+    .from("subjects")
+    .select(
+      `
+    *,
+    tutor_subjects (
+      user_id,
+      users (
+        name
+      )
+    )
+  `,
+    )
+    .eq("id", id)
+    .single();
+
+  return { data, error };
+}
+
+export async function getSubjectsByPelajarId(pelajarId: number) {
+  const { supabase } = await getAuthContext();
+  const { data, error } = await supabase.rpc("get_student_subjects", {
+    p_user_id: pelajarId,
+  });
+  return { data, error };
+}
+
 export async function InsertSubject(name: string, description: string) {
   const { token, supabase } = await getAuthContext();
   const isAuthorized = await isAuthorizedAdmin(token);

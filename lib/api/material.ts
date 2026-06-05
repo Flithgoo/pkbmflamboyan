@@ -25,6 +25,22 @@ export async function getMaterialById(id: number) {
   return { data, error };
 }
 
+// Ambil SEMUA materi yang boleh diakses siswa tertentu berdasarkan kelas dan lokasi.
+export async function getStudentMaterialsBySubjectId(
+  subjectId: number,
+  studentId: number,
+) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase.rpc("get_student_materials", {
+    p_subject_id: subjectId,
+    p_user_id: studentId,
+  });
+
+  return { data, error };
+}
+
+// Ambil SATU materi berdasarkan ID beserta nama mapel dan nama tutor.
 export async function getMaterialWithRelations(id: number) {
   const { supabase } = await getAuthContext();
 
