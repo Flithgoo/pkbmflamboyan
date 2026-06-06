@@ -16,36 +16,37 @@ import { getStudentMaterialsBySubjectId } from "@/lib/api/material";
 import { useUserStore } from "@/src/store/useUserStore";
 import { Subject } from "@/lib/types/types";
 import Link from "next/link";
+import { stripHtmlAndTruncate } from "@/app/utils/react-quill-helper";
 
-let materials = [
-  {
-    id: 1,
-    title: "Materi SPOK",
-    upload_type: "Materi",
-    tutor_name: "Tutor Informatika",
-    created_at: "2026-06-01",
-    attendance_status: "hadir_online",
-    preview: "Memahami Subjek, Predikat, Objek dan Keterangan...",
-  },
-  {
-    id: 2,
-    title: "Membuat Cerita Pendek",
-    upload_type: "Tugas",
-    tutor_name: "Tutor Informatika",
-    created_at: "2026-06-01",
-    attendance_status: null,
-    preview: "Buatlah sebuah cerita pendek bertema computational thinking...",
-  },
-  {
-    id: 3,
-    title: "Pengumuman Semester",
-    upload_type: "Pengumuman",
-    tutor_name: "Tutor Informatika",
-    created_at: "2026-06-01",
-    attendance_status: "hadir_offline",
-    preview: "Informasi kegiatan pembelajaran semester depan...",
-  },
-];
+// let materials = [
+//   {
+//     id: 1,
+//     title: "Materi SPOK",
+//     upload_type: "Materi",
+//     tutor_name: "Tutor Informatika",
+//     created_at: "2026-06-01",
+//     attendance_status: "hadir_online",
+//     preview: "Memahami Subjek, Predikat, Objek dan Keterangan...",
+//   },
+//   {
+//     id: 2,
+//     title: "Membuat Cerita Pendek",
+//     upload_type: "Tugas",
+//     tutor_name: "Tutor Informatika",
+//     created_at: "2026-06-01",
+//     attendance_status: null,
+//     preview: "Buatlah sebuah cerita pendek bertema computational thinking...",
+//   },
+//   {
+//     id: 3,
+//     title: "Pengumuman Semester",
+//     upload_type: "Pengumuman",
+//     tutor_name: "Tutor Informatika",
+//     created_at: "2026-06-01",
+//     attendance_status: "hadir_offline",
+//     preview: "Informasi kegiatan pembelajaran semester depan...",
+//   },
+// ];
 
 type SubjectWithTutor = Subject & {
   tutor_name: string;
@@ -59,6 +60,7 @@ export default function SubjectPage(props: { params: { id: string } }) {
     created_at: "",
     tutor_name: "",
   });
+  const [materials, setMaterials] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Semua");
 
@@ -75,7 +77,15 @@ export default function SubjectPage(props: { params: { id: string } }) {
         Number(subjectId),
         Number(user?.id),
       );
-      console.log("🚀 ~ initialFetch ~ materialsData:", materialsData);
+
+      if (materialsData) {
+        const materialsWithTutor = materialsData;
+        console.log(
+          "🚀 ~ initialFetch ~ materialsWithTutor:",
+          materialsWithTutor,
+        );
+        setMaterials(materialsWithTutor);
+      }
 
       if (subjectData) {
         const transformedSubject: SubjectWithTutor = {
@@ -106,7 +116,7 @@ export default function SubjectPage(props: { params: { id: string } }) {
 
       return matchSearch && matchFilter;
     });
-  }, [search, filter]);
+  }, [materials, search, filter]);
 
   const getBadgeColor = (type: string) => {
     switch (type) {
@@ -151,19 +161,22 @@ export default function SubjectPage(props: { params: { id: string } }) {
           </span>
         );
 
-      default:
+      case "belum_absen":
         return (
           <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
             Belum Absen
           </span>
         );
+
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-4 md:p-8">
+    <div className="w-full min-h-screen p-4 md:p-8">
       {/* HEADER */}
-      <section className="flex justify-between mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 to-emerald-500 shadow-xl">
+      <section className="flex flex-col lg:flex-row justify-between mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 to-emerald-500 shadow-xl">
         <div className="p-8 text-white">
           <div className="mb-3 flex items-center gap-3">
             <BookOpen className="h-8 w-8" />
@@ -178,7 +191,7 @@ export default function SubjectPage(props: { params: { id: string } }) {
             {filteredMaterials.length} Materi Tersedia
           </div>
         </div>
-        <div className="p-8 justify-center items-end">
+        <div className="pt-0 lg:pt-8 p-8 justify-center items-end">
           <Link
             href={`/LMS/pelajar/Mapel`}
             className="text-sm flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold shadow transition"
@@ -267,13 +280,13 @@ export default function SubjectPage(props: { params: { id: string } }) {
                 </div>
 
                 {/* TITLE */}
-                <h2 className="mb-3 line-clamp-2 text-lg font-bold text-gray-800">
+                <h2 className="min-h-[4rem] mb-3 line-clamp-2 text-lg font-bold text-gray-800">
                   {material.title}
                 </h2>
 
                 {/* PREVIEW */}
                 <p className="mb-5 line-clamp-3 text-sm text-gray-600">
-                  {material.preview}
+                  {stripHtmlAndTruncate(material.content)}
                 </p>
 
                 {/* INFO */}
