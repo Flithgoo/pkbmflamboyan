@@ -18,36 +18,6 @@ import { Subject } from "@/lib/types/types";
 import Link from "next/link";
 import { stripHtmlAndTruncate } from "@/app/utils/react-quill-helper";
 
-// let materials = [
-//   {
-//     id: 1,
-//     title: "Materi SPOK",
-//     upload_type: "Materi",
-//     tutor_name: "Tutor Informatika",
-//     created_at: "2026-06-01",
-//     attendance_status: "hadir_online",
-//     preview: "Memahami Subjek, Predikat, Objek dan Keterangan...",
-//   },
-//   {
-//     id: 2,
-//     title: "Membuat Cerita Pendek",
-//     upload_type: "Tugas",
-//     tutor_name: "Tutor Informatika",
-//     created_at: "2026-06-01",
-//     attendance_status: null,
-//     preview: "Buatlah sebuah cerita pendek bertema computational thinking...",
-//   },
-//   {
-//     id: 3,
-//     title: "Pengumuman Semester",
-//     upload_type: "Pengumuman",
-//     tutor_name: "Tutor Informatika",
-//     created_at: "2026-06-01",
-//     attendance_status: "hadir_offline",
-//     preview: "Informasi kegiatan pembelajaran semester depan...",
-//   },
-// ];
-
 type SubjectWithTutor = Subject & {
   tutor_name: string;
 };
@@ -250,7 +220,7 @@ export default function SubjectPage(props: { params: { id: string } }) {
               key={material.id}
               className="group rounded-3xl border border-emerald-100 bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="p-6">
+              <div className="flex flex-col p-6">
                 {/* BADGE */}
                 <div className="mb-4 flex items-center justify-between">
                   <span
@@ -307,9 +277,12 @@ export default function SubjectPage(props: { params: { id: string } }) {
                 </div>
 
                 {/* BUTTON */}
-                <button className="mt-6 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-3 font-medium text-white transition hover:from-emerald-600 hover:to-emerald-700">
+                <Link
+                  href={`/LMS/pelajar/Mapel/${subjectId}/Materi/${material.id}`}
+                  className="text-center mt-6 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-3 font-medium text-white transition hover:from-emerald-600 hover:to-emerald-700"
+                >
                   Lihat Materi
-                </button>
+                </Link>
               </div>
             </article>
           ))}
