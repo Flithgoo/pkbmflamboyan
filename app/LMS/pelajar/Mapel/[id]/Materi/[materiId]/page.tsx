@@ -1,24 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  ArrowLeft,
   BookOpen,
   Calendar,
   Download,
   User,
   CheckCircle2,
-  AlertCircle,
   FileText,
   Clock,
   Award,
-  Link,
+  NotebookPen,
+  ArrowLeft,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useUserStore } from "@/src/store/useUserStore";
+import { getStudentWithMaterialDetail } from "@/lib/api/material";
+import Link from "next/link";
 
 type AttendanceStatus =
   | "not_active"
@@ -28,45 +30,113 @@ type AttendanceStatus =
   | "izin"
   | "tidak_hadir";
 
-export default function MaterialDetailPage() {
-  const [material] = useState({
-    id: 1,
-    title: "Belajar Algoritma Dasar",
-    tutor_name: "Tutor Informatika",
-    subject_name: "Informatika",
-    created_at: "2026-06-05",
+type MaterialDetail = {
+  id: number;
+  title: string;
+  content: string;
+  subject_name: string;
+  tutor_name: string;
+  attendance_status: AttendanceStatus;
+  attendance_start: string | null;
+  attendance_end: string | null;
+  created_at: string;
+  file_url: string | null;
+};
 
-    attendance_status: "belum_absen" as AttendanceStatus,
+export default function MaterialDetailPage({
+  params,
+}: {
+  params: { id: string; materiId: string };
+}) {
+  const [material, setMaterial] = useState<MaterialDetail | null>(null);
+  const materiId = params.materiId;
+  const { user } = useUserStore();
 
-    attendance_start: "08.00 WIB",
-    attendance_end: "12.00 WIB",
+  useEffect(() => {
+    async function initialFetch() {
+      try {
+        const { data, error } = await getStudentWithMaterialDetail(
+          Number(user?.id),
+          Number(materiId),
+        );
 
-    file_url: "https://example.com/file.pdf",
+        if (error) {
+          console.error(error);
+          return;
+        }
 
-    content: `
-      <h2>Apa itu Algoritma?</h2>
-      <p>
-      Algoritma adalah langkah-langkah logis
-      untuk menyelesaikan suatu masalah.
-      </p>
+        if (data && data.length > 0) {
+          const raw = data[0] as MaterialDetail;
 
-      <h3>Contoh Algoritma Membuat Teh</h3>
+          setMaterial(raw);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
-      <ol>
-        <li>Siapkan gelas</li>
-        <li>Masukkan teh</li>
-        <li>Tuang air panas</li>
-        <li>Aduk</li>
-      </ol>
+    if (user?.id) {
+      initialFetch();
+    }
+  }, [materiId, user?.id]);
 
-      <p>
-      Dalam informatika, algoritma digunakan
-      untuk membuat program komputer.
-      </p>
-    `,
-  });
+  if (!material) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-emerald-700 font-semibold">Memuat materi...</div>
+      </div>
+    );
+  }
 
-  function renderAttendanceBadge() {
+  function formatDateTime(value: string | null) {
+    if (!value) return "-";
+    const date = new Date(value);
+    const formattedDate = new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(date);
+    const formattedTime = new Intl.DateTimeFormat("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(date);
+    return `${formattedDate}, ${formattedTime}`;
+  }
+
+  function formatMaterialDate(value: string) {
+    const d = new Date(value);
+
+    const datePart = new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(d);
+
+    const timePart = d.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
+    return `${datePart}, ${timePart}`;
+  }
+
+  function isAttendanceOpen(start: string | null, end: string | null): boolean {
+    if (!start || !end) return false;
+
+    const now = new Date();
+
+    return now >= new Date(start) && now <= new Date(end);
+  }
+
+  function isAttendanceClosed(end: string | null): boolean {
+    if (!end) return false;
+
+    return new Date() > new Date(end);
+  }
+
+  function renderAttendanceBadge(material: MaterialDetail) {
     switch (material.attendance_status) {
       case "not_active":
         return (
@@ -76,6 +146,21 @@ export default function MaterialDetailPage() {
         );
 
       case "belum_absen":
+        const open = isAttendanceOpen(
+          material.attendance_start,
+          material.attendance_end,
+        );
+
+        const closed = isAttendanceClosed(material.attendance_end);
+
+        if (closed) {
+          return (
+            <Badge variant="destructive" className="bg-red-600 text-white">
+              Absensi Ditutup
+            </Badge>
+          );
+        }
+
         return (
           <Badge className="bg-amber-500 hover:bg-amber-600">Belum Absen</Badge>
         );
@@ -102,7 +187,7 @@ export default function MaterialDetailPage() {
     }
   }
 
-  function renderAttendanceCard() {
+  function renderAttendanceCard(material: MaterialDetail) {
     switch (material.attendance_status) {
       case "not_active":
         return (
@@ -113,7 +198,32 @@ export default function MaterialDetailPage() {
           </Alert>
         );
 
-      case "belum_absen":
+      case "belum_absen": {
+        const open = isAttendanceOpen(
+          material.attendance_start,
+          material.attendance_end,
+        );
+
+        const closed = isAttendanceClosed(material.attendance_end);
+
+        if (closed) {
+          return (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertDescription className="text-red-900">
+                Absensi telah ditutup.
+              </AlertDescription>
+            </Alert>
+          );
+        }
+
+        if (!open) {
+          return (
+            <Alert className="border-slate-200 bg-slate-50">
+              <AlertDescription>Absensi belum dibuka.</AlertDescription>
+            </Alert>
+          );
+        }
+
         return (
           <div className="space-y-4">
             <Alert className="border-amber-200 bg-amber-50">
@@ -124,29 +234,41 @@ export default function MaterialDetailPage() {
             </Alert>
 
             <div className="grid gap-3 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col items-center justify-between">
                 <span className="font-medium text-slate-700">Mulai:</span>
-                <span className="text-emerald-600 font-semibold">
-                  {material.attendance_start}
+
+                <span className="font-semibold text-emerald-600">
+                  {formatDateTime(material.attendance_start)}
                 </span>
               </div>
+
               <div className="h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
-              <div className="flex items-center justify-between">
+
+              <div className="flex flex-col items-center justify-between">
                 <span className="font-medium text-slate-700">Berakhir:</span>
-                <span className="text-emerald-600 font-semibold">
-                  {material.attendance_end}
+
+                <span className="font-semibold text-emerald-600">
+                  {formatDateTime(material.attendance_end)}
                 </span>
               </div>
             </div>
 
             <Button
               size="lg"
-              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 shadow-lg"
+              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700"
             >
               Hadir
             </Button>
+
+            <Button
+              size="lg"
+              className="w-full bg-gradient-to-r from-amber-400 to-amber-500"
+            >
+              Izin
+            </Button>
           </div>
         );
+      }
 
       case "hadir_online":
         return (
@@ -189,21 +311,31 @@ export default function MaterialDetailPage() {
   }
 
   return (
-    <div className="w-full min-h-screen p-4 md:p-8">
+    <div className="w-full min-h-screen p-2 md:p-3 md:pt-0">
       {/* Full Height Container */}
       <div className="relative flex flex-col">
         {/* Main Content  */}
         <div className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-            {/* Title Section */}
             <div className="space-y-4 animate-in fade-in duration-500">
+              <div className="flex justify-end">
+                <Link
+                  href={`/LMS/pelajar/Mapel/${params.id}`}
+                  className="text-sm flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold shadow transition"
+                >
+                  <ArrowLeft size={20} />
+                  Kembali ke Daftar Mapel
+                </Link>
+              </div>
+
+              {/* Title Section */}
               <section className="flex flex-col gap-4 justify-between p-8 mb-8 border-2 overflow-hidden rounded-3xl border-emerald-200 bg-white/50 backdrop-blur shadow-lg transition-all">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className="bg-gradient-to-r from-emerald-600 to-emerald-700 shadow-lg">
                     <Award size={14} className="mr-1" />
                     PKBM Flamboyan
                   </Badge>
-                  {renderAttendanceBadge()}
+                  {renderAttendanceBadge(material)}
                 </div>
                 <h1 className="text-4xl lg:text-5xl font-bold text-emerald-700">
                   {material.title}
@@ -232,15 +364,7 @@ export default function MaterialDetailPage() {
                     <div>
                       <p className="text-sm text-slate-600">Tanggal Materi</p>
                       <p className="font-semibold text-slate-900">
-                        {new Date(material.created_at).toLocaleDateString(
-                          "id-ID",
-                          {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          },
-                        )}
+                        {formatMaterialDate(material.created_at)}
                       </p>
                     </div>
                   </CardContent>
@@ -313,12 +437,12 @@ export default function MaterialDetailPage() {
                 <Card className="border-emerald-100 shadow-lg hover:shadow-xl transition-all sticky top-4">
                   <CardHeader className="rounded-t-xl bg-gradient-to-r from-emerald-600/10 to-teal-600/10 border-b border-emerald-100">
                     <CardTitle className="flex items-center gap-2 text-emerald-700">
-                      <CheckCircle2 size={22} />
+                      <NotebookPen size={22} />
                       Status Absensi
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-6">
-                    {renderAttendanceCard()}
+                    {renderAttendanceCard(material)}
                   </CardContent>
                 </Card>
               </div>

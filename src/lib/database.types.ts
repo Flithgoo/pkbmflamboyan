@@ -617,6 +617,24 @@ export type Database = {
           session_start: string
         }[]
       }
+      get_student_material_detail: {
+        Args: { p_material_id: number; p_user_id: number }
+        Returns: {
+          attendance_end: string
+          attendance_start: string
+          attendance_status: string
+          content: string
+          created_at: string
+          file_url: string
+          id: number
+          subject_id: number
+          subject_name: string
+          title: string
+          tutor_id: number
+          tutor_name: string
+          upload_type: string
+        }[]
+      }
       get_student_materials: {
         Args: { p_subject_id: number; p_user_id: number }
         Returns: {

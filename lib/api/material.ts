@@ -65,6 +65,20 @@ export async function getMaterialWithRelations(id: number) {
   return { data, error };
 }
 
+export async function getStudentWithMaterialDetail(
+  studentId: number,
+  materialId: number,
+) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase.rpc("get_student_material_detail", {
+    p_user_id: studentId,
+    p_material_id: materialId,
+  });
+
+  return { data, error };
+}
+
 export async function updateMaterial(
   id: number,
   updates: { title?: string; content?: string },

@@ -50,10 +50,7 @@ export default function SubjectPage(props: { params: { id: string } }) {
 
       if (materialsData) {
         const materialsWithTutor = materialsData;
-        console.log(
-          "🚀 ~ initialFetch ~ materialsWithTutor:",
-          materialsWithTutor,
-        );
+
         setMaterials(materialsWithTutor);
       }
 
@@ -62,10 +59,6 @@ export default function SubjectPage(props: { params: { id: string } }) {
           ...subjectData,
           tutor_name: subjectData.tutor_subjects?.[0]?.users?.name ?? "",
         };
-        console.log(
-          "🚀 ~ initialFetch ~ transformedSubject:",
-          transformedSubject,
-        );
 
         setSubject(transformedSubject);
       }
