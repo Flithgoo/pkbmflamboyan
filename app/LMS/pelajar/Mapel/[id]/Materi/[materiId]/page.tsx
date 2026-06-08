@@ -21,6 +21,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserStore } from "@/src/store/useUserStore";
 import { getStudentWithMaterialDetail } from "@/lib/api/material";
 import Link from "next/link";
+import { studentCheckIn } from "@/lib/api/attendance";
+import { studentCheckInAction } from "@/lib/actions/attendance";
 
 type AttendanceStatus =
   | "not_active"
@@ -36,6 +38,7 @@ type MaterialDetail = {
   content: string;
   subject_name: string;
   tutor_name: string;
+  attendance_id: number;
   attendance_status: AttendanceStatus;
   attendance_start: string | null;
   attendance_end: string | null;
@@ -83,7 +86,7 @@ export default function MaterialDetailPage({
   if (!material) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-emerald-700 font-semibold">Memuat materi...</div>
+        <p className="text-emerald-700 font-semibold">Memuat materi...</p>
       </div>
     );
   }
@@ -187,6 +190,45 @@ export default function MaterialDetailPage({
     }
   }
 
+  async function handleAttendance(attendanceId: number, status: string) {
+    try {
+      const { success, error } = await studentCheckInAction(
+        attendanceId,
+        status,
+      );
+
+      if (error)
+        return (
+          <Alert className="fixed top-2 left-1/2 transform -translate-x-1/2 border-slate-200 bg-slate-50">
+            <AlertDescription className="text-slate-700">
+              Gagal melakukan absensi: {error}
+            </AlertDescription>
+          </Alert>
+        );
+
+      if (success) {
+        setMaterial((prev) =>
+          prev
+            ? {
+                ...prev,
+                attendance_status: status === "hadir" ? "hadir_online" : "izin",
+              }
+            : prev,
+        );
+
+        return (
+          <Alert className="fixed top-2 left-1/2 transform -translate-x-1/2 border-slate-200 bg-slate-50">
+            <AlertDescription className="text-slate-700">
+              Absensi berhasil dilakukan.
+            </AlertDescription>
+          </Alert>
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   function renderAttendanceCard(material: MaterialDetail) {
     switch (material.attendance_status) {
       case "not_active":
@@ -254,6 +296,9 @@ export default function MaterialDetailPage({
             </div>
 
             <Button
+              onClick={async () =>
+                await handleAttendance(material.attendance_id, "hadir")
+              }
               size="lg"
               className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700"
             >
@@ -261,6 +306,9 @@ export default function MaterialDetailPage({
             </Button>
 
             <Button
+              onClick={async () =>
+                await handleAttendance(material.attendance_id, "izin")
+              }
               size="lg"
               className="w-full bg-gradient-to-r from-amber-400 to-amber-500"
             >

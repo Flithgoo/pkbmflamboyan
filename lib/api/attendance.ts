@@ -43,3 +43,21 @@ export async function getAttendanceForUser(sessionId: number) {
 
   return { data, error: null };
 }
+
+export async function studentCheckIn(attendanceId: number, status: string) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase
+    .from("attendances")
+    .update({
+      status: status,
+      updated_at: new Date().toISOString(),
+      attendance_time: new Date().toISOString(),
+    })
+    .eq("id", attendanceId)
+    .is("updated_by", null)
+    .select()
+    .single();
+
+  return { data, error };
+}

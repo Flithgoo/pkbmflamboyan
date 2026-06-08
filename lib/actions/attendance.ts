@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthContext } from "@/lib/getAuthContext";
+import { studentCheckIn } from "../api/attendance";
 
 export async function markAttendanceAction(sessionId: number) {
   const { supabase } = await getAuthContext();
@@ -19,6 +20,11 @@ export async function markAttendanceAction(sessionId: number) {
     .eq("session_id", sessionId)
     .eq("user_id", userId);
 
+  if (existingError) {
+    console.error("Error checking existing attendance:", existingError);
+    return { success: false, error: existingError };
+  }
+
   if (existing && existing.length > 0) {
     return { success: false, error: "Sudah melakukan absensi" };
   }
@@ -34,4 +40,27 @@ export async function markAttendanceAction(sessionId: number) {
   }
 
   return { success: true, data };
+}
+
+export async function studentCheckInAction(
+  attendanceId: number,
+  status: string,
+) {
+  try {
+    const { data, error } = await studentCheckIn(attendanceId, status);
+
+    if (error) {
+      const errorMessage = typeof error === "string" ? error : error.message;
+      return { success: false, error: errorMessage };
+    }
+
+    console.log(
+      "app/lib/actions/attendance.ts Student checked in successfully: ",
+      data,
+    );
+    return { success: true };
+  } catch (err) {
+    console.error(err);
+    return { success: false, error: "An unexpected error occurred" };
+  }
 }

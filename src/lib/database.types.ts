@@ -148,7 +148,7 @@ export type Database = {
       }
       attendances: {
         Row: {
-          "attendance time": string | null
+          attendance_time: string | null
           created_at: string
           id: number
           note: string | null
@@ -159,7 +159,7 @@ export type Database = {
           user_id: number
         }
         Insert: {
-          "attendance time"?: string | null
+          attendance_time?: string | null
           created_at?: string
           id?: number
           note?: string | null
@@ -170,7 +170,7 @@ export type Database = {
           user_id: number
         }
         Update: {
-          "attendance time"?: string | null
+          attendance_time?: string | null
           created_at?: string
           id?: number
           note?: string | null
@@ -621,6 +621,7 @@ export type Database = {
         Args: { p_material_id: number; p_user_id: number }
         Returns: {
           attendance_end: string
+          attendance_id: number
           attendance_start: string
           attendance_status: string
           content: string
