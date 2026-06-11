@@ -120,7 +120,7 @@ const tutorDashboardLinks = [
     href: "/LMS/tutor/Mapel",
     icon: BookOpen,
   },
-  { name: "Tugas", href: "/LMS//tutor/Tugas", icon: ClipboardList },
+  { name: "Absensi", href: "/LMS/tutor/Absensi", icon: Users },
   { name: "Pengumuman", href: "/LMS/tutor/Pengumuman", icon: BellRing },
   { name: "Ujian", href: "/LMS/tutor/Ujian", icon: ClipboardCheck },
   { name: "Bantuan", href: "/LMS/Bantuan", icon: Info },
