@@ -85,8 +85,11 @@ export default function MaterialDetailPage({
 
   if (!material) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-emerald-700 font-semibold">Memuat materi...</p>
+      <div className="min-h-screen w-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-600 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Memuat materi...</p>
+        </div>
       </div>
     );
   }
