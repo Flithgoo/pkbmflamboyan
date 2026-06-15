@@ -61,3 +61,18 @@ export async function studentCheckIn(attendanceId: number, status: string) {
 
   return { data, error };
 }
+
+export async function getTutorAttendanceSessions(tutorId: number) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase.rpc("get_tutor_attendance_sessions", {
+    p_tutor_id: tutorId,
+  });
+
+  if (error) {
+    console.error("Error fetching tutor attendance sessions:", error);
+    return { data: null, error };
+  }
+
+  return { data, error: null };
+}

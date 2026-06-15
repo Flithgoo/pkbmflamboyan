@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Clock,
   BookOpen,
-  Users,
+  MapPin,
   ChevronRight,
   ChevronLeft,
   ChevronUp,
   ChevronDown,
+  List,
+  TimerOff,
+  Users,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,15 +22,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Loading from "@/app/components/Loading";
+import { useUserStore } from "@/src/store/useUserStore";
+import { getTutorAttendanceSessions } from "@/lib/api/attendance";
 
 interface AttendanceSession {
   id: number;
   title: string;
   subject_name: string;
-  class_name: string;
-  date: string;
+  location: string;
+
+  created_at: string;
+
   session_start: string;
+  session_end: string;
+
   upload_type: string;
+
+  total_students: number;
 }
 
 const getRelativeDate = (dateString: string): string => {
@@ -52,6 +64,23 @@ const getRelativeDate = (dateString: string): string => {
     month: "long",
     day: "numeric",
   });
+};
+
+const getLocationColor = (location: string) => {
+  switch (location) {
+    case "PKBM Flamboyan":
+      return "bg-teal-100 text-teal-800 border-teal-300";
+    case "Pondok Sidokare":
+      return "bg-stone-100 text-stone-800 border-stone-300";
+    case "Pondok Gedeg":
+      return "bg-amber-100 text-amber-800 border-amber-300";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-300";
+  }
+};
+
+const getLocationIcon = (location: string) => {
+  return <MapPin size={14} />;
 };
 
 const SortableHeader = ({
@@ -94,7 +123,9 @@ const SortableHeader = ({
 };
 
 export default function AbsensiPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useUserStore();
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"semua" | "aktif" | "selesai">("semua");
   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -105,120 +136,50 @@ export default function AbsensiPage() {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
-    // Mock data - ganti dengan API call sebenarnya
-    const mockSessions: AttendanceSession[] = [
-      {
-        id: 1,
-        title: "Algoritma Dasar",
-        subject_name: "Informatika",
-        class_name: "7",
-        date: new Date().toISOString().split("T")[0],
-        session_start: new Date().toISOString(),
-        upload_type: "Materi",
-      },
-      {
-        id: 2,
-        title: "Word Dasar",
-        subject_name: "Informatika",
-        class_name: "5",
-        date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 86400000).toISOString(),
-        upload_type: "Materi",
-      },
-      {
-        id: 3,
-        title: "SPOK",
-        subject_name: "Bahasa Indonesia",
-        class_name: "6",
-        date: new Date(Date.now() - 604800000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 604800000).toISOString(),
-        upload_type: "Tugas",
-      },
-      {
-        id: 4,
-        title: "Excel Lanjutan",
-        subject_name: "Informatika",
-        class_name: "8",
-        date: new Date(Date.now() - 172800000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 172800000).toISOString(),
-        upload_type: "Materi",
-      },
-      {
-        id: 5,
-        title: "Tenses",
-        subject_name: "Bahasa Inggris",
-        class_name: "9",
-        date: new Date(Date.now() - 1296000000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 1296000000).toISOString(),
-        upload_type: "Materi",
-      },
-      {
-        id: 6,
-        title: "Tenses",
-        subject_name: "Bahasa Inggris",
-        class_name: "9",
-        date: new Date(Date.now() - 1296000000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 1296000000).toISOString(),
-        upload_type: "Tugas",
-      },
-      {
-        id: 7,
-        title: "Grammar",
-        subject_name: "Bahasa Inggris",
-        class_name: "8",
-        date: new Date(Date.now() - 1296000000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 1296000000).toISOString(),
-        upload_type: "Tugas",
-      },
-      {
-        id: 8,
-        title: "Vocabulary",
-        subject_name: "Bahasa Inggris",
-        class_name: "7",
-        date: new Date(Date.now() - 1296000000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 1296000000).toISOString(),
-        upload_type: "Materi",
-      },
-      {
-        id: 9,
-        title: "Pythagorean Theorem",
-        subject_name: "Matematika",
-        class_name: "9",
-        date: new Date(Date.now() - 1296000000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 1296000000).toISOString(),
-        upload_type: "Tugas",
-      },
-      {
-        id: 10,
-        title: "Linear Equations",
-        subject_name: "Matematika",
-        class_name: "8",
-        date: new Date(Date.now() - 1296000000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 1296000000).toISOString(),
-        upload_type: "Materi",
-      },
-      {
-        id: 11,
-        title: "Quadratic Equations",
-        subject_name: "Matematika",
-        class_name: "9",
-        date: new Date(Date.now() - 1296000000).toISOString().split("T")[0],
-        session_start: new Date(Date.now() - 1296000000).toISOString(),
-        upload_type: "Tugas",
-      },
-    ];
-    setSessions(mockSessions);
-    setLoading(false);
-  }, []);
+    async function fetchAttendanceSessions() {
+      if (!user?.id) return;
 
-  const filteredSessions = sessions.filter((session) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      session.title.toLowerCase().includes(searchLower) ||
-      session.subject_name.toLowerCase().includes(searchLower) ||
-      session.class_name.toLowerCase().includes(searchLower)
-    );
-  });
+      setLoading(true);
+
+      const { data, error } = await getTutorAttendanceSessions(user.id);
+
+      if (!error && data) {
+        setSessions(data);
+      }
+
+      setLoading(false);
+    }
+
+    fetchAttendanceSessions();
+  }, [user?.id]);
+
+  const filteredSessions = useMemo(() => {
+    return sessions.filter((session) => {
+      const matchSearch =
+        session.title.toLowerCase().includes(search.toLowerCase()) ||
+        session.subject_name.toLowerCase().includes(search.toLowerCase());
+
+      const active = new Date(session.session_end) > new Date();
+
+      const matchFilter =
+        filter === "semua" ? true : filter === "aktif" ? active : !active;
+
+      return matchSearch && matchFilter;
+    });
+  }, [sessions, search, filter]);
+
+  const stats = useMemo(() => {
+    return {
+      totalSessions: sessions.length,
+      activeSessions: sessions.filter(
+        (s) => new Date(s.session_end) > new Date(),
+      ).length,
+      finishedSessions: sessions.filter(
+        (s) => new Date(s.session_end) <= new Date(),
+      ).length,
+      totalStudents: sessions.reduce((sum, s) => sum + s.total_students, 0),
+    };
+  }, [sessions]);
 
   // Sorting logic
   const sortedSessions = [...filteredSessions].sort((a, b) => {
@@ -237,9 +198,14 @@ export default function AbsensiPage() {
     }
 
     // Handle date comparisons
-    if (sortColumn === "date") {
-      aValue = new Date(a.date).getTime();
-      bValue = new Date(b.date).getTime();
+    if (
+      sortColumn === "created_at" ||
+      sortColumn === "session_start" ||
+      sortColumn === "session_end"
+    ) {
+      aValue = new Date(a[sortColumn]).getTime();
+
+      bValue = new Date(b[sortColumn]).getTime();
       return sortDirection === "asc"
         ? (aValue as number) - (bValue as number)
         : (bValue as number) - (aValue as number);
@@ -261,7 +227,7 @@ export default function AbsensiPage() {
 
   // Reset to page 1 when search term changes
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
+    setSearch(value);
     setCurrentPage(1);
   };
 
@@ -293,6 +259,10 @@ export default function AbsensiPage() {
     });
   };
 
+  if (loading) {
+    return <Loading text="Memuat sesi absensi..." />;
+  }
+
   return (
     <div className="min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8">
       {/* Header */}
@@ -313,8 +283,8 @@ export default function AbsensiPage() {
         <div className="bg-white rounded-xl shadow-md p-4 border-l-4 border-emerald-500">
           <Input
             type="text"
-            placeholder="Cari berdasarkan materi, mapel, atau kelas..."
-            value={searchTerm}
+            placeholder="Cari berdasarkan materi, mapel, atau lokasi..."
+            value={search}
             onChange={(e) => handleSearch(e.target.value)}
             className="border-emerald-200 focus:ring-emerald-500"
           />
@@ -331,7 +301,7 @@ export default function AbsensiPage() {
                 {sessions.length}
               </p>
             </div>
-            <Clock size={40} className="text-emerald-200" />
+            <List size={40} className="text-emerald-200" />
           </div>
         </div>
         <div className="bg-white rounded-xl shadow p-4 border-t-4 border-amber-500">
@@ -340,12 +310,13 @@ export default function AbsensiPage() {
               <p className="text-gray-600 text-sm font-medium">Sesi Aktif</p>
               <p className="text-3xl font-bold text-amber-700 mt-1">
                 {
-                  sortedSessions.filter((s) => new Date(s.date) >= new Date())
-                    .length
+                  sortedSessions.filter(
+                    (s) => new Date(s.session_end) > new Date(),
+                  ).length
                 }
               </p>
             </div>
-            <BookOpen size={40} className="text-amber-200" />
+            <Clock size={40} className="text-amber-200" />
           </div>
         </div>
         <div className="bg-white rounded-xl shadow p-4 border-t-4 border-emerald-600">
@@ -354,12 +325,13 @@ export default function AbsensiPage() {
               <p className="text-gray-600 text-sm font-medium">Sesi Selesai</p>
               <p className="text-3xl font-bold text-emerald-600 mt-1">
                 {
-                  sortedSessions.filter((s) => new Date(s.date) < new Date())
-                    .length
+                  sortedSessions.filter(
+                    (s) => new Date(s.session_end) < new Date(),
+                  ).length
                 }
               </p>
             </div>
-            <Users size={40} className="text-emerald-200" />
+            <TimerOff size={40} className="text-emerald-200" />
           </div>
         </div>
       </div>
@@ -370,7 +342,7 @@ export default function AbsensiPage() {
           <table className="w-full">
             <thead className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold">
+                <th className="px-3 py-4 text-left text-sm font-semibold">
                   <SortableHeader
                     column="title"
                     label="Materi"
@@ -379,7 +351,16 @@ export default function AbsensiPage() {
                     onSort={handleSort}
                   />
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold">
+                <th className="px-1 py-4 text-center text-sm font-semibold">
+                  <SortableHeader
+                    column="total_students"
+                    label="Total Siswa"
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                </th>
+                <th className="px-3 py-4 text-left text-sm font-semibold">
                   <SortableHeader
                     column="subject_name"
                     label="Mapel"
@@ -388,25 +369,25 @@ export default function AbsensiPage() {
                     onSort={handleSort}
                   />
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold">
+                <th className="px-3 py-4 text-left text-sm font-semibold">
                   <SortableHeader
-                    column="class_name"
-                    label="Kelas"
+                    column="location"
+                    label="Lokasi"
                     sortColumn={sortColumn}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold">
+                <th className="px-3 py-4 text-left text-sm font-semibold">
                   <SortableHeader
-                    column="date"
+                    column="created_at"
                     label="Tanggal"
                     sortColumn={sortColumn}
                     sortDirection={sortDirection}
                     onSort={handleSort}
                   />
                 </th>
-                <th className="px-6 py-4 text-center text-sm font-semibold">
+                <th className="px-3 py-4 text-center text-sm font-semibold">
                   Kelola
                 </th>
               </tr>
@@ -420,12 +401,17 @@ export default function AbsensiPage() {
                       idx % 2 === 0 ? "bg-white" : "bg-gray-50"
                     }`}
                   >
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-semibold text-gray-900">
+                    <td className="ps-3 py-4">
+                      <div className="text-sm max-w-48 font-semibold text-gray-800">
                         {session.title}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-2 py-4">
+                      <div className="ps-7 text-sm font-medium">
+                        {session.total_students}
+                      </div>
+                    </td>
+                    <td className="px-3 py-4">
                       <div
                         className={`inline-flex items-center gap-2 px-3 py-1 ${session.upload_type === "Tugas" ? "bg-cyan-100 text-cyan-800 border-cyan-300" : "bg-emerald-100 text-emerald-800 border-emerald-300"} rounded-full text-xs font-semibold border`}
                       >
@@ -433,21 +419,29 @@ export default function AbsensiPage() {
                         {session.subject_name}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold border border-amber-300">
-                        <Users size={14} />
-                        Kelas {session.class_name}
+                    <td className="px-3 py-4">
+                      <div
+                        className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${getLocationColor(
+                          session.location,
+                        )}`}
+                      >
+                        {getLocationIcon(session.location)}
+                        {session.location}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="ps-3 py-4 text-sm text-gray-600">
                       <div className="font-medium">
-                        {getRelativeDate(session.date)}
+                        {/* absensi start */}
+                        {getRelativeDate(session.session_start)}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {new Date(session.date).toLocaleDateString("id-ID")}
+                        {/* created_at */}
+                        {new Date(session.created_at).toLocaleDateString(
+                          "id-ID",
+                        )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="ps-1 py-4 text-center">
                       <Link
                         href={`/LMS/tutor/attendance/${session.id}`}
                         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
@@ -462,7 +456,7 @@ export default function AbsensiPage() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-6 py-12 text-center text-gray-500"
+                    className="px-3 py-12 text-center text-gray-500"
                   >
                     Tidak ada sesi absensi ditemukan.
                   </td>
@@ -491,7 +485,6 @@ export default function AbsensiPage() {
                   className="text-emerald-600 flex-shrink-0"
                 />
               </div>
-
               <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2">
                   <BookOpen
@@ -503,21 +496,28 @@ export default function AbsensiPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users size={16} className="text-amber-600" />
+                  <MapPin size={16} className="text-purple-600" />
                   <span className="text-sm font-medium text-gray-700">
-                    Kelas {session.class_name}
+                    {session.location}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users size={16} className="text-slate-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    {session.total_students} Siswa
                   </span>
                 </div>
               </div>
-
               <div className="pt-3 border-t border-gray-200">
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-xs text-gray-500 font-medium">
-                      {getRelativeDate(session.date)}
+                      {/* session_start */}
+                      {getRelativeDate(session.session_start)}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
-                      {new Date(session.date).toLocaleDateString("id-ID")}
+                      {/* created_at */}
+                      {new Date(session.created_at).toLocaleDateString("id-ID")}
                     </p>
                   </div>
                   <div className="text-right">

@@ -660,6 +660,20 @@ export type Database = {
           name: string
         }[]
       }
+      get_tutor_attendance_sessions: {
+        Args: { p_tutor_id: number }
+        Returns: {
+          created_at: string
+          id: number
+          location: string
+          session_end: string
+          session_start: string
+          subject_name: string
+          title: string
+          total_students: number
+          upload_type: string
+        }[]
+      }
       insert_subject_with_tutor_and_class_relation: {
         Args: {
           p_class_ids: number[]
