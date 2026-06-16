@@ -443,7 +443,7 @@ export default function AbsensiPage() {
                     </td>
                     <td className="ps-1 py-4 text-center">
                       <Link
-                        href={`/LMS/tutor/attendance/${session.id}`}
+                        href={`/LMS/tutor/Absensi/${session.id}`}
                         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
                       >
                         Lihat Detail

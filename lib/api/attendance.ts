@@ -1,4 +1,4 @@
-"use server";
+("use server");
 
 import { getAuthContext } from "@/lib/getAuthContext";
 
@@ -71,6 +71,21 @@ export async function getTutorAttendanceSessions(tutorId: number) {
 
   if (error) {
     console.error("Error fetching tutor attendance sessions:", error);
+    return { data: null, error };
+  }
+
+  return { data, error: null };
+}
+
+export async function getTutorAttendanceDetial(sessionId: number) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase.rpc("get_tutor_attendance_detail", {
+    p_session_id: sessionId,
+  });
+
+  if (error) {
+    console.error("Error fetching tutor attendance detail:", error);
     return { data: null, error };
   }
 
