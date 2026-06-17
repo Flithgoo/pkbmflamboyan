@@ -91,3 +91,24 @@ export async function getTutorAttendanceDetial(sessionId: number) {
 
   return { data, error: null };
 }
+
+export async function updateAttendanceStatus(
+  attendanceId: number,
+  status: string,
+  tutorId: number,
+) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase
+    .from("attendances")
+    .update({
+      status: status === "absen" ? null : status,
+      updated_by: tutorId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", attendanceId)
+    .select()
+    .single();
+
+  return { data, error };
+}

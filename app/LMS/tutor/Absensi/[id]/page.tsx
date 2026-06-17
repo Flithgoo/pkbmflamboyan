@@ -14,6 +14,7 @@ import {
   Edit2,
   ChevronUp,
   ChevronDown,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,12 +26,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Loading from "@/app/components/Loading";
+import {
+  getTutorAttendanceDetial,
+  updateAttendanceStatus,
+} from "@/lib/api/attendance";
+import { useUserStore } from "@/src/store/useUserStore";
+import * as XLSX from "xlsx";
 
 interface AttendanceRecord {
   id: number;
   student_id: string;
   student_name: string;
-  status: "hadir" | "absen" | "izin";
+  status: string;
   attendance_time: string | null;
 }
 
@@ -98,82 +105,43 @@ export default function AttendanceDetailPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const { user } = useUserStore();
 
   useEffect(() => {
-    // Mock data - ganti dengan API call sebenarnya
-    const mockSession: SessionDetail = {
-      id: parseInt(sessionId),
-      material_name: "Algoritma Dasar",
-      subject_name: "Informatika",
-      class_name: "7",
-      date: new Date().toISOString().split("T")[0],
-      session_start: "08:00",
-      session_end: "09:30",
-    };
+    async function fetchAttendance() {
+      setLoading(true);
 
-    const mockRecords: AttendanceRecord[] = [
-      {
-        id: 1,
-        student_id: "001",
-        student_name: "Ahmad Rizki Pratama",
-        status: "hadir",
-        attendance_time: "08:00",
-      },
-      {
-        id: 2,
-        student_id: "002",
-        student_name: "Budi Santoso",
-        status: "hadir",
-        attendance_time: "08:05",
-      },
-      {
-        id: 3,
-        student_id: "003",
-        student_name: "Citra Dewi",
-        status: "izin",
-        attendance_time: null,
-      },
-      {
-        id: 4,
-        student_id: "004",
-        student_name: "Dedi Gunawan",
-        status: "absen",
-        attendance_time: null,
-      },
-      {
-        id: 5,
-        student_id: "005",
-        student_name: "Eka Putri",
-        status: "hadir",
-        attendance_time: "08:10",
-      },
-      {
-        id: 6,
-        student_id: "006",
-        student_name: "Fajar Ismanto",
-        status: "izin",
-        attendance_time: null,
-      },
-      {
-        id: 7,
-        student_id: "007",
-        student_name: "Gina Nur Aziz",
-        status: "hadir",
-        attendance_time: "08:02",
-      },
-      {
-        id: 8,
-        student_id: "008",
-        student_name: "Hendra Wijaya",
-        status: "absen",
-        attendance_time: null,
-      },
-    ];
+      const { data } = await getTutorAttendanceDetial(Number(sessionId));
 
-    setSession(mockSession);
-    setRecords(mockRecords);
-    setFilteredRecords(mockRecords);
-    setLoading(false);
+      if (data && data.length > 0) {
+        const first = data[0];
+
+        setSession({
+          id: first.session_id,
+          material_name: first.material_name,
+          subject_name: first.subject_name,
+          class_name: first.location_name,
+          date: first.created_at,
+          session_start: first.session_start,
+          session_end: first.session_end,
+        });
+
+        const attendanceRecords: AttendanceRecord[] = data.map((item) => ({
+          id: item.id,
+          student_id: item.student_id,
+          student_name: item.student_name,
+          status: item.status as "hadir" | "absen" | "izin" | "belum absen",
+          attendance_time: item.attendance_time,
+        }));
+
+        setRecords(attendanceRecords);
+        setFilteredRecords(attendanceRecords);
+      }
+
+      setLoading(false);
+    }
+
+    fetchAttendance();
   }, [sessionId]);
 
   useEffect(() => {
@@ -207,13 +175,29 @@ export default function AttendanceDetailPage() {
     setFilteredRecords(filtered);
   }, [searchTerm, filterStatus, records, sortColumn, sortDirection]);
 
-  const handleStatusChange = (recordId: number, newStatus: string) => {
-    const updated = records.map((r) =>
-      r.id === recordId
-        ? { ...r, status: newStatus as AttendanceRecord["status"] }
-        : r,
+  const handleStatusChange = async (attendanceId: number, status: string) => {
+    const { error } = await updateAttendanceStatus(
+      attendanceId,
+      status,
+      Number(user?.id),
     );
-    setRecords(updated);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setRecords((prev) =>
+      prev.map((record) =>
+        record.id === attendanceId
+          ? {
+              ...record,
+              status,
+            }
+          : record,
+      ),
+    );
+    setEditingId(null);
   };
 
   const handleSort = (column: string) => {
@@ -225,11 +209,79 @@ export default function AttendanceDetailPage() {
     }
   };
 
-  const stats = {
-    total: records.length,
-    hadir: records.filter((r) => r.status === "hadir").length,
-    absen: records.filter((r) => r.status === "absen").length,
-    izin: records.filter((r) => r.status === "izin").length,
+  const handleExport = () => {
+    if (!session) return;
+
+    // Header laporan
+    const header = [
+      ["PKBM FLAMBOYAN"],
+      ["Laporan Absensi"],
+      [],
+      ["Materi", session.material_name],
+      ["Mata Pelajaran", session.subject_name],
+      ["Lokasi", session.class_name],
+      ["Sesi Dimulai", new Date(session.session_start).toLocaleString("id-ID")],
+      ["Sesi Berakhir", new Date(session.session_end).toLocaleString("id-ID")],
+      [],
+    ];
+
+    // Header tabel
+    const tableHeader = [
+      ["No", "NIS", "Nama Pelajar", "Status", "Waktu Absensi"],
+    ];
+
+    const formatStatus = (status: AttendanceRecord["status"]) => {
+      switch (status) {
+        case "hadir":
+          return "Hadir";
+
+        case "izin":
+          return "Izin";
+
+        case "belum absen":
+          return "Belum Absen";
+
+        case "absen":
+          return "Tidak Hadir";
+
+        default:
+          return status;
+      }
+    };
+
+    // Isi tabel
+    const tableData = records.map((record, index) => [
+      index + 1,
+      record.student_id,
+      record.student_name,
+      formatStatus(record.status),
+      record.attendance_time
+        ? new Date(record.attendance_time).toLocaleString("id-ID")
+        : "-",
+    ]);
+
+    // Gabungkan semuanya
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ...header,
+      ...tableHeader,
+      ...tableData,
+    ]);
+
+    // Lebar kolom
+    worksheet["!cols"] = [
+      { wch: 6 },
+      { wch: 15 },
+      { wch: 35 },
+      { wch: 15 },
+      { wch: 25 },
+    ];
+
+    // Workbook
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Absensi");
+
+    XLSX.writeFile(workbook, `Absensi-${session.material_name}.xlsx`);
   };
 
   const getStatusColor = (status: string) => {
@@ -270,10 +322,18 @@ export default function AttendanceDetailPage() {
     );
   }
 
+  const totalPelajar = records.length;
+  const jmlBelumAbsen = records.filter(
+    (r) => r.status === "belum absen",
+  ).length;
+  const jmlHadir = records.filter((r) => r.status === "hadir").length;
+  const jmlIzin = records.filter((r) => r.status === "izin").length;
+  const jmlAbsen = records.filter((r) => r.status === "absen").length;
+
   return (
     <div className="min-h-screen w-full p-4 md:p-8">
       {/* Back Button */}
-      <div className="mb-8">
+      <div className="mb-6 flex justify-end pe-2">
         <Link
           href="/LMS/tutor/Absensi"
           className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium transition hover:gap-3"
@@ -284,43 +344,108 @@ export default function AttendanceDetailPage() {
       </div>
 
       {/* Header Card - Session Info */}
-      <div className="mb-8 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl shadow-lg p-8 text-white">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-8">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+      <div className="mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-600 to-emerald-700 p-6 text-white shadow-xl md:p-8">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          {/* Left */}
+          <div className="flex-1">
+            <p className="mb-2 text-sm font-medium uppercase tracking-wider text-emerald-200">
+              Kelola Absensi
+            </p>
+
+            <h1 className="mb-3 text-3xl font-bold leading-tight md:text-4xl">
               {session.material_name}
             </h1>
-            <p className="text-emerald-100 text-lg">
-              Kelas {session.class_name} • {session.subject_name}
+
+            <div className="flex flex-wrap items-center gap-2 text-sm text-emerald-100 md:text-base">
+              <BookOpen size={18} />
+              <span>{session.subject_name}</span>
+
+              <span className="opacity-60">•</span>
+
+              <Users size={18} />
+              <span>{session.class_name}</span>
+            </div>
+
+            <p className="mt-5 text-sm text-emerald-100">
+              {new Date(session.date).toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
             </p>
           </div>
-          <div className="flex gap-6">
-            <div className="flex items-center gap-2">
-              <Clock size={20} className="text-emerald-200" />
-              <div>
-                <p className="text-emerald-100 text-sm">Waktu Sesi</p>
-                <p className="font-bold">
-                  {session.session_start} - {session.session_end}
-                </p>
+
+          {/* Right */}
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4 lg:min-w-[320px]">
+            <div className="rounded-2xl bg-white/10 p-3 backdrop-blur-sm ring-1 ring-white/20">
+              <Clock className="mb-3 h-6 w-6 text-emerald-200" />
+
+              <p className="text-xs uppercase tracking-wide text-emerald-200">
+                Waktu Sesi
+              </p>
+
+              <div className="mt-2 space-y-3">
+                <div>
+                  <p className="text-sm font-semibold">
+                    <span>
+                      {new Date(session.session_start).toLocaleDateString(
+                        "id-ID",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        },
+                      )}
+                    </span>
+                    <span className="font-normal">{" : "}</span>
+                    <span className="font-normal">
+                      {new Date(session.session_start).toLocaleTimeString(
+                        "id-ID",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="border-t border-white/20 pt-3">
+                  <p className="text-sm font-semibold">
+                    {new Date(session.session_end).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                    <span className="font-normal">{" : "}</span>
+                    <span className="font-normal">
+                      {new Date(session.session_end).toLocaleTimeString(
+                        "id-ID",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Users size={20} className="text-emerald-200" />
-              <div>
-                <p className="text-emerald-100 text-sm">Total Pelajar</p>
-                <p className="font-bold">{stats.total}</p>
-              </div>
+
+            <div className="rounded-2xl bg-white/10 p-5 backdrop-blur-sm ring-1 ring-white/20">
+              <Users className="mb-3 h-6 w-6 text-emerald-200" />
+
+              <p className="text-xs uppercase tracking-wide text-emerald-200">
+                Total Pelajar
+              </p>
+
+              <p className="mt-1 text-3xl font-bold">{totalPelajar}</p>
+
+              <p className="text-sm text-emerald-100">Peserta Terdaftar</p>
             </div>
           </div>
         </div>
-        <p className="text-emerald-100 text-sm">
-          {new Date(session.date).toLocaleDateString("id-ID", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
       </div>
 
       {/* Statistics */}
@@ -329,8 +454,20 @@ export default function AttendanceDetailPage() {
         <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition p-6 border-l-4 border-slate-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-medium mb-1">Total</p>
-              <p className="text-3xl font-bold text-slate-800">{stats.total}</p>
+              <p className="text-gray-600 text-sm font-medium mb-1">
+                Belum Absen
+              </p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-3xl font-bold text-gray-600">
+                  {jmlBelumAbsen}
+                </p>
+                <p className="text-sm text-gray-600 font-medium">
+                  {totalPelajar > 0
+                    ? Math.round((jmlBelumAbsen / totalPelajar) * 100)
+                    : 0}
+                  %
+                </p>
+              </div>
             </div>
             <Users size={32} className="text-slate-200" />
           </div>
@@ -343,11 +480,11 @@ export default function AttendanceDetailPage() {
               <p className="text-gray-600 text-sm font-medium mb-1">Hadir</p>
               <div className="flex items-baseline gap-2">
                 <p className="text-3xl font-bold text-emerald-700">
-                  {stats.hadir}
+                  {jmlHadir}
                 </p>
                 <p className="text-sm text-emerald-600 font-medium">
-                  {stats.total > 0
-                    ? Math.round((stats.hadir / stats.total) * 100)
+                  {totalPelajar > 0
+                    ? Math.round((jmlHadir / totalPelajar) * 100)
                     : 0}
                   %
                 </p>
@@ -361,12 +498,14 @@ export default function AttendanceDetailPage() {
         <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition p-6 border-l-4 border-red-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-medium mb-1">Absen</p>
+              <p className="text-gray-600 text-sm font-medium mb-1">
+                Tidak Hadir
+              </p>
               <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-bold text-red-700">{stats.absen}</p>
+                <p className="text-3xl font-bold text-red-700">{jmlAbsen}</p>
                 <p className="text-sm text-red-600 font-medium">
-                  {stats.total > 0
-                    ? Math.round((stats.absen / stats.total) * 100)
+                  {totalPelajar > 0
+                    ? Math.round((jmlAbsen / totalPelajar) * 100)
                     : 0}
                   %
                 </p>
@@ -382,10 +521,10 @@ export default function AttendanceDetailPage() {
             <div>
               <p className="text-gray-600 text-sm font-medium mb-1">Izin</p>
               <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-bold text-blue-700">{stats.izin}</p>
+                <p className="text-3xl font-bold text-blue-700">{jmlIzin}</p>
                 <p className="text-sm text-blue-600 font-medium">
-                  {stats.total > 0
-                    ? Math.round((stats.izin / stats.total) * 100)
+                  {totalPelajar > 0
+                    ? Math.round((jmlIzin / totalPelajar) * 100)
                     : 0}
                   %
                 </p>
@@ -427,7 +566,10 @@ export default function AttendanceDetailPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2 h-10 px-6 transition">
+          <Button
+            onClick={handleExport}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center justify-center gap-2 h-10 px-6 transition"
+          >
             <Download size={18} />
             <span>Export</span>
           </Button>
@@ -515,7 +657,15 @@ export default function AttendanceDetailPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-center text-sm text-gray-600">
-                      {record.attendance_time || "—"}
+                      {record.attendance_time
+                        ? new Date(record.attendance_time).toLocaleTimeString(
+                            "id-ID",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )
+                        : "—"}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button
@@ -610,7 +760,15 @@ export default function AttendanceDetailPage() {
                 <p>
                   Waktu Check-in:{" "}
                   <span className="font-medium">
-                    {record.attendance_time || "—"}
+                    {record.attendance_time
+                      ? new Date(record.attendance_time).toLocaleTimeString(
+                          "id-ID",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )
+                      : "—"}
                   </span>
                 </p>
               </div>
@@ -632,8 +790,8 @@ export default function AttendanceDetailPage() {
               Presentase Hadir
             </p>
             <p className="text-3xl font-bold">
-              {stats.total > 0
-                ? Math.round((stats.hadir / stats.total) * 100)
+              {totalPelajar > 0
+                ? Math.round((jmlHadir / totalPelajar) * 100)
                 : 0}
               %
             </p>
@@ -643,8 +801,8 @@ export default function AttendanceDetailPage() {
               Presentase Absen
             </p>
             <p className="text-3xl font-bold">
-              {stats.total > 0
-                ? Math.round((stats.absen / stats.total) * 100)
+              {totalPelajar > 0
+                ? Math.round((jmlAbsen / totalPelajar) * 100)
                 : 0}
               %
             </p>
@@ -654,8 +812,8 @@ export default function AttendanceDetailPage() {
               Presentase Izin
             </p>
             <p className="text-3xl font-bold">
-              {stats.total > 0
-                ? Math.round((stats.izin / stats.total) * 100)
+              {totalPelajar > 0
+                ? Math.round((jmlIzin / totalPelajar) * 100)
                 : 0}
               %
             </p>
