@@ -12,6 +12,10 @@ import {
   Award,
   NotebookPen,
   ArrowLeft,
+  Send,
+  AlertCircle,
+  ClipboardList,
+  CheckCheck,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +35,12 @@ type AttendanceStatus =
   | "hadir_offline"
   | "izin"
   | "tidak_hadir";
+
+type TaskStatus =
+  | "belum_dikumpulkan"
+  | "dikumpulkan"
+  | "terlambat"
+  | "tidak_ada_tugas";
 
 type MaterialDetail = {
   id: number;
@@ -52,6 +62,8 @@ export default function MaterialDetailPage({
   params: { id: string; materiId: string };
 }) {
   const [material, setMaterial] = useState<MaterialDetail | null>(null);
+  const [taskAnswer, setTaskAnswer] = useState<string>("");
+  const [isSubmittingTask, setIsSubmittingTask] = useState(false);
   const materiId = params.materiId;
   const { user } = useUserStore();
 
@@ -70,7 +82,6 @@ export default function MaterialDetailPage({
 
         if (data && data.length > 0) {
           const raw = data[0] as MaterialDetail;
-
           setMaterial(raw);
         }
       } catch (err) {
@@ -193,171 +204,72 @@ export default function MaterialDetailPage({
     }
   }
 
-  async function handleAttendance(attendanceId: number, status: string) {
-    try {
-      const { success, error } = await studentCheckInAction(
-        attendanceId,
-        status,
-      );
+  function renderTaskStatusBadge(status?: string) {
+    // Hardcoded status: belum_dikumpulkan
+    const hardcodedStatus:
+      | "belum_dikumpulkan"
+      | "dikumpulkan"
+      | "terlambat"
+      | "tidak_ada_tugas" = "dikumpulkan";
 
-      if (error)
+    switch (hardcodedStatus) {
+      case "belum_dikumpulkan":
         return (
-          <Alert className="fixed top-2 left-1/2 transform -translate-x-1/2 border-slate-200 bg-slate-50">
-            <AlertDescription className="text-slate-700">
-              Gagal melakukan absensi: {error}
-            </AlertDescription>
-          </Alert>
+          <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold">
+            <span className="inline-block w-2 h-2 rounded-full bg-white mr-2"></span>
+            Belum Mengumpulkan
+          </Badge>
         );
-
-      if (success) {
-        setMaterial((prev) =>
-          prev
-            ? {
-                ...prev,
-                attendance_status: status === "hadir" ? "hadir_online" : "izin",
-              }
-            : prev,
-        );
-
+      case "dikumpulkan":
         return (
-          <Alert className="fixed top-2 left-1/2 transform -translate-x-1/2 border-slate-200 bg-slate-50">
-            <AlertDescription className="text-slate-700">
-              Absensi berhasil dilakukan.
-            </AlertDescription>
-          </Alert>
+          <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+            <span className="inline-block w-2 h-2 rounded-full bg-white mr-2"></span>
+            Sudah Dikumpulkan
+          </Badge>
         );
-      }
-    } catch (err) {
-      console.error(err);
+      case "terlambat":
+        return (
+          <Badge variant="destructive" className="font-semibold">
+            <span className="inline-block w-2 h-2 rounded-full bg-white mr-2"></span>
+            Terlambat
+          </Badge>
+        );
+      case "tidak_ada_tugas":
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-slate-200 text-slate-700 font-semibold"
+          >
+            Tidak Ada Tugas
+          </Badge>
+        );
+      default:
+        return null;
     }
   }
 
-  function renderAttendanceCard(material: MaterialDetail) {
-    switch (material.attendance_status) {
-      case "not_active":
-        return (
-          <Alert className="border-slate-200 bg-slate-50">
-            <AlertDescription className="text-slate-700">
-              Materi ini tidak menggunakan absensi.
-            </AlertDescription>
-          </Alert>
-        );
+  async function handleSubmitTask() {
+    if (!taskAnswer.trim()) {
+      alert("Silakan isi jawaban terlebih dahulu");
+      return;
+    }
 
-      case "belum_absen": {
-        const open = isAttendanceOpen(
-          material.attendance_start,
-          material.attendance_end,
-        );
+    setIsSubmittingTask(true);
+    try {
+      // TODO: Implement actual API call to submit task
+      // const { success, error } = await submitStudentTask(material.id, taskAnswer);
 
-        const closed = isAttendanceClosed(material.attendance_end);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        if (closed) {
-          return (
-            <Alert className="border-red-200 bg-red-50">
-              <AlertDescription className="text-red-900">
-                Absensi telah ditutup.
-              </AlertDescription>
-            </Alert>
-          );
-        }
-
-        if (!open) {
-          return (
-            <Alert className="border-slate-200 bg-slate-50">
-              <AlertDescription>Absensi belum dibuka.</AlertDescription>
-            </Alert>
-          );
-        }
-
-        return (
-          <div className="space-y-4">
-            <Alert className="border-amber-200 bg-amber-50">
-              <Clock className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-amber-900">
-                Silakan melakukan absensi sebelum batas waktu berakhir.
-              </AlertDescription>
-            </Alert>
-
-            <div className="grid gap-3 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-              <div className="flex flex-col items-center justify-between">
-                <span className="font-medium text-slate-700">Mulai:</span>
-
-                <span className="font-semibold text-emerald-600">
-                  {formatDateTime(material.attendance_start)}
-                </span>
-              </div>
-
-              <div className="h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
-
-              <div className="flex flex-col items-center justify-between">
-                <span className="font-medium text-slate-700">Berakhir:</span>
-
-                <span className="font-semibold text-emerald-600">
-                  {formatDateTime(material.attendance_end)}
-                </span>
-              </div>
-            </div>
-
-            <Button
-              onClick={async () =>
-                await handleAttendance(material.attendance_id, "hadir")
-              }
-              size="lg"
-              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700"
-            >
-              Hadir
-            </Button>
-
-            <Button
-              onClick={async () =>
-                await handleAttendance(material.attendance_id, "izin")
-              }
-              size="lg"
-              className="w-full bg-gradient-to-r from-amber-400 to-amber-500"
-            >
-              Izin
-            </Button>
-          </div>
-        );
-      }
-
-      case "hadir_online":
-        return (
-          <Alert className="border-emerald-200 bg-emerald-50">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-            <AlertDescription className="text-emerald-900">
-              ✓ Anda telah melakukan absensi secara online.
-            </AlertDescription>
-          </Alert>
-        );
-
-      case "hadir_offline":
-        return (
-          <Alert className="border-emerald-200 bg-emerald-50">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-            <AlertDescription className="text-emerald-900">
-              ✓ Tutor telah mencatat kehadiran Anda.
-            </AlertDescription>
-          </Alert>
-        );
-
-      case "izin":
-        return (
-          <Alert className="border-amber-200 bg-amber-50">
-            <AlertDescription className="text-amber-900">
-              Status kehadiran Anda adalah izin.
-            </AlertDescription>
-          </Alert>
-        );
-
-      case "tidak_hadir":
-        return (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertDescription className="text-red-900">
-              Anda tidak mengikuti sesi absensi ini.
-            </AlertDescription>
-          </Alert>
-        );
+      // On success, update task answer state
+      console.log("Tugas berhasil dikumpulkan dengan jawaban:", taskAnswer);
+      alert("Tugas berhasil dikumpulkan!");
+    } catch (err) {
+      console.error(err);
+      alert("Gagal mengumpulkan tugas. Silakan coba lagi.");
+    } finally {
+      setIsSubmittingTask(false);
     }
   }
 
@@ -466,17 +378,102 @@ export default function MaterialDetailPage({
                       <Button
                         asChild
                         size="lg"
-                        className="gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-lg hover:shadow-xl transition-all"
+                        className="w-full gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-lg hover:shadow-xl transition-all font-semibold"
                       >
                         <a
                           href={material.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full"
                         >
                           <Download size={20} />
                           Download File Materi
                         </a>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Informasi Tugas */}
+                {material && (
+                  <Card className="border-blue-100 shadow-lg hover:shadow-xl transition-all overflow-hidden">
+                    <CardHeader className="rounded-t-xl bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border-b border-blue-100">
+                      <CardTitle className="flex items-center gap-2 text-blue-700">
+                        <ClipboardList size={22} />
+                        Informasi Tugas
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-8 space-y-6">
+                      {/* Deadline Section - HARDCODED */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                          <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+                            <Clock size={16} />
+                            Deadline
+                          </span>
+                        </div>
+                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border border-blue-200">
+                          <p className="text-2xl sm:text-3xl font-bold text-blue-700">
+                            27 Juli 2026
+                          </p>
+                          <p className="text-sm text-blue-600 font-semibold mt-1">
+                            23:59 WIB
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Status Section - HARDCODED */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                          <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+                            <CheckCheck size={16} />
+                            Status
+                          </span>
+                        </div>
+                        <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-lg p-4 border border-gray-200 flex items-center justify-between">
+                          {renderTaskStatusBadge()}
+                          <AlertCircle className="w-6 h-6 text-yellow-500" />
+                        </div>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+
+                      {/* Answer Section - HARDCODED (always show for input) */}
+                      <div className="space-y-3">
+                        <label className="block text-sm font-semibold text-gray-800 flex items-center gap-2">
+                          <FileText size={16} />
+                          Jawaban Tugas
+                        </label>
+                        <textarea
+                          value={taskAnswer}
+                          onChange={(e) => setTaskAnswer(e.target.value)}
+                          placeholder="Masukkan jawaban tugas Anda di sini..."
+                          className="w-full min-h-48 p-4 border-2 border-blue-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 resize-none font-medium text-gray-700"
+                        />
+                        <p className="text-xs text-gray-500">
+                          Pastikan jawaban Anda jelas dan lengkap sebelum
+                          mengirim.
+                        </p>
+                      </div>
+
+                      {/* Submit Button */}
+                      <Button
+                        onClick={handleSubmitTask}
+                        disabled={isSubmittingTask || !taskAnswer.trim()}
+                        size="lg"
+                        className="w-full gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all font-semibold text-base py-6"
+                      >
+                        {isSubmittingTask ? (
+                          <>
+                            <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                            Mengirim Tugas...
+                          </>
+                        ) : (
+                          <>
+                            <Send size={20} />
+                            Kirim Tugas
+                          </>
+                        )}
                       </Button>
                     </CardContent>
                   </Card>
@@ -503,4 +500,172 @@ export default function MaterialDetailPage({
       </div>
     </div>
   );
+
+  function renderAttendanceCard(material: MaterialDetail) {
+    switch (material.attendance_status) {
+      case "not_active":
+        return (
+          <Alert className="border-slate-200 bg-slate-50">
+            <AlertDescription className="text-slate-700">
+              Materi ini tidak menggunakan absensi.
+            </AlertDescription>
+          </Alert>
+        );
+
+      case "belum_absen": {
+        const open = isAttendanceOpen(
+          material.attendance_start,
+          material.attendance_end,
+        );
+
+        const closed = isAttendanceClosed(material.attendance_end);
+
+        if (closed) {
+          return (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertDescription className="text-red-900">
+                Absensi telah ditutup.
+              </AlertDescription>
+            </Alert>
+          );
+        }
+
+        if (!open) {
+          return (
+            <Alert className="border-slate-200 bg-slate-50">
+              <AlertDescription>Absensi belum dibuka.</AlertDescription>
+            </Alert>
+          );
+        }
+
+        return (
+          <div className="space-y-4">
+            <Alert className="border-amber-200 bg-amber-50">
+              <Clock className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-900">
+                Silakan melakukan absensi sebelum batas waktu berakhir.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid gap-3 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+              <div className="flex flex-col items-center justify-between">
+                <span className="font-medium text-slate-700">Mulai:</span>
+
+                <span className="font-semibold text-emerald-600">
+                  {formatDateTime(material.attendance_start)}
+                </span>
+              </div>
+
+              <div className="h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+
+              <div className="flex flex-col items-center justify-between">
+                <span className="font-medium text-slate-700">Berakhir:</span>
+
+                <span className="font-semibold text-emerald-600">
+                  {formatDateTime(material.attendance_end)}
+                </span>
+              </div>
+            </div>
+
+            <Button
+              onClick={async () =>
+                await handleAttendance(material.attendance_id, "hadir")
+              }
+              size="lg"
+              className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700"
+            >
+              Hadir
+            </Button>
+
+            <Button
+              onClick={async () =>
+                await handleAttendance(material.attendance_id, "izin")
+              }
+              size="lg"
+              className="w-full bg-gradient-to-r from-amber-400 to-amber-500"
+            >
+              Izin
+            </Button>
+          </div>
+        );
+      }
+
+      case "hadir_online":
+        return (
+          <Alert className="border-emerald-200 bg-emerald-50">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <AlertDescription className="text-emerald-900">
+              Anda telah melakukan absensi secara online.
+            </AlertDescription>
+          </Alert>
+        );
+
+      case "hadir_offline":
+        return (
+          <Alert className="border-emerald-200 bg-emerald-50">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <AlertDescription className="text-emerald-900">
+              Tutor telah mencatat kehadiran Anda.
+            </AlertDescription>
+          </Alert>
+        );
+
+      case "izin":
+        return (
+          <Alert className="border-amber-200 bg-amber-50">
+            <AlertDescription className="text-amber-900">
+              Status kehadiran Anda adalah izin.
+            </AlertDescription>
+          </Alert>
+        );
+
+      case "tidak_hadir":
+        return (
+          <Alert className="border-red-200 bg-red-50">
+            <AlertDescription className="text-red-900">
+              Anda tidak mengikuti sesi absensi ini.
+            </AlertDescription>
+          </Alert>
+        );
+    }
+  }
+
+  async function handleAttendance(attendanceId: number, status: string) {
+    try {
+      const { success, error } = await studentCheckInAction(
+        attendanceId,
+        status,
+      );
+
+      if (error)
+        return (
+          <Alert className="fixed top-2 left-1/2 transform -translate-x-1/2 border-slate-200 bg-slate-50">
+            <AlertDescription className="text-slate-700">
+              Gagal melakukan absensi: {error}
+            </AlertDescription>
+          </Alert>
+        );
+
+      if (success) {
+        setMaterial((prev) =>
+          prev
+            ? {
+                ...prev,
+                attendance_status: status === "hadir" ? "hadir_online" : "izin",
+              }
+            : prev,
+        );
+
+        return (
+          <Alert className="fixed top-2 left-1/2 transform -translate-x-1/2 border-slate-200 bg-slate-50">
+            <AlertDescription className="text-slate-700">
+              Absensi berhasil dilakukan.
+            </AlertDescription>
+          </Alert>
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 }

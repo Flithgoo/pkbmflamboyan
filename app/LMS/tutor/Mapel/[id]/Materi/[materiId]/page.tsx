@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Loading from "@/app/components/Loading";
 
 // Dynamic import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -176,14 +177,7 @@ export default function MateriDetailPage({ params }: PageProps) {
   };
 
   if (loading) {
-    return (
-      <div className="w-full min-h-screen flex-grow bg-gradient-to-br from-emerald-50 to-amber-50 p-4 md:p-8 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat data materi...</p>
-        </div>
-      </div>
-    );
+    return <Loading text="Memuat data detail materi..." />;
   }
 
   if (error && !materi) {
@@ -343,6 +337,137 @@ export default function MateriDetailPage({ params }: PageProps) {
                 theme="snow"
                 className="bg-white"
               />
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-8 border-t border-gray-200 pt-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              {/* Total Siswa */}
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-emerald-600 uppercase tracking-wide mb-2">
+                      Total Siswa
+                    </p>
+                    <p className="text-4xl font-bold text-emerald-700">23</p>
+                  </div>
+                  <div className="p-3 bg-emerald-200 rounded-lg">
+                    <svg
+                      className="w-6 h-6 text-emerald-700"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4.354a4 4 0 110 5.292m0 0H7.5M12 9.354v5M5.5 17.5h13a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5h-13a1.5 1.5 0 00-1.5 1.5v12.5a1.5 1.5 0 001.5 1.5z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs text-emerald-600 mt-3">Jumlah peserta</p>
+              </div>
+
+              {/* Sudah Mengumpulkan */}
+              <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-600 uppercase tracking-wide mb-2">
+                      Sudah Mengumpulkan
+                    </p>
+                    <p className="text-4xl font-bold text-green-700">17</p>
+                  </div>
+                  <div className="p-3 bg-green-200 rounded-lg">
+                    <svg
+                      className="w-6 h-6 text-green-700"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs text-green-600 mt-3">73.9% selesai</p>
+              </div>
+
+              {/* Belum Mengumpulkan */}
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-amber-600 uppercase tracking-wide mb-2">
+                      Belum Mengumpulkan
+                    </p>
+                    <p className="text-4xl font-bold text-amber-700">6</p>
+                  </div>
+                  <div className="p-3 bg-amber-200 rounded-lg">
+                    <svg
+                      className="w-6 h-6 text-amber-700"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs text-amber-600 mt-3">26.1% tertunda</p>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="bg-white rounded-xl p-6 border border-gray-100 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-semibold text-gray-700">
+                  Progres Pengumpulan Tugas
+                </p>
+                <p className="text-sm font-bold text-emerald-600">73.9%</p>
+              </div>
+              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-full transition-all duration-500"
+                  style={{ width: "73.9%" }}
+                ></div>
+              </div>
+              <div className="flex justify-between mt-3">
+                <span className="text-xs text-gray-500">Dimulai</span>
+                <span className="text-xs text-emerald-600 font-semibold">
+                  Selesai
+                </span>
+              </div>
+            </div>
+
+            {/* Button Kelola Penilaian */}
+            <div className="flex justify-end">
+              <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all duration-200 font-medium">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Kelola Penilaian
+              </button>
             </div>
           </div>
         </div>

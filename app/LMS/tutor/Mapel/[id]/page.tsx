@@ -50,23 +50,6 @@ import { Close } from "@radix-ui/react-popover";
 import { getMaterialBySubjectId } from "@/lib/api/material";
 import { useRouter } from "next/navigation";
 
-// Dummy data (bisa dihapus jika sudah terhubung API)
-const dummyMaterial = [
-  {
-    id: 1,
-    title: "Operasi Hitung Dasar",
-    description:
-      "Penjelasan tentang penjumlahan, pengurangan, perkalian, dan pembagian.",
-    created_at: "2025-07-10",
-  },
-  {
-    id: 2,
-    title: "Pengenalan Pecahan",
-    description: "Materi tentang konsep pecahan dan penggunaannya.",
-    created_at: "2025-07-12",
-  },
-];
-
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 export default function MateriMapelPage({
