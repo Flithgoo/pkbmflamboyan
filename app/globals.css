@@ -22,7 +22,9 @@
   background: none repeat scroll 0 0 transparent;
   content: "";
   height: 2px;
-  transition: width 0.3s ease 0s, left 0.3s ease 0s;
+  transition:
+    width 0.3s ease 0s,
+    left 0.3s ease 0s;
   @apply w-0 bg-orange-500 left-1/2 block bottom-0 absolute;
 }
 
@@ -66,8 +68,6 @@
     }
   }
 }
-
-
 
 @layer base {
   :root {
@@ -141,7 +141,34 @@
   }
 }
 
+/* React Quill - Jawaban Tugas */
 
+.task-editor .ql-toolbar {
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.task-editor .ql-container {
+  border: none;
+  min-height: 220px;
+  font-size: 14px;
+}
+
+.task-editor .ql-editor {
+  min-height: 220px;
+  padding: 16px;
+}
+
+.task-editor .ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+@media (min-width: 768px) {
+  .task-editor .ql-editor {
+    min-height: 260px;
+  }
+}
 
 @layer base {
   * {

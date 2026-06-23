@@ -26,6 +26,11 @@ import { useUserStore } from "@/src/store/useUserStore";
 import { getStudentWithMaterialDetail } from "@/lib/api/material";
 import Link from "next/link";
 import { studentCheckInAction } from "@/lib/actions/attendance";
+import { submitAssignment } from "@/lib/api/assignment";
+import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
+
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 type AttendanceStatus =
   | "not_active"
@@ -91,6 +96,7 @@ export default function MaterialDetailPage({
           const raw = data[0] as MaterialDetail;
           console.log("🚀 ~ initialFetch ~ raw:", raw);
           setMaterial(raw);
+          setTaskAnswer(raw.answer ?? "");
         }
       } catch (err) {
         console.error(err);
@@ -101,12 +107,6 @@ export default function MaterialDetailPage({
       initialFetch();
     }
   }, [materiId, user?.id]);
-
-  useEffect(() => {
-    if (material?.answer) {
-      setTaskAnswer(material.answer);
-    }
-  }, [material]);
 
   if (!material) {
     return (
@@ -237,21 +237,35 @@ export default function MaterialDetailPage({
     }
   }
 
+  const isEmpty = taskAnswer.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+
   async function handleSubmitTask() {
-    if (!taskAnswer.trim()) {
+    if (isEmpty) {
       alert("Silakan isi jawaban terlebih dahulu");
       return;
     }
 
     setIsSubmittingTask(true);
     try {
-      // TODO: Implement actual API call to submit task
-      // const { success, error } = await submitStudentTask(material.id, taskAnswer);
+      if (material) {
+        const { error } = await submitAssignment(
+          material.id,
+          Number(user?.id),
+          taskAnswer,
+        );
+        if (error) console.log(error);
+      }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // On success, update task answer state
+      setMaterial((prev) =>
+        prev
+          ? {
+              ...prev,
+              submission_status: "sudah_mengumpulkan",
+              answer: taskAnswer,
+              submitted_at: new Date().toISOString(),
+            }
+          : prev,
+      );
       console.log("Tugas berhasil dikumpulkan dengan jawaban:", taskAnswer);
       alert("Tugas berhasil dikumpulkan!");
     } catch (err) {
@@ -426,7 +440,7 @@ export default function MaterialDetailPage({
                           </div>
                         </div>
 
-                        {/* Status Section - HARDCODED */}
+                        {/* Status Section */}
                         <div className="space-y-3">
                           <div className="flex items-center justify-between pb-3 border-b border-gray-200">
                             <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
@@ -443,27 +457,23 @@ export default function MaterialDetailPage({
                         {/* Divider */}
                         <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
 
-                        {/* Answer Section - HARDCODED (always show for input) */}
+                        {/* Answer Section */}
                         <div className="space-y-3">
                           <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
                             <FileText size={16} />
                             Jawaban Tugas
                           </label>
-                          {/* {material.submission_status ===
-                            "sudah_mengumpulkan" && (
-                            <Alert>
-                              <AlertDescription>
-                                Tugas sudah dikumpulkan pada
-                                {formatDateTime(material.submitted_at)}
-                              </AlertDescription>
-                            </Alert>
-                          )} */}
-                          <textarea
-                            value={taskAnswer}
-                            onChange={(e) => setTaskAnswer(e.target.value)}
-                            placeholder="Masukkan jawaban tugas Anda di sini..."
-                            className="w-full min-h-48 p-4 border-2 border-blue-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 resize-none font-medium text-gray-700"
-                          />
+
+                          <div className="overflow-hidden rounded-xl border-2 border-blue-200 bg-white shadow-sm transition-all hover:border-blue-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200">
+                            <ReactQuill
+                              theme="snow"
+                              value={taskAnswer}
+                              onChange={setTaskAnswer}
+                              placeholder="Tuliskan jawaban tugas Anda di sini..."
+                              className="task-editor"
+                            />
+                          </div>
+
                           <p className="text-xs text-gray-500">
                             Pastikan jawaban Anda jelas dan lengkap sebelum
                             mengirim.
@@ -473,7 +483,7 @@ export default function MaterialDetailPage({
                         {/* Submit Button */}
                         <Button
                           onClick={handleSubmitTask}
-                          disabled={isSubmittingTask || !taskAnswer.trim()}
+                          disabled={isSubmittingTask || isEmpty}
                           size="lg"
                           className="w-full gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all font-semibold text-base py-6"
                         >
@@ -485,7 +495,10 @@ export default function MaterialDetailPage({
                           ) : (
                             <>
                               <Send size={20} />
-                              Kirim Tugas
+                              {material.submission_status ===
+                              "sudah_mengumpulkan"
+                                ? "Perbarui Jawaban"
+                                : "Kirim Tugas"}
                             </>
                           )}
                         </Button>
