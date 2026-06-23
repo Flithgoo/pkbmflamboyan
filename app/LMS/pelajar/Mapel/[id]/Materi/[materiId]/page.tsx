@@ -205,12 +205,7 @@ export default function MaterialDetailPage({
   }
 
   function renderTaskStatusBadge(status?: string) {
-    // Hardcoded status: belum_dikumpulkan
-    const hardcodedStatus:
-      | "belum_dikumpulkan"
-      | "dikumpulkan"
-      | "terlambat"
-      | "tidak_ada_tugas" = "dikumpulkan";
+    const hardcodedStatus = status ?? "dikumpulkan";
 
     switch (hardcodedStatus) {
       case "belum_dikumpulkan":
