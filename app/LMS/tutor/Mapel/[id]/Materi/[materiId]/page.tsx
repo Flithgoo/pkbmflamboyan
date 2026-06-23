@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CheckCircle, Trash2, Save, X, Clock, AlertCircle } from "lucide-react";
+import {
+  CheckCircle,
+  Trash2,
+  Save,
+  X,
+  Clock,
+  AlertCircle,
+  NotebookPen,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   getMaterialWithRelations,
@@ -453,19 +461,7 @@ export default function MateriDetailPage({ params }: PageProps) {
             {/* Button Kelola Penilaian */}
             <div className="flex justify-end">
               <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all duration-200 font-medium">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <NotebookPen />
                 Kelola Penilaian
               </button>
             </div>

@@ -73,6 +73,8 @@ export default function MateriMapelPage({
   const [isAbsensiEnabled, setIsAbsensiEnabled] = useState(false);
   const [absensiStart, setAbsensiStart] = useState("");
   const [absensiEnd, setAbsensiEnd] = useState("");
+  // ✅ BARU: State untuk deadline tugas
+  const [taskDeadline, setTaskDeadline] = useState("");
   const [material, setMaterial] = useState<Material[]>([]);
 
   const subjectId = params.id as unknown as number;
@@ -110,6 +112,18 @@ export default function MateriMapelPage({
     }
   }, [open, isAbsensiEnabled, absensiStart]);
 
+  // ✅ BARU: useEffect untuk mengatur waktu default deadline tugas
+  useEffect(() => {
+    if (open && jenisUpload === "Tugas" && !taskDeadline) {
+      const now = new Date();
+      // Set default deadline ke 24 jam dari sekarang
+      now.setDate(now.getDate() + 1);
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      const formattedDateTime = now.toISOString().slice(0, 16);
+      setTaskDeadline(formattedDateTime);
+    }
+  }, [open, jenisUpload, taskDeadline]);
+
   const toggleSelect = (kelas: Omit<Location, "created_at">) => {
     setSelected((prev) =>
       prev.includes(kelas) ? prev.filter((c) => c !== kelas) : [...prev, kelas],
@@ -138,6 +152,13 @@ export default function MateriMapelPage({
       setError("Harap lengkapi semua field sebelum posting.");
       return;
     }
+
+    // ✅ BARU: Validasi deadline tugas
+    if (jenisUpload === "Tugas" && !taskDeadline) {
+      setError("Harap atur batas pengumpulan tugas.");
+      return;
+    }
+
     if (isAbsensiEnabled && (!absensiStart || !absensiEnd)) {
       setError("Harap isi rentang waktu absensi jika fitur diaktifkan.");
       return;
@@ -158,6 +179,8 @@ export default function MateriMapelPage({
       is_absensi_enabled: isAbsensiEnabled,
       absensi_start: isAbsensiEnabled ? absensiStart : undefined,
       absensi_end: isAbsensiEnabled ? absensiEnd : undefined,
+      // ✅ BARU: Tambahkan deadline tugas ke payload
+      due_date: jenisUpload === "Tugas" ? taskDeadline : undefined,
     };
 
     try {
@@ -180,6 +203,8 @@ export default function MateriMapelPage({
       setIsAbsensiEnabled(false);
       setAbsensiStart("");
       setAbsensiEnd("");
+      // ✅ BARU: Reset deadline tugas
+      setTaskDeadline("");
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan saat mengirim data.");
     } finally {
@@ -334,6 +359,30 @@ export default function MateriMapelPage({
                       </Label>
                     </div>
                   </div>
+
+                  {/* ✅ BARU: Blok input untuk deadline tugas */}
+                  {jenisUpload === "Tugas" && (
+                    <div className="mb-4 p-4 border rounded-lg bg-blue-50/50">
+                      <div>
+                        <label
+                          htmlFor="taskDeadline"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Batas Pengumpulan Tugas
+                        </label>
+                        <div className="relative">
+                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                          <Input
+                            type="datetime-local"
+                            id="taskDeadline"
+                            value={taskDeadline}
+                            onChange={(e) => setTaskDeadline(e.target.value)}
+                            className="w-full pl-10 pr-3 py-2 bg-white border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 transition duration-200 hover:border-blue-300"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* ✅ DIUBAH: Blok JSX untuk absensi dengan styling baru */}
                   {isAbsensiEnabled && (

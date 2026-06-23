@@ -58,11 +58,13 @@ interface Payload {
   content: string;
   tutor_id: number;
   mapel_id: number;
+
+  due_date?: string | null;
+
   is_absensi_enabled?: boolean;
   absensi_start?: string;
   absensi_end?: string;
 }
-
 export async function addMaterialAction({
   jenis_upload,
   location_id,
@@ -71,6 +73,7 @@ export async function addMaterialAction({
   content,
   tutor_id,
   mapel_id,
+  due_date,
   is_absensi_enabled,
   absensi_start,
   absensi_end,
@@ -86,6 +89,7 @@ export async function addMaterialAction({
       content,
       tutor_id,
       mapel_id,
+      p_due_date: due_date ?? undefined,
       is_absensi_enabled,
       absensi_start,
       absensi_end,

@@ -25,7 +25,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserStore } from "@/src/store/useUserStore";
 import { getStudentWithMaterialDetail } from "@/lib/api/material";
 import Link from "next/link";
-import { studentCheckIn } from "@/lib/api/attendance";
 import { studentCheckInAction } from "@/lib/actions/attendance";
 
 type AttendanceStatus =
@@ -36,24 +35,32 @@ type AttendanceStatus =
   | "izin"
   | "tidak_hadir";
 
-type TaskStatus =
-  | "belum_dikumpulkan"
-  | "dikumpulkan"
-  | "terlambat"
-  | "tidak_ada_tugas";
+type SubmissionStatus = "belum_mengumpulkan" | "sudah_mengumpulkan";
 
 type MaterialDetail = {
   id: number;
   title: string;
   content: string;
+  upload_type: string;
+
   subject_name: string;
   tutor_name: string;
+
   attendance_id: number;
   attendance_status: AttendanceStatus;
   attendance_start: string | null;
   attendance_end: string | null;
+
   created_at: string;
   file_url: string | null;
+
+  due_date: string | null;
+
+  submission_status: SubmissionStatus | null;
+  answer: string | null;
+  score: number | null;
+  feedback: string | null;
+  submitted_at: string | null;
 };
 
 export default function MaterialDetailPage({
@@ -82,6 +89,7 @@ export default function MaterialDetailPage({
 
         if (data && data.length > 0) {
           const raw = data[0] as MaterialDetail;
+          console.log("🚀 ~ initialFetch ~ raw:", raw);
           setMaterial(raw);
         }
       } catch (err) {
@@ -93,6 +101,12 @@ export default function MaterialDetailPage({
       initialFetch();
     }
   }, [materiId, user?.id]);
+
+  useEffect(() => {
+    if (material?.answer) {
+      setTaskAnswer(material.answer);
+    }
+  }, [material]);
 
   if (!material) {
     return (
@@ -204,42 +218,22 @@ export default function MaterialDetailPage({
     }
   }
 
-  function renderTaskStatusBadge(status?: string) {
-    const hardcodedStatus = status ?? "dikumpulkan";
+  function renderTaskStatusBadge(status?: string | null) {
+    switch (status) {
+      case "belum_mengumpulkan":
+        return (
+          <Badge className="bg-yellow-500 text-white">Belum Mengumpulkan</Badge>
+        );
 
-    switch (hardcodedStatus) {
-      case "belum_dikumpulkan":
+      case "sudah_mengumpulkan":
         return (
-          <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold">
-            <span className="inline-block w-2 h-2 rounded-full bg-white mr-2"></span>
-            Belum Mengumpulkan
+          <Badge className="bg-emerald-600 text-white">
+            Sudah Mengumpulkan
           </Badge>
         );
-      case "dikumpulkan":
-        return (
-          <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
-            <span className="inline-block w-2 h-2 rounded-full bg-white mr-2"></span>
-            Sudah Dikumpulkan
-          </Badge>
-        );
-      case "terlambat":
-        return (
-          <Badge variant="destructive" className="font-semibold">
-            <span className="inline-block w-2 h-2 rounded-full bg-white mr-2"></span>
-            Terlambat
-          </Badge>
-        );
-      case "tidak_ada_tugas":
-        return (
-          <Badge
-            variant="secondary"
-            className="bg-slate-200 text-slate-700 font-semibold"
-          >
-            Tidak Ada Tugas
-          </Badge>
-        );
+
       default:
-        return null;
+        return <Badge variant="secondary">Tidak Ada Tugas</Badge>;
     }
   }
 
@@ -389,89 +383,135 @@ export default function MaterialDetailPage({
                 )}
 
                 {/* Informasi Tugas */}
-                {material && (
-                  <Card className="border-blue-100 shadow-lg hover:shadow-xl transition-all overflow-hidden">
-                    <CardHeader className="rounded-t-xl bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border-b border-blue-100">
-                      <CardTitle className="flex items-center gap-2 text-blue-700">
-                        <ClipboardList size={22} />
-                        Informasi Tugas
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-8 space-y-6">
-                      {/* Deadline Section - HARDCODED */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                          <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
-                            <Clock size={16} />
-                            Deadline
-                          </span>
+                {material.upload_type === "Tugas" && (
+                  <>
+                    <Card className="border-blue-100 shadow-lg hover:shadow-xl transition-all overflow-hidden">
+                      <CardHeader className="rounded-t-xl bg-gradient-to-r from-blue-600/10 to-cyan-600/10 border-b border-blue-100">
+                        <CardTitle className="flex items-center gap-2 text-blue-700">
+                          <ClipboardList size={22} />
+                          Informasi Tugas
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-8 space-y-6">
+                        {/* Deadline Section - HARDCODED */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                            <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+                              <Clock size={16} />
+                              Deadline
+                            </span>
+                          </div>
+                          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border border-blue-200">
+                            <p className="text-2xl sm:text-3xl font-bold text-blue-700">
+                              <p className="text-2xl font-bold text-blue-700">
+                                {material.due_date
+                                  ? Intl.DateTimeFormat("id-ID", {
+                                      day: "numeric",
+                                      month: "long",
+                                      year: "numeric",
+                                    }).format(new Date(material.due_date))
+                                  : "Tanggal belum tersedia"}
+                              </p>
+                            </p>
+                            <p className="text-sm text-blue-600 font-semibold mt-1">
+                              {material.due_date
+                                ? Intl.DateTimeFormat("id-ID", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: false,
+                                  }).format(new Date(material.due_date))
+                                : "Jam belum tersedia"}
+                              {" WIB"}
+                            </p>
+                          </div>
                         </div>
-                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border border-blue-200">
-                          <p className="text-2xl sm:text-3xl font-bold text-blue-700">
-                            27 Juli 2026
+
+                        {/* Status Section - HARDCODED */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                            <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
+                              <CheckCheck size={16} />
+                              Status
+                            </span>
+                          </div>
+                          <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-lg p-4 border border-gray-200 flex items-center justify-between">
+                            {renderTaskStatusBadge(material.submission_status)}
+                            <AlertCircle className="w-6 h-6 text-yellow-500" />
+                          </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+
+                        {/* Answer Section - HARDCODED (always show for input) */}
+                        <div className="space-y-3">
+                          <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                            <FileText size={16} />
+                            Jawaban Tugas
+                          </label>
+                          {/* {material.submission_status ===
+                            "sudah_mengumpulkan" && (
+                            <Alert>
+                              <AlertDescription>
+                                Tugas sudah dikumpulkan pada
+                                {formatDateTime(material.submitted_at)}
+                              </AlertDescription>
+                            </Alert>
+                          )} */}
+                          <textarea
+                            value={taskAnswer}
+                            onChange={(e) => setTaskAnswer(e.target.value)}
+                            placeholder="Masukkan jawaban tugas Anda di sini..."
+                            className="w-full min-h-48 p-4 border-2 border-blue-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 resize-none font-medium text-gray-700"
+                          />
+                          <p className="text-xs text-gray-500">
+                            Pastikan jawaban Anda jelas dan lengkap sebelum
+                            mengirim.
                           </p>
-                          <p className="text-sm text-blue-600 font-semibold mt-1">
-                            23:59 WIB
-                          </p>
                         </div>
-                      </div>
 
-                      {/* Status Section - HARDCODED */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                          <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center gap-2">
-                            <CheckCheck size={16} />
-                            Status
-                          </span>
-                        </div>
-                        <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-lg p-4 border border-gray-200 flex items-center justify-between">
-                          {renderTaskStatusBadge()}
-                          <AlertCircle className="w-6 h-6 text-yellow-500" />
-                        </div>
-                      </div>
+                        {/* Submit Button */}
+                        <Button
+                          onClick={handleSubmitTask}
+                          disabled={isSubmittingTask || !taskAnswer.trim()}
+                          size="lg"
+                          className="w-full gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all font-semibold text-base py-6"
+                        >
+                          {isSubmittingTask ? (
+                            <>
+                              <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                              Mengirim Tugas...
+                            </>
+                          ) : (
+                            <>
+                              <Send size={20} />
+                              Kirim Tugas
+                            </>
+                          )}
+                        </Button>
+                      </CardContent>
+                    </Card>
 
-                      {/* Divider */}
-                      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                    {material.score !== null && (
+                      <Card>
+                        <CardContent className="pt-6">
+                          <div className="flex items-center justify-between">
+                            <span>Nilai</span>
 
-                      {/* Answer Section - HARDCODED (always show for input) */}
-                      <div className="space-y-3">
-                        <label className="block text-sm font-semibold text-gray-800 flex items-center gap-2">
-                          <FileText size={16} />
-                          Jawaban Tugas
-                        </label>
-                        <textarea
-                          value={taskAnswer}
-                          onChange={(e) => setTaskAnswer(e.target.value)}
-                          placeholder="Masukkan jawaban tugas Anda di sini..."
-                          className="w-full min-h-48 p-4 border-2 border-blue-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-300 resize-none font-medium text-gray-700"
-                        />
-                        <p className="text-xs text-gray-500">
-                          Pastikan jawaban Anda jelas dan lengkap sebelum
-                          mengirim.
-                        </p>
-                      </div>
+                            <span className="text-3xl font-bold text-emerald-600">
+                              {material.score}
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
 
-                      {/* Submit Button */}
-                      <Button
-                        onClick={handleSubmitTask}
-                        disabled={isSubmittingTask || !taskAnswer.trim()}
-                        size="lg"
-                        className="w-full gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all font-semibold text-base py-6"
-                      >
-                        {isSubmittingTask ? (
-                          <>
-                            <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                            Mengirim Tugas...
-                          </>
-                        ) : (
-                          <>
-                            <Send size={20} />
-                            Kirim Tugas
-                          </>
-                        )}
-                      </Button>
-                    </CardContent>
-                  </Card>
+                    {material.feedback && (
+                      <Alert>
+                        <AlertDescription>{material.feedback}</AlertDescription>
+                      </Alert>
+                    )}
+                  </>
                 )}
               </div>
 

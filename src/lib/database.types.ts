@@ -56,31 +56,79 @@ export type Database = {
           },
         ]
       }
-      assignment: {
+      assignment_submissions: {
         Row: {
+          answer: string | null
           created_at: string
-          due_date: string
+          feedback: string | null
           id: number
-          material_id: number
-          title: string
+          material_id: number | null
+          score: number | null
+          student_id: number | null
+          submitted_at: string | null
         }
         Insert: {
+          answer?: string | null
           created_at?: string
-          due_date: string
+          feedback?: string | null
           id?: number
-          material_id: number
-          title: string
+          material_id?: number | null
+          score?: number | null
+          student_id?: number | null
+          submitted_at?: string | null
         }
         Update: {
+          answer?: string | null
           created_at?: string
-          due_date?: string
+          feedback?: string | null
           id?: number
-          material_id?: number
-          title?: string
+          material_id?: number | null
+          score?: number | null
+          student_id?: number | null
+          submitted_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "assignment_material_id_fkey"
+            foreignKeyName: "assignment_submissions_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: true
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_submissions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          id: number
+          material_id: number
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          id?: number
+          material_id: number
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          id?: number
+          material_id?: number
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_material_id_fkey"
             columns: ["material_id"]
             isOneToOne: false
             referencedRelation: "materials"
@@ -387,7 +435,7 @@ export type Database = {
             foreignKeyName: "question_asignment_id_fkey"
             columns: ["asignment_id"]
             isOneToOne: false
-            referencedRelation: "assignment"
+            referencedRelation: "assignments"
             referencedColumns: ["id"]
           },
         ]
@@ -592,21 +640,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      add_material_with_attendance: {
-        Args: {
-          absensi_end?: string
-          absensi_start?: string
-          content: string
-          is_absensi_enabled?: boolean
-          jenis_upload: string
-          kelas: Json
-          mapel_id: number
-          p_location_id: number
-          title: string
-          tutor_id: number
-        }
-        Returns: undefined
-      }
+      add_material_with_attendance:
+        | {
+            Args: {
+              absensi_end?: string
+              absensi_start?: string
+              content: string
+              is_absensi_enabled?: boolean
+              jenis_upload: string
+              kelas: Json
+              mapel_id: number
+              p_location_id: number
+              title: string
+              tutor_id: number
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              absensi_end?: string
+              absensi_start?: string
+              content: string
+              is_absensi_enabled?: boolean
+              jenis_upload: string
+              kelas: Json
+              mapel_id: number
+              p_due_date?: string
+              p_location_id: number
+              title: string
+              tutor_id: number
+            }
+            Returns: undefined
+          }
       delete_user: { Args: { p_user_id: number }; Returns: boolean }
       get_active_session_with_attendance: {
         Args: { p_material_id: number; p_user_id: number }
@@ -620,16 +685,23 @@ export type Database = {
       get_student_material_detail: {
         Args: { p_material_id: number; p_user_id: number }
         Returns: {
+          answer: string
+          assignment_id: number
           attendance_end: string
           attendance_id: number
           attendance_start: string
           attendance_status: string
           content: string
           created_at: string
+          due_date: string
+          feedback: string
           file_url: string
           id: number
+          score: number
           subject_id: number
           subject_name: string
+          submission_status: string
+          submitted_at: string
           title: string
           tutor_id: number
           tutor_name: string
