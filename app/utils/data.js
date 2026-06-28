@@ -9,6 +9,7 @@ import {
   BellRing,
   ClipboardCheck,
   Info,
+  NotebookIcon,
 } from "lucide-react";
 
 const imageData = [
@@ -122,7 +123,7 @@ const tutorDashboardLinks = [
   },
   { name: "Absensi", href: "/LMS/tutor/Absensi", icon: Users },
   { name: "Pengumuman", href: "/LMS/tutor/Pengumuman", icon: BellRing },
-  { name: "Ujian", href: "/LMS/tutor/Ujian", icon: ClipboardCheck },
+  { name: "Penilaian", href: "/LMS/tutor/Penilaian", icon: NotebookIcon },
   { name: "Bantuan", href: "/LMS/Bantuan", icon: Info },
 ];
 

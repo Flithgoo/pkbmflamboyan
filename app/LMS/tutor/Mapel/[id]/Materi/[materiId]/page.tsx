@@ -460,10 +460,13 @@ export default function MateriDetailPage({ params }: PageProps) {
 
             {/* Button Kelola Penilaian */}
             <div className="flex justify-end">
-              <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all duration-200 font-medium">
+              <Link
+                href={`/LMS/tutor/Penilaian/${materiId}`}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg hover:from-emerald-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+              >
                 <NotebookPen />
                 Kelola Penilaian
-              </button>
+              </Link>
             </div>
           </div>
         </div>

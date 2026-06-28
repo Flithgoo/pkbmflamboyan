@@ -91,14 +91,14 @@ export type Database = {
           {
             foreignKeyName: "assignment_submissions_material_id_fkey"
             columns: ["material_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "materials"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "assignment_submissions_student_id_fkey"
             columns: ["student_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -680,6 +680,36 @@ export type Database = {
           session_end: string
           session_id: number
           session_start: string
+        }[]
+      }
+      get_assignment_materials: {
+        Args: { p_tutor_id: number }
+        Returns: {
+          created_at: string
+          material_id: number
+          progress: number
+          subject_id: number
+          subject_name: string
+          title: string
+          total_not_submitted: number
+          total_students: number
+          total_submitted: number
+        }[]
+      }
+      get_assignment_submissions: {
+        Args: { p_material_id: number }
+        Returns: {
+          answer: string
+          class_id: number
+          class_name: string
+          feedback: string
+          score: number
+          student_id: number
+          student_name: string
+          student_nis: string
+          submission_id: number
+          submission_status: string
+          submitted_at: string
         }[]
       }
       get_student_material_detail: {
