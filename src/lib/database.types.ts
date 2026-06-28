@@ -691,6 +691,8 @@ export type Database = {
           subject_id: number
           subject_name: string
           title: string
+          total_graded: number
+          total_not_graded: number
           total_not_submitted: number
           total_students: number
           total_submitted: number
