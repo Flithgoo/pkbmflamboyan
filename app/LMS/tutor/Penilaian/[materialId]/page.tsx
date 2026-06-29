@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -45,204 +46,360 @@ import {
   Eye,
   Loader2,
   AlertCircle,
+  ChevronRight,
+  GraduationCap,
+  ArrowLeft,
 } from "lucide-react";
+import { getAssignmentSubmissions } from "@/lib/api/assignment";
+import { getMaterialById } from "@/lib/api/material";
+import { Material } from "@/lib/types/types";
 
 // ============================================================
-// DUMMY DATA
+// TYPE DEFINITIONS
 // ============================================================
 
-const assignmentData = {
-  id: "mat-001",
-  title: "Analisis Puisi Modern Indonesia",
-  subject: "Bahasa Indonesia",
-  tutor: "Dr. Siti Nurhaliza",
-  deadline: "2024-01-25 23:59",
-  totalStudents: 32,
-  submittedCount: 28,
-  gradedCount: 15,
-  averageGrade: 82.5,
-};
+type SubmissionStatus = "belum_mengumpulkan" | "sudah_mengumpulkan";
+type FilterStatusValue =
+  | "all"
+  | "submitted"
+  | "not_submitted"
+  | "graded"
+  | "not_graded";
 
-const studentSubmissionsData = [
-  {
-    id: "sub-001",
-    studentName: "Ahmad Rizki Pratama",
-    nis: "2023001",
-    class: "XII IPA 1",
-    status: "submitted",
-    grade: 85,
-    submittedAt: "2024-01-20 14:30",
-    answer:
-      "Puisi modern Indonesia memiliki ciri khas yang unik dalam penggunaan bahasa dan inovasi bentuk. Melalui analisis mendalam terhadap karya-karya penyair kontemporer, kita dapat memahami bagaimana perkembangan sastra Indonesia mencerminkan perubahan sosial dan budaya masyarakat.",
-  },
-  {
-    id: "sub-002",
-    studentName: "Bella Maharani Putri",
-    nis: "2023002",
-    class: "XII IPA 1",
-    status: "submitted",
-    grade: null,
-    submittedAt: "2024-01-19 09:15",
-    answer:
-      "Perkembangan puisi modern dimulai dari era reformasi sastra Indonesia. Penyair-penyair muda menciptakan inovasi dalam bentuk dan isi yang lebih bebas dibanding puisi tradisional. Karakteristik utamanya adalah penggunaan bahasa yang lebih ekspresif dan simbolis.",
-  },
-  {
-    id: "sub-003",
-    studentName: "Chandra Wijaya Kusuma",
-    nis: "2023003",
-    class: "XII IPA 1",
-    status: "submitted",
-    grade: 78,
-    submittedAt: "2024-01-21 16:45",
-    answer:
-      "Analisis puisi modern Indonesia menunjukkan evolusi signifikan dalam penggunaan metafora dan personifikasi untuk mengekspresikan emosi kompleks.",
-  },
-  {
-    id: "sub-004",
-    studentName: "Dina Sari Lestari",
-    nis: "2023004",
-    class: "XII IPA 1",
-    status: "not_submitted",
-    grade: null,
-    submittedAt: null,
-    answer: null,
-  },
-  {
-    id: "sub-005",
-    studentName: "Eka Saputra Wijaya",
-    nis: "2023005",
-    class: "XII IPA 1",
-    status: "submitted",
-    grade: 92,
-    submittedAt: "2024-01-18 10:20",
-    answer:
-      "Puisi modern Indonesia merupakan wadah ekspresi artistik yang memadukan tradisi dengan inovasi kontemporer. Analisis komprehensif menunjukkan bahwa perubahan bentuk dan gaya puisi mencerminkan dinamika masyarakat modern yang terus berkembang.",
-  },
-  {
-    id: "sub-006",
-    studentName: "Farah Azizah Rahman",
-    nis: "2023006",
-    class: "XII IPA 1",
-    status: "submitted",
-    grade: 88,
-    submittedAt: "2024-01-22 13:00",
-    answer:
-      "Kajian tentang puisi modern Indonesia memberikan wawasan mendalam mengenai pergeseran paradigma dalam sastra kontemporer.",
-  },
-  {
-    id: "sub-007",
-    studentName: "Gita Permata Sari",
-    nis: "2023007",
-    class: "XII IPA 1",
-    status: "not_submitted",
-    grade: null,
-    submittedAt: null,
-    answer: null,
-  },
-  {
-    id: "sub-008",
-    studentName: "Hendri Sutrisno",
-    nis: "2023008",
-    class: "XII IPA 2",
-    status: "submitted",
-    grade: 95,
-    submittedAt: "2024-01-17 08:45",
-    answer:
-      "Analisis mendalam terhadap puisi modern Indonesia mengungkapkan kompleksitas dalam penggunaan simbol dan kiasan yang menciptakan makna berlapis.",
-  },
-  {
-    id: "sub-009",
-    studentName: "Ida Nurjanah Sari",
-    nis: "2023009",
-    class: "XII IPA 2",
-    status: "not_submitted",
-    grade: null,
-    submittedAt: null,
-    answer: null,
-  },
-  {
-    id: "sub-010",
-    studentName: "Joko Wardoyo",
-    nis: "2023010",
-    class: "XII IPA 2",
-    status: "submitted",
-    grade: 81,
-    submittedAt: "2024-01-23 15:30",
-    answer:
-      "Puisi modern Indonesia menampilkan keragaman tema dan pendekatan artistik yang mencerminkan semangat zaman baru.",
-  },
-];
+interface StudentDisplayData {
+  submission_id: number | null;
+  student_id: number;
+  nis: string;
+  name: string;
+  className: string;
+  answer: string | null;
+  grade: number | null;
+  feedback: string | null;
+  submittedAt: string | null;
+  status: SubmissionStatus;
+  isGraded: boolean;
+}
+
+interface Statistics {
+  total: number;
+  submitted: number;
+  notSubmitted: number;
+  graded: number;
+  notGraded: number;
+  averageGrade: number;
+}
 
 // ============================================================
-// COMPONENT
+// MOBILE CARD COMPONENT
 // ============================================================
 
-export default function PenilaianPage() {
-  const [isLoading, setIsLoading] = useState(false);
+interface StudentCardProps {
+  student: StudentDisplayData;
+  index: number;
+  onOpenDialog: (student: StudentDisplayData) => void;
+}
+
+function StudentCard({
+  student,
+  index,
+  onOpenDialog,
+}: StudentCardProps): React.ReactElement {
+  const getStatusBadge = (
+    status: SubmissionStatus,
+    isGraded: boolean,
+  ): React.ReactElement => {
+    if (status === "belum_mengumpulkan") {
+      return (
+        <Badge className="bg-red-50 text-red-700 border border-red-200">
+          Belum Mengumpulkan
+        </Badge>
+      );
+    }
+    if (isGraded) {
+      return (
+        <Badge className="bg-emerald-600 text-white">
+          Dinilai: {student.grade}
+        </Badge>
+      );
+    }
+    return (
+      <Badge className="bg-amber-50 text-amber-700 border border-amber-200">
+        Belum Dinilai
+      </Badge>
+    );
+  };
+
+  return (
+    <Card className="border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all bg-white">
+      <CardContent className="p-3">
+        <div className="space-y-3">
+          {/* Header Row */}
+          <div className="flex items-start justify-between">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+                  {index}
+                </span>
+                <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">
+                  {student.name}
+                </h3>
+              </div>
+              <p className="text-xs text-gray-500 mt-1 font-mono">
+                NIS {student.nis}
+              </p>
+            </div>
+            <div className="text-right">
+              {student.status === "belum_mengumpulkan" ? (
+                <p className="text-lg font-bold text-gray-300">-</p>
+              ) : (
+                <p className="text-2xl font-bold text-emerald-600">
+                  {student.grade ?? "-"}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Info Row */}
+          <div className="flex items-center justify-between text-xs bg-gray-50 rounded-lg p-2">
+            <div className="flex items-center gap-2 text-gray-600">
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>{student.className}</span>
+            </div>
+            {student.submittedAt && (
+              <span className="text-gray-500">{student.submittedAt}</span>
+            )}
+          </div>
+
+          {/* Status Badge */}
+          <div className="pt-1">
+            {getStatusBadge(student.status, student.isGraded)}
+          </div>
+
+          {/* Action Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenDialog(student)}
+            className="w-full border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 text-sm h-9"
+          >
+            <Eye className="w-3.5 h-3.5 mr-2" />
+            Lihat Detail & Nilai
+            <ChevronRight className="w-3.5 h-3.5 ml-auto" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ============================================================
+// SKELETON CARD
+// ============================================================
+
+function SkeletonCard(): React.ReactElement {
+  return (
+    <Card className="border border-gray-200 bg-white">
+      <CardContent className="p-3">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <Skeleton className="h-8 w-12" />
+          </div>
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
+
+interface PenilaianPageProps {
+  params: { materialId: string };
+}
+
+export default function PenilaianPage({
+  params,
+}: PenilaianPageProps): React.ReactElement {
+  const materialId = Number(params.materialId);
+  const router = useRouter();
+
+  // State management
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [submissions, setSubmissions] = useState<StudentDisplayData[]>([]);
+  const [material, setMaterial] = useState<Material | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // UI State
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [filterStatus, setFilterStatus] = useState<FilterStatusValue>("all");
+  const [selectedStudent, setSelectedStudent] =
+    useState<StudentDisplayData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [gradeInput, setGradeInput] = useState<string>("");
-  const [feedbackInput, setFeedbackInput] = useState<string>("");
+  const [gradeInput, setGradeInput] = useState("");
+  const [feedbackInput, setFeedbackInput] = useState("");
 
-  // Handle dialog open
-  const handleOpenDialog = (student: any) => {
-    setSelectedStudent(student);
-    setGradeInput(student.grade?.toString() || "");
-    setFeedbackInput("");
-    setIsDialogOpen(true);
-  };
+  // Fetch submissions from RPC
+  const fetchSubmissions = useCallback(async (): Promise<void> => {
+    try {
+      setError(null);
+      const { data: materialData, error: materialError } =
+        await getMaterialById(materialId);
+      const { data, error } = await getAssignmentSubmissions(materialId);
 
-  // Handle dialog close
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-    setSelectedStudent(null);
-    setGradeInput("");
-    setFeedbackInput("");
-  };
+      if (error) {
+        throw new Error(error.message || "Gagal memuat data");
+      }
 
-  // Handle save grade (dummy)
-  const handleSaveGrade = () => {
-    console.log("Save grade:", {
-      studentId: selectedStudent.id,
-      grade: gradeInput,
-      feedback: feedbackInput,
-    });
-    handleCloseDialog();
-  };
+      if (!Array.isArray(data)) {
+        throw new Error("Format data tidak valid dari server");
+      }
 
-  // Handle refresh (dummy)
-  const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
-  };
+      // Transform RPC data to display format
+      const transformedData: StudentDisplayData[] = data.map((item: any) => ({
+        submission_id: item.submission_id,
+        student_id: item.student_id,
+        nis: item.student_nis,
+        name: item.student_name,
+        className: item.class_name,
+        answer: item.answer,
+        grade: item.score ? Number(item.score) : null,
+        feedback: item.feedback,
+        submittedAt: item.submitted_at
+          ? new Date(item.submitted_at).toLocaleString("id-ID")
+          : null,
+        status: item.submission_status,
+        isGraded: item.score !== null,
+      }));
+
+      setMaterial(materialData);
+      setSubmissions(transformedData);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Gagal memuat data";
+      setError(errorMessage);
+      console.error("Error fetching submissions:", err);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [materialId]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchSubmissions();
+  }, [materialId, fetchSubmissions]);
+
+  // Handle refresh
+  const handleRefresh = useCallback((): void => {
+    setIsRefreshing(true);
+    fetchSubmissions();
+  }, [fetchSubmissions]);
+
+  // Calculate statistics
+  const statistics = useMemo((): Statistics => {
+    const total = submissions.length;
+    const submitted = submissions.filter(
+      (s) => s.status === "sudah_mengumpulkan",
+    ).length;
+    const notSubmitted = total - submitted;
+    const graded = submissions.filter((s) => s.isGraded).length;
+    const notGraded = submitted - graded;
+
+    const averageGrade =
+      graded > 0
+        ? Math.round(
+            (submissions
+              .filter((s) => s.grade !== null)
+              .reduce((sum, s) => sum + (s.grade ?? 0), 0) /
+              graded) *
+              10,
+          ) / 10
+        : 0;
+
+    return {
+      total,
+      submitted,
+      notSubmitted,
+      graded,
+      notGraded,
+      averageGrade,
+    };
+  }, [submissions]);
 
   // Filter and search logic
-  const filteredData = useMemo(() => {
-    return studentSubmissionsData.filter((student) => {
+  const filteredData = useMemo((): StudentDisplayData[] => {
+    return submissions.filter((student) => {
       const matchSearch =
-        student.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         student.nis.includes(searchQuery);
 
       let matchFilter = true;
-      if (filterStatus === "submitted") {
-        matchFilter = student.status === "submitted";
-      } else if (filterStatus === "not_submitted") {
-        matchFilter = student.status === "not_submitted";
-      } else if (filterStatus === "graded") {
-        matchFilter = student.grade !== null;
-      } else if (filterStatus === "not_graded") {
-        matchFilter = student.status === "submitted" && student.grade === null;
+      switch (filterStatus) {
+        case "submitted":
+          matchFilter = student.status === "sudah_mengumpulkan";
+          break;
+        case "not_submitted":
+          matchFilter = student.status === "belum_mengumpulkan";
+          break;
+        case "graded":
+          matchFilter = student.isGraded;
+          break;
+        case "not_graded":
+          matchFilter =
+            student.status === "sudah_mengumpulkan" && !student.isGraded;
+          break;
+        case "all":
+        default:
+          matchFilter = true;
       }
 
       return matchSearch && matchFilter;
     });
-  }, [searchQuery, filterStatus]);
+  }, [submissions, searchQuery, filterStatus]);
 
-  // Get status badge
-  const getStatusBadge = (status: string, grade: number | null) => {
-    if (status === "not_submitted") {
+  // Dialog handlers
+  const handleOpenDialog = useCallback((student: StudentDisplayData): void => {
+    setSelectedStudent(student);
+    setGradeInput(student.grade?.toString() ?? "");
+    setFeedbackInput(student.feedback ?? "");
+    setIsDialogOpen(true);
+  }, []);
+
+  const handleCloseDialog = useCallback((): void => {
+    setIsDialogOpen(false);
+    setSelectedStudent(null);
+    setGradeInput("");
+    setFeedbackInput("");
+  }, []);
+
+  const handleSaveGrade = useCallback((): void => {
+    if (!selectedStudent) return;
+
+    console.log("Save grade:", {
+      studentId: selectedStudent.student_id,
+      submissionId: selectedStudent.submission_id,
+      grade: gradeInput ? Number(gradeInput) : null,
+      feedback: feedbackInput,
+    });
+
+    // TODO: Implement API call to save grade
+    handleCloseDialog();
+  }, [selectedStudent, gradeInput, feedbackInput, handleCloseDialog]);
+
+  // Get status badge for dialog
+  const getStatusBadge = (
+    status: SubmissionStatus,
+    isGraded: boolean,
+  ): React.ReactElement => {
+    if (status === "belum_mengumpulkan") {
       return (
         <Badge
           variant="outline"
@@ -252,7 +409,7 @@ export default function PenilaianPage() {
         </Badge>
       );
     }
-    if (grade !== null) {
+    if (isGraded) {
       return (
         <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white">
           Sudah Dinilai
@@ -269,131 +426,140 @@ export default function PenilaianPage() {
     );
   };
 
-  // Get status badge compact (for table)
-  const getStatusBadgeCompact = (status: string, grade: number | null) => {
-    if (status === "not_submitted") {
-      return (
-        <Badge
-          variant="outline"
-          className="bg-red-50 text-red-700 border-red-200 text-xs py-0.5"
-        >
-          Belum
-        </Badge>
-      );
-    }
-    if (grade !== null) {
-      return (
-        <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-0.5">
-          Dinilai
-        </Badge>
-      );
-    }
+  // Show loading state
+  if (isLoading) {
     return (
-      <Badge
-        variant="outline"
-        className="bg-amber-50 text-amber-700 border-amber-200 text-xs py-0.5"
-      >
-        Proses
-      </Badge>
+      <div className="min-h-screen w-full bg-gray-50 p-3 sm:p-4 md:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-4">
+          {/* Header skeleton */}
+          <Card className="border-0 shadow-md bg-white">
+            <CardHeader className="pb-4">
+              <Skeleton className="h-8 w-80 mb-2" />
+              <Skeleton className="h-4 w-60" />
+            </CardHeader>
+          </Card>
+
+          {/* Stats skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="border-0 shadow-sm bg-white">
+                <CardHeader className="pb-2">
+                  <Skeleton className="h-3 w-20 mb-2" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-12 mb-2" />
+                  <Skeleton className="h-2 w-16" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Toolbar skeleton */}
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4 space-y-3">
+              <Skeleton className="h-9 w-full" />
+              <div className="flex gap-2">
+                <Skeleton className="h-9 flex-1" />
+                <Skeleton className="h-9 w-10" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Content skeleton */}
+          <div className="md:hidden space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
     );
-  };
+  }
 
-  // Get grade display
-  const getGradeDisplay = (grade: number | null) => {
-    if (grade === null) return "-";
-    return <span className="font-bold text-lg text-emerald-600">{grade}</span>;
-  };
-
-  // Get grade display compact
-  const getGradeDisplayCompact = (grade: number | null) => {
-    if (grade === null) return "-";
-    return <span className="text-emerald-600">{grade}</span>;
-  };
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen w-full bg-gray-50 p-3 sm:p-4 md:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <Card className="border-0 shadow-md bg-white">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center gap-4 text-center">
+                <AlertCircle className="h-12 w-12 text-red-500" />
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Gagal Memuat Data
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">{error}</p>
+                </div>
+                <Button
+                  onClick={handleRefresh}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  Coba Lagi
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen w-full p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen w-full p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-4">
-        {/* HEADER */}
+        {/* ============ HEADER ============ */}
         <Card className="border-0 shadow-md bg-white overflow-hidden">
-          <div className="bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-100">
-            <CardHeader className="pb-4">
+          <div className="border-b border-emerald-100">
+            <CardHeader className="pb-3 sm:pb-4">
               <div className="space-y-3">
                 <div>
-                  <CardTitle className="text-2xl sm:text-3xl font-bold text-emerald-900">
-                    {assignmentData.title}
+                  <CardTitle className=" flex justify-between text-xl sm:text-2xl md:text-3xl font-bold text-emerald-900">
+                    <span>{material ? material.title : "Penilaian Tugas"}</span>
+                    <button
+                      onClick={() => router.back()}
+                      className="text-sm flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 font-semibold shadow transition"
+                    >
+                      <ArrowLeft size={20} />
+                      Kembali
+                    </button>
                   </CardTitle>
-                  <CardDescription className="text-sm text-emerald-700 mt-1">
-                    {assignmentData.subject} • {assignmentData.tutor}
+                  <CardDescription className="text-xs sm:text-sm text-emerald-700 mt-1">
+                    Kelola dan nilai tugas siswa
                   </CardDescription>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-medium text-gray-600">
-                      Progres Penilaian
-                    </span>
-                    <span className="text-xs font-bold text-emerald-600">
-                      {Math.round(
-                        (assignmentData.gradedCount /
-                          assignmentData.submittedCount) *
-                          100,
-                      )}
-                      %
-                    </span>
+                {statistics.submitted > 0 && (
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-medium text-gray-600">
+                        Progres Penilaian
+                      </span>
+                      <span className="text-xs font-bold text-emerald-600">
+                        {statistics.graded}/{statistics.submitted}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-emerald-500 to-green-500 transition-all duration-300"
+                        style={{
+                          width:
+                            statistics.submitted > 0
+                              ? `${(statistics.graded / statistics.submitted) * 100}%`
+                              : "0%",
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-emerald-500 to-green-500 transition-all duration-300"
-                      style={{
-                        width: `${(assignmentData.gradedCount / assignmentData.submittedCount) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Info Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                  <div className="space-y-0.5">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">
-                      Deadline
-                    </p>
-                    <p className="font-semibold text-sm text-gray-900">
-                      {assignmentData.deadline}
-                    </p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">
-                      Total Siswa
-                    </p>
-                    <p className="font-semibold text-sm text-gray-900">
-                      {assignmentData.totalStudents}
-                    </p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">
-                      Sudah Submit
-                    </p>
-                    <p className="font-semibold text-sm text-emerald-600">
-                      {assignmentData.submittedCount}
-                    </p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">
-                      Rata-rata Nilai
-                    </p>
-                    <p className="font-semibold text-sm text-emerald-600">
-                      {assignmentData.averageGrade}
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
             </CardHeader>
           </div>
         </Card>
 
-        {/* STATISTIK */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* ============ STATISTIK ============ */}
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {/* Total Siswa */}
           <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white">
             <CardHeader className="pb-2">
@@ -405,10 +571,10 @@ export default function PenilaianPage() {
               </div>
             </CardHeader>
             <CardContent className="py-1">
-              <p className="text-2xl font-bold text-gray-900">
-                {assignmentData.totalStudents}
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                {statistics.total}
               </p>
-              <p className="text-xs text-gray-500 mt-1">Peserta tugasnya</p>
+              <p className="text-xs text-gray-500 mt-1">Peserta tugas</p>
             </CardContent>
           </Card>
 
@@ -417,22 +583,20 @@ export default function PenilaianPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-gray-600">
-                  Sudah Mengumpulkan
+                  Mengumpulkan
                 </CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
               </div>
             </CardHeader>
             <CardContent className="py-1">
-              <p className="text-2xl font-bold text-gray-900">
-                {assignmentData.submittedCount}
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                {statistics.submitted}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {Math.round(
-                  (assignmentData.submittedCount /
-                    assignmentData.totalStudents) *
-                    100,
-                )}
-                % dari total
+                {statistics.total > 0
+                  ? Math.round((statistics.submitted / statistics.total) * 100)
+                  : 0}
+                %
               </p>
             </CardContent>
           </Card>
@@ -442,23 +606,22 @@ export default function PenilaianPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-gray-600">
-                  Belum Mengumpulkan
+                  Belum Kumpul
                 </CardTitle>
                 <Clock className="h-4 w-4 text-amber-600" />
               </div>
             </CardHeader>
             <CardContent className="py-1">
-              <p className="text-2xl font-bold text-gray-900">
-                {assignmentData.totalStudents - assignmentData.submittedCount}
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                {statistics.notSubmitted}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {Math.round(
-                  ((assignmentData.totalStudents -
-                    assignmentData.submittedCount) /
-                    assignmentData.totalStudents) *
-                    100,
-                )}
-                % dari total
+                {statistics.total > 0
+                  ? Math.round(
+                      (statistics.notSubmitted / statistics.total) * 100,
+                    )
+                  : 0}
+                %
               </p>
             </CardContent>
           </Card>
@@ -468,43 +631,48 @@ export default function PenilaianPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-gray-600">
-                  Rata-rata Nilai
+                  Rata-rata
                 </CardTitle>
                 <BarChart3 className="h-4 w-4 text-emerald-600" />
               </div>
             </CardHeader>
             <CardContent className="py-1">
-              <p className="text-2xl font-bold text-gray-900">
-                {assignmentData.averageGrade}
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                {statistics.averageGrade}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                Dari {assignmentData.gradedCount} siswa yang dinilai
+                Dari {statistics.graded} siswa
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* TOOLBAR */}
-        <div className="flex flex-col sm:flex-row gap-2.5 items-center justify-between bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+        {/* ============ TOOLBAR ============ */}
+        <div className="flex flex-col gap-3 bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 sticky top-3 z-40">
           {/* Search */}
-          <div className="w-full sm:w-56 relative">
-            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+          <div className="w-full relative">
+            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Cari nama atau NIS..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-gray-50 border-gray-200 focus:bg-white text-sm h-8"
+              className="pl-9 bg-gray-50 border-gray-200 focus:bg-white text-sm h-9 sm:h-10"
             />
           </div>
 
           {/* Filter dan Refresh */}
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full sm:w-48 bg-gray-50 border-gray-200 text-sm h-8">
-                <SelectValue placeholder="Filter status" />
+          <div className="flex gap-2 w-full">
+            <Select
+              value={filterStatus}
+              onValueChange={(value) =>
+                setFilterStatus(value as FilterStatusValue)
+              }
+            >
+              <SelectTrigger className="flex-1 bg-gray-50 border-gray-200 text-sm h-9 sm:h-10">
+                <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Semua</SelectItem>
+                <SelectItem value="all">Semua Status</SelectItem>
                 <SelectItem value="submitted">Sudah Mengumpulkan</SelectItem>
                 <SelectItem value="not_submitted">
                   Belum Mengumpulkan
@@ -518,185 +686,208 @@ export default function PenilaianPage() {
               variant="outline"
               size="icon"
               onClick={handleRefresh}
-              disabled={isLoading}
-              className="border-gray-200 hover:bg-gray-50 h-8 w-8"
+              disabled={isRefreshing}
+              className="border-gray-200 hover:bg-gray-50 h-9 sm:h-10 w-9 sm:w-10 flex-shrink-0"
             >
-              {isLoading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              {isRefreshing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <RefreshCw className="h-3.5 w-3.5" />
+                <RefreshCw className="h-4 w-4" />
               )}
             </Button>
           </div>
+
+          {/* Result info */}
+          <p className="text-xs text-gray-500 font-medium">
+            Menampilkan {filteredData.length} dari {submissions.length} siswa
+          </p>
         </div>
 
-        {/* TABEL */}
-        <Card className="border-0 shadow-md bg-white overflow-hidden">
-          <CardHeader className="pb-3 border-b border-gray-100">
-            <CardTitle className="text-base">Daftar Siswa</CardTitle>
-            <CardDescription className="text-xs">
-              Menampilkan {filteredData.length} dari{" "}
-              {studentSubmissionsData.length} siswa
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-gray-50 border-b border-gray-200">
-                  <TableRow className="hover:bg-gray-50">
-                    <TableHead className="text-xs font-semibold text-gray-600 w-10 h-10 px-2 py-1">
-                      No
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold text-gray-600 h-10 px-2 py-1">
-                      NIS
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold text-gray-600 h-10 px-2 py-1">
-                      Nama
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold text-gray-600 h-10 px-2 py-1">
-                      Kelas
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold text-gray-600 h-10 px-2 py-1">
-                      Status
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold text-gray-600 text-center h-10 px-2 py-1">
-                      Nilai
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold text-gray-600 h-10 px-2 py-1">
-                      Waktu Submit
-                    </TableHead>
-                    <TableHead className="text-xs font-semibold text-gray-600 text-right h-10 px-2 py-1">
-                      Aksi
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLoading ? (
-                    // Loading skeleton
-                    Array.from({ length: 5 }).map((_, i) => (
-                      <TableRow
-                        key={i}
-                        className="border-b border-gray-100 h-9"
-                      >
-                        <TableCell className="px-2 py-1">
-                          <Skeleton className="h-3 w-4" />
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Skeleton className="h-3 w-12" />
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Skeleton className="h-3 w-28" />
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Skeleton className="h-3 w-16" />
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Skeleton className="h-5 w-24" />
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Skeleton className="h-3 w-6 mx-auto" />
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Skeleton className="h-3 w-20" />
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          <Skeleton className="h-6 w-14" />
-                        </TableCell>
+        {/* ============ CONTENT ============ */}
+        <div>
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <Card className="border-0 shadow-md bg-white overflow-hidden">
+              <CardHeader className="pb-3 border-b border-gray-100">
+                <CardTitle className="text-base">Daftar Siswa</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-gray-50 border-b border-gray-200">
+                      <TableRow className="hover:bg-gray-50">
+                        <TableHead className="text-xs font-semibold text-gray-600 w-10 px-3 py-3">
+                          No
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold text-gray-600 px-3 py-3">
+                          NIS
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold text-gray-600 px-3 py-3">
+                          Nama
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold text-gray-600 px-3 py-3">
+                          Kelas
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold text-gray-600 px-3 py-3">
+                          Status
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold text-gray-600 text-center px-3 py-3">
+                          Nilai
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold text-gray-600 px-3 py-3">
+                          Waktu Submit
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold text-gray-600 text-right px-3 py-3">
+                          Aksi
+                        </TableHead>
                       </TableRow>
-                    ))
-                  ) : filteredData.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <AlertCircle className="h-6 w-6 text-gray-300" />
-                          <p className="text-xs text-gray-500 font-medium">
-                            Tidak ada data yang sesuai dengan filter
-                          </p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredData.map((student, index) => (
-                      <TableRow
-                        key={student.id}
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors h-9"
-                      >
-                        <TableCell className="text-xs text-gray-600 font-medium px-2 py-1">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell className="text-xs font-mono text-gray-900 px-2 py-1">
-                          {student.nis}
-                        </TableCell>
-                        <TableCell className="text-xs text-gray-900 font-medium px-2 py-1">
-                          <span className="line-clamp-1">
-                            {student.studentName}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-xs text-gray-600 px-2 py-1">
-                          {student.class}
-                        </TableCell>
-                        <TableCell className="px-2 py-1">
-                          {getStatusBadgeCompact(student.status, student.grade)}
-                        </TableCell>
-                        <TableCell className="text-xs text-center font-bold px-2 py-1">
-                          {getGradeDisplayCompact(student.grade)}
-                        </TableCell>
-                        <TableCell className="text-xs text-gray-600 px-2 py-1">
-                          <span className="line-clamp-1">
-                            {student.submittedAt || "-"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right px-2 py-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenDialog(student)}
-                            className="h-7 px-2 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                    </TableHeader>
+                    <TableBody>
+                      {filteredData.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8">
+                            <div className="flex flex-col items-center gap-2">
+                              <AlertCircle className="h-6 w-6 text-gray-300" />
+                              <p className="text-xs text-gray-500 font-medium">
+                                Tidak ada data yang sesuai dengan filter
+                              </p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredData.map((student, index) => (
+                          <TableRow
+                            key={student.student_id}
+                            className="border-b border-gray-100 hover:bg-gray-50 transition-colors h-12"
                           >
-                            <Eye className="h-3.5 w-3.5 mr-1" />
-                            Lihat
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                            <TableCell className="text-xs text-gray-600 font-medium ps-4 py-2">
+                              {index + 1}
+                            </TableCell>
+                            <TableCell className="text-xs font-mono text-gray-900 px-3 py-2">
+                              {student.nis}
+                            </TableCell>
+                            <TableCell className="text-xs text-gray-900 font-medium px-3 py-2">
+                              <span className="line-clamp-1">
+                                {student.name}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-xs text-gray-600 px-3 py-2">
+                              {student.className}
+                            </TableCell>
+                            <TableCell className="px-3 py-2">
+                              {student.status === "belum_mengumpulkan" ? (
+                                <Badge
+                                  variant="outline"
+                                  className="bg-red-50 text-red-700 border-red-200 text-xs"
+                                >
+                                  Belum
+                                </Badge>
+                              ) : student.isGraded ? (
+                                <Badge className="bg-emerald-600 text-white text-xs">
+                                  Dinilai
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className="bg-amber-50 text-amber-700 border-amber-200 text-xs"
+                                >
+                                  Proses
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs text-center font-bold px-3 py-2">
+                              <span className="text-emerald-600">
+                                {student.grade ?? "-"}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-xs text-gray-600 px-3 py-2">
+                              <span className="line-clamp-1">
+                                {student.submittedAt ?? "-"}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right px-3 py-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenDialog(student)}
+                                className="h-8 px-2 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                              >
+                                <Eye className="h-3.5 w-3.5 mr-1" />
+                                Lihat
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-2">
+            {filteredData.length === 0 ? (
+              <Card className="border border-gray-200 bg-white">
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <AlertCircle className="h-8 w-8 text-gray-300" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">
+                        Tidak ada data
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Tidak ada siswa yang sesuai dengan filter
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredData.map((student, index) => (
+                <StudentCard
+                  key={student.student_id}
+                  student={student}
+                  index={index + 1}
+                  onOpenDialog={handleOpenDialog}
+                />
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* DIALOG PENILAIAN */}
+      {/* ============ DIALOG PENILAIAN ============ */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6 gap-4">
           {selectedStudent && (
             <>
               {/* Header */}
               <DialogHeader className="pb-3 border-b border-gray-200">
-                <div className="space-y-2">
-                  <DialogTitle className="text-xl">
-                    {selectedStudent.studentName}
+                <div className="space-y-3">
+                  <DialogTitle className="text-lg sm:text-xl">
+                    {selectedStudent.name}
                   </DialogTitle>
-                  <div className="flex flex-wrap gap-3 text-xs">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 text-xs">
                     <div>
-                      <p className="text-gray-500 text-xs">NIS</p>
-                      <p className="font-mono font-semibold text-gray-900">
+                      <p className="text-gray-500">NIS</p>
+                      <p className="font-mono font-semibold text-gray-900 mt-1">
                         {selectedStudent.nis}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500 text-xs">Kelas</p>
-                      <p className="font-semibold text-gray-900">
-                        {selectedStudent.class}
+                      <p className="text-gray-500">Kelas</p>
+                      <p className="font-semibold text-gray-900 mt-1">
+                        {selectedStudent.className}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500 text-xs">Status</p>
+                      <p className="text-gray-500">Status</p>
                       <div className="mt-1">
                         {getStatusBadge(
                           selectedStudent.status,
-                          selectedStudent.grade,
+                          selectedStudent.isGraded,
                         )}
                       </div>
                     </div>
@@ -711,21 +902,27 @@ export default function PenilaianPage() {
                     <BookOpen className="h-4 w-4 text-emerald-600" />
                     Jawaban Siswa
                   </h3>
-                  {selectedStudent.status === "not_submitted" ? (
+                  {selectedStudent.status === "belum_mengumpulkan" ? (
                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
                       <AlertCircle className="h-6 w-6 mx-auto text-gray-400 mb-2" />
                       <p className="text-gray-600 font-medium text-xs">
                         Siswa belum mengumpulkan tugas.
                       </p>
                     </div>
-                  ) : (
+                  ) : selectedStudent.answer ? (
                     <Card className="border border-gray-200 bg-gray-50">
                       <CardContent className="p-3">
-                        <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap line-clamp-6">
+                        <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap line-clamp-8">
                           {selectedStudent.answer}
                         </p>
                       </CardContent>
                     </Card>
+                  ) : (
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                      <p className="text-gray-600 font-medium text-xs">
+                        Tidak ada jawaban
+                      </p>
+                    </div>
                   )}
                 </div>
 
@@ -744,7 +941,7 @@ export default function PenilaianPage() {
                     placeholder="Masukkan nilai..."
                     value={gradeInput}
                     onChange={(e) => setGradeInput(e.target.value)}
-                    className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm"
+                    className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 text-sm h-10"
                   />
                 </div>
 
@@ -767,17 +964,17 @@ export default function PenilaianPage() {
               </div>
 
               {/* Footer */}
-              <DialogFooter className="pt-3 border-t border-gray-200 gap-2">
+              <DialogFooter className="pt-3 border-t border-gray-200 gap-2 flex-col sm:flex-row">
                 <Button
                   variant="outline"
                   onClick={handleCloseDialog}
-                  className="border-gray-300 hover:bg-gray-50 text-sm"
+                  className="border-gray-300 hover:bg-gray-50 text-sm order-2 sm:order-1"
                 >
                   Batal
                 </Button>
                 <Button
                   onClick={handleSaveGrade}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm order-1 sm:order-2"
                 >
                   Simpan
                 </Button>
