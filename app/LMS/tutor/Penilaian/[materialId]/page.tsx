@@ -50,10 +50,14 @@ import {
   GraduationCap,
   ArrowLeft,
 } from "lucide-react";
-import { getAssignmentSubmissions } from "@/lib/api/assignment";
+import {
+  getAssignmentSubmissions,
+  updateSubmissionGrade,
+} from "@/lib/api/assignment";
 import { getMaterialById } from "@/lib/api/material";
 import { Material } from "@/lib/types/types";
 import DOMPurify from "isomorphic-dompurify";
+import { toast } from "sonner";
 
 // ============================================================
 // TYPE DEFINITIONS
@@ -237,6 +241,7 @@ export default function PenilaianPage({
   const [submissions, setSubmissions] = useState<StudentDisplayData[]>([]);
   const [material, setMaterial] = useState<Material | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // UI State
   const [searchQuery, setSearchQuery] = useState("");
@@ -271,7 +276,7 @@ export default function PenilaianPage({
         name: item.student_name,
         className: item.class_name,
         answer: item.answer,
-        grade: item.score ? Number(item.score) : null,
+        grade: item.score !== null ? Number(item.score) : null,
         feedback: item.feedback,
         submittedAt: item.submitted_at
           ? new Date(item.submitted_at).toLocaleString("id-ID")
@@ -381,19 +386,46 @@ export default function PenilaianPage({
     setFeedbackInput("");
   }, []);
 
-  const handleSaveGrade = useCallback((): void => {
-    if (!selectedStudent) return;
+  const handleSaveGrade = useCallback(async (): Promise<void> => {
+    if (!selectedStudent?.submission_id)
+      return console.log("Submission ID is null, tidak bisa update nilai");
 
-    console.log("Save grade:", {
-      studentId: selectedStudent.student_id,
-      submissionId: selectedStudent.submission_id,
-      grade: gradeInput ? Number(gradeInput) : null,
-      feedback: feedbackInput,
-    });
+    const grade = gradeInput.trim() === "" ? null : Number(gradeInput);
 
-    // TODO: Implement API call to save grade
-    handleCloseDialog();
-  }, [selectedStudent, gradeInput, feedbackInput, handleCloseDialog]);
+    if (grade !== null && (isNaN(grade) || grade < 0 || grade > 100)) {
+      toast.error("Nilai harus berada di antara 0 dan 100.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      const { error } = await updateSubmissionGrade(
+        selectedStudent.submission_id,
+        grade,
+        feedbackInput.trim(),
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      await fetchSubmissions();
+      toast.success("Nilai berhasil disimpan.");
+      handleCloseDialog();
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal menyimpan nilai.");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    selectedStudent,
+    gradeInput,
+    feedbackInput,
+    fetchSubmissions,
+    handleCloseDialog,
+  ]);
 
   // Get status badge for dialog
   const getStatusBadge = (
@@ -738,7 +770,7 @@ export default function PenilaianPage({
                         <TableHead className="text-xs font-semibold text-gray-600 px-3 py-3">
                           Waktu Submit
                         </TableHead>
-                        <TableHead className="text-xs font-semibold text-gray-600 text-right px-3 py-3">
+                        <TableHead className="text-xs font-semibold text-gray-600 text-right px-7 py-3">
                           Aksi
                         </TableHead>
                       </TableRow>
@@ -1019,9 +1051,20 @@ export default function PenilaianPage({
                 </Button>
                 <Button
                   onClick={handleSaveGrade}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm order-1 sm:order-2"
+                  disabled={
+                    isSaving || selectedStudent?.status === "belum_mengumpulkan"
+                  }
                 >
-                  Simpan
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Menyimpan...
+                    </>
+                  ) : selectedStudent?.isGraded ? (
+                    "Perbarui Nilai"
+                  ) : (
+                    "Simpan"
+                  )}
                 </Button>
               </DialogFooter>
             </>

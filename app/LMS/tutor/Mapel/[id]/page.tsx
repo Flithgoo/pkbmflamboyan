@@ -49,6 +49,7 @@ import { Label } from "@/components/ui/label";
 import { Close } from "@radix-ui/react-popover";
 import { getMaterialBySubjectId } from "@/lib/api/material";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -189,7 +190,7 @@ export default function MateriMapelPage({
       if (!success) throw new Error("Gagal menambahkan materi.");
 
       console.log("Data terkirim:", payload);
-      alert("Materi berhasil diposting!");
+      toast.success("Materi berhasil diposting!");
       await fetchData();
 
       router.refresh();

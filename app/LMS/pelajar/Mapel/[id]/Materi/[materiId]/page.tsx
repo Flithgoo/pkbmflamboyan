@@ -29,6 +29,7 @@ import { studentCheckInAction } from "@/lib/actions/attendance";
 import { submitAssignment } from "@/lib/api/assignment";
 import "react-quill/dist/quill.snow.css";
 import dynamic from "next/dynamic";
+import { toast } from "sonner";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -94,7 +95,6 @@ export default function MaterialDetailPage({
 
         if (data && data.length > 0) {
           const raw = data[0] as MaterialDetail;
-          console.log("🚀 ~ initialFetch ~ raw:", raw);
           setMaterial(raw);
           setTaskAnswer(raw.answer ?? "");
         }
@@ -237,40 +237,53 @@ export default function MaterialDetailPage({
     }
   }
 
+  function due_dateHasPassed(due_date: string | null) {
+    if (!due_date) return false;
+    const dueDate = new Date(due_date);
+    const now = new Date();
+    return now > dueDate;
+  }
+
   const isEmpty = taskAnswer.replace(/<(.|\n)*?>/g, "").trim().length === 0;
 
   async function handleSubmitTask() {
     if (isEmpty) {
-      alert("Silakan isi jawaban terlebih dahulu");
+      toast.warning("Silakan isi jawaban terlebih dahulu");
       return;
     }
 
     setIsSubmittingTask(true);
     try {
-      if (material) {
+      if (material && !due_dateHasPassed(material.due_date)) {
         const { error } = await submitAssignment(
           material.id,
           Number(user?.id),
           taskAnswer,
         );
         if (error) console.log(error);
-      }
 
-      setMaterial((prev) =>
-        prev
-          ? {
-              ...prev,
-              submission_status: "sudah_mengumpulkan",
-              answer: taskAnswer,
-              submitted_at: new Date().toISOString(),
-            }
-          : prev,
-      );
-      console.log("Tugas berhasil dikumpulkan dengan jawaban:", taskAnswer);
-      alert("Tugas berhasil dikumpulkan!");
+        setMaterial((prev) =>
+          prev
+            ? {
+                ...prev,
+                submission_status: "sudah_mengumpulkan",
+                answer: taskAnswer,
+                submitted_at: new Date().toISOString(),
+              }
+            : prev,
+        );
+        console.log("Tugas berhasil dikumpulkan dengan jawaban:", taskAnswer);
+        toast.success("Tugas berhasil dikumpulkan!");
+      }
+      if (due_dateHasPassed(material?.due_date ?? null)) {
+        throw new Error("Batas waktu pengumpulan tugas telah lewat.");
+      }
     } catch (err) {
       console.error(err);
-      alert("Gagal mengumpulkan tugas. Silakan coba lagi.");
+      toast.error(
+        "Gagal mengumpulkan tugas. " +
+          (err instanceof Error ? err.message : ""),
+      );
     } finally {
       setIsSubmittingTask(false);
     }
