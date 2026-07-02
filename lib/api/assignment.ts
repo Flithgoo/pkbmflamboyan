@@ -49,3 +49,19 @@ export async function getAssignmentSubmissions(materialId: number) {
   }
   return { data, error };
 }
+
+export async function updateSubmissionGrade(
+  submissionId: number,
+  score: number | null,
+  feedback: string,
+) {
+  const { supabase } = await getAuthContext();
+
+  return await supabase
+    .from("assignment_submissions")
+    .update({
+      score,
+      feedback,
+    })
+    .eq("id", submissionId);
+}

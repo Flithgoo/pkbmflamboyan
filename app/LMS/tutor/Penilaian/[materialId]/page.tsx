@@ -53,6 +53,7 @@ import {
 import { getAssignmentSubmissions } from "@/lib/api/assignment";
 import { getMaterialById } from "@/lib/api/material";
 import { Material } from "@/lib/types/types";
+import DOMPurify from "isomorphic-dompurify";
 
 // ============================================================
 // TYPE DEFINITIONS
@@ -912,9 +913,53 @@ export default function PenilaianPage({
                   ) : selectedStudent.answer ? (
                     <Card className="border border-gray-200 bg-gray-50">
                       <CardContent className="p-3">
-                        <p className="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap line-clamp-8">
-                          {selectedStudent.answer}
-                        </p>
+                        <div
+                          className="
+              quill-content
+              max-h-64 overflow-y-auto
+              text-sm text-gray-900 leading-relaxed
+              [&_p]:mb-2 [&_p:last-child]:mb-0
+              [&_strong]:font-semibold [&_em]:italic [&_u]:underline
+              [&_s]:line-through
+              [&_h1]:text-lg [&_h1]:font-bold [&_h1]:mb-2 [&_h1]:mt-3
+              [&_h2]:text-base [&_h2]:font-bold [&_h2]:mb-2 [&_h2]:mt-3
+              [&_h3]:text-sm [&_h3]:font-bold [&_h3]:mb-1 [&_h3]:mt-2
+              [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_ul]:space-y-1
+              [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-2 [&_ol]:space-y-1
+              [&_li]:leading-relaxed
+              [&_a]:text-emerald-600 [&_a]:underline [&_a]:break-all
+              [&_blockquote]:border-l-4 [&_blockquote]:border-emerald-300 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-2
+              [&_code]:bg-gray-200 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono
+              [&_pre.ql-syntax]:bg-gray-900 [&_pre.ql-syntax]:text-white [&_pre.ql-syntax]:p-2 [&_pre.ql-syntax]:rounded-md [&_pre.ql-syntax]:overflow-x-auto [&_pre.ql-syntax]:text-xs [&_pre.ql-syntax]:my-2
+              [&_img]:max-w-full [&_img]:rounded-md [&_img]:my-2
+              [&_hr]:my-3 [&_hr]:border-gray-300
+
+              /* --- Quill-specific alignment classes --- */
+              [&_.ql-align-center]:text-center
+              [&_.ql-align-right]:text-right
+              [&_.ql-align-justify]:text-justify
+
+              /* --- Quill indent classes (level 1-8) --- */
+              [&_.ql-indent-1]:pl-6
+              [&_.ql-indent-2]:pl-12
+              [&_.ql-indent-3]:pl-[4.5rem]
+              [&_.ql-indent-4]:pl-24
+              [&_.ql-indent-5]:pl-[7.5rem]
+              [&_.ql-indent-6]:pl-36
+              [&_.ql-indent-7]:pl-[10.5rem]
+              [&_.ql-indent-8]:pl-48
+
+              /* --- Quill font-size classes --- */
+              [&_.ql-size-small]:text-xs
+              [&_.ql-size-large]:text-lg
+              [&_.ql-size-huge]:text-2xl
+
+              break-words
+            "
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(selectedStudent.answer),
+                          }}
+                        />
                       </CardContent>
                     </Card>
                   ) : (
