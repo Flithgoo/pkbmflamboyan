@@ -21,6 +21,7 @@ import "react-quill/dist/quill.snow.css";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Loading from "@/app/components/Loading";
+import CommentSection from "@/app/components/Materi/CommentSection";
 
 // Dynamic import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
@@ -529,6 +530,7 @@ export default function MateriDetailPage({ params }: PageProps) {
           </button>
         </div>
       </section>
+      {materiId && <CommentSection materialId={materiId} />}
     </div>
   );
 }

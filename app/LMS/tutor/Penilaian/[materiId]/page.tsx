@@ -226,13 +226,13 @@ function SkeletonCard(): React.ReactElement {
 // ============================================================
 
 interface PenilaianPageProps {
-  params: { materialId: string };
+  params: { materiId: string };
 }
 
 export default function PenilaianPage({
   params,
 }: PenilaianPageProps): React.ReactElement {
-  const materialId = Number(params.materialId);
+  const materiId = Number(params.materiId);
   const router = useRouter();
 
   // State management
@@ -257,8 +257,8 @@ export default function PenilaianPage({
     try {
       setError(null);
       const { data: materialData, error: materialError } =
-        await getMaterialById(materialId);
-      const { data, error } = await getAssignmentSubmissions(materialId);
+        await getMaterialById(materiId);
+      const { data, error } = await getAssignmentSubmissions(materiId);
 
       if (error) {
         throw new Error(error.message || "Gagal memuat data");
@@ -296,12 +296,12 @@ export default function PenilaianPage({
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [materialId]);
+  }, [materiId]);
 
   // Initial fetch
   useEffect(() => {
     fetchSubmissions();
-  }, [materialId, fetchSubmissions]);
+  }, [materiId, fetchSubmissions]);
 
   // Handle refresh
   const handleRefresh = useCallback((): void => {

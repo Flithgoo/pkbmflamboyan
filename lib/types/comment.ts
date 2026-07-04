@@ -1,0 +1,15 @@
+export type CommentUserRole = "Tutor" | "Siswa";
+
+export interface MaterialComment {
+  id: number;
+  user_name: string;
+  user_role: CommentUserRole;
+  class_name?: string | null;
+  comment: string;
+  created_at: string;
+  is_owner: boolean;
+}
+
+export interface CreateCommentPayload {
+  comment: string;
+}
