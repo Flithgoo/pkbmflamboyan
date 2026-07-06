@@ -86,13 +86,14 @@ export default function CommentSection({ materialId }: CommentSectionProps) {
         }
 
         if (data) {
-          const newComment: MaterialComment = {
+          const newComment = {
             ...data,
             comment: data.comment ?? "",
             user_name: user?.name ?? "Anda",
             user_role: (user?.role ?? "siswa") as any,
+            profile_picture: user?.profile_picture ?? "",
             is_owner: true,
-          };
+          } as MaterialComment;
 
           setComments((prev) => [...prev, newComment]);
         }
@@ -106,7 +107,7 @@ export default function CommentSection({ materialId }: CommentSectionProps) {
         setIsSubmitting(false);
       }
     },
-    [materialId, user?.id, user?.name, user?.role],
+    [materialId, user?.id, user?.name, user?.profile_picture, user?.role],
   );
 
   return (
