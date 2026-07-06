@@ -4,6 +4,8 @@ import React from "react";
 import { MaterialComment } from "@/lib/types/comment";
 import { getInitials, formatCommentTime } from "@/app/utils/comment";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 interface CommentCardProps {
   comment: MaterialComment;
 }
@@ -19,13 +21,19 @@ export default function CommentCard({ comment }: CommentCardProps) {
           : "bg-white border-gray-100 hover:border-emerald-100"
       }`}
     >
-      <div
-        className={`flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center font-semibold text-sm ${
-          isTutor ? "bg-emerald-500 text-white" : "bg-amber-400 text-white"
-        }`}
-      >
-        {getInitials(comment.user_name)}
-      </div>
+      <Avatar className="h-10 w-10 flex-shrink-0">
+        <AvatarImage
+          src={comment.profile_picture ?? undefined}
+          alt={comment.user_name}
+        />
+        <AvatarFallback
+          className={`font-semibold text-sm ${
+            isTutor ? "bg-emerald-500 text-white" : "bg-amber-400 text-white"
+          }`}
+        >
+          {getInitials(comment.user_name)}
+        </AvatarFallback>
+      </Avatar>
 
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -49,7 +57,7 @@ export default function CommentCard({ comment }: CommentCardProps) {
             </span>
           )}
 
-          <span className="text-[11px] text-gray-400 ml-auto">
+          <span className="ml-auto text-[11px] text-gray-400">
             {formatCommentTime(comment.created_at)}
           </span>
         </div>

@@ -1,57 +1,43 @@
-import { MaterialComment, CreateCommentPayload } from "@/lib/types/comment";
+"use server";
 
-// Mock data sementara — TODO: ganti dengan query Supabase / RPC sesungguhnya
-const MOCK_COMMENTS: MaterialComment[] = [
-  {
-    id: 1,
-    user_name: "Ahmad",
-    user_role: "Siswa",
-    class_name: "Paket B",
-    comment: "Pak saya belum paham materi ini.",
-    created_at: "2026-07-04T10:30:00Z",
-    is_owner: false,
-  },
-  {
-    id: 2,
-    user_name: "Ibu Sari",
-    user_role: "Tutor",
-    class_name: null,
-    comment: "Baik, akan saya jelaskan ulang di pertemuan berikutnya ya.",
-    created_at: "2026-07-04T11:05:00Z",
-    is_owner: true,
-  },
-];
+import { getAuthContext } from "@/lib/getAuthContext";
 
-/**
- * Placeholder: mengambil daftar komentar untuk sebuah materi.
- * TODO: ganti dengan panggilan Supabase RPC / REST API sesungguhnya.
- */
-export async function getMaterialComments(
-  materialId: number,
-): Promise<{ data: MaterialComment[] | null; error: Error | null }> {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  return { data: MOCK_COMMENTS, error: null };
+export async function getMaterialComments(materialId: number) {
+  const { supabase } = await getAuthContext();
+
+  const { data, error } = await supabase.rpc("get_material_comments", {
+    p_material_id: materialId,
+  });
+
+  if (error) {
+    console.error("Error rpc get_material_comments:", error);
+    return { data: null, error };
+  }
+
+  return { data, error: null };
 }
 
-/**
- * Placeholder: membuat komentar baru untuk sebuah materi.
- * TODO: ganti dengan insert ke Supabase / RPC sesungguhnya.
- */
 export async function createMaterialComment(
+  userId: number,
   materialId: number,
-  payload: CreateCommentPayload,
-): Promise<{ data: MaterialComment | null; error: Error | null }> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  comment: string,
+) {
+  const { supabase } = await getAuthContext();
 
-  const newComment: MaterialComment = {
-    id: Date.now(),
-    user_name: "Anda",
-    user_role: "Tutor",
-    class_name: null,
-    comment: payload.comment,
-    created_at: new Date().toISOString(),
-    is_owner: true,
-  };
+  const { data, error } = await supabase
+    .from("comments")
+    .insert({
+      material_id: materialId,
+      user_id: userId,
+      comment: comment.trim(),
+    })
+    .select()
+    .single();
 
-  return { data: newComment, error: null };
+  if (error) {
+    console.error("Error createMaterialComment:", error);
+    return { data: null, error };
+  }
+
+  return { data, error: null };
 }

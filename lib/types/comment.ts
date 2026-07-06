@@ -5,6 +5,7 @@ export interface MaterialComment {
   user_name: string;
   user_role: CommentUserRole;
   class_name?: string | null;
+  profile_picture: string | null;
   comment: string;
   created_at: string;
   is_owner: boolean;

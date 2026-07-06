@@ -8,6 +8,7 @@ import { getMaterialComments, createMaterialComment } from "@/lib/api/comment";
 import CommentCard from "./CommentCard";
 import { CommentSkeletonList } from "./CommentSkeleton";
 import CommentInput from "./CommentInput";
+import { useUserStore } from "@/src/store/useUserStore";
 
 interface CommentSectionProps {
   materialId: number;
@@ -18,6 +19,7 @@ export default function CommentSection({ materialId }: CommentSectionProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const { user } = useUserStore();
 
   useEffect(() => {
     let isMounted = true;
@@ -36,7 +38,13 @@ export default function CommentSection({ materialId }: CommentSectionProps) {
           return;
         }
 
-        setComments(data ?? []);
+        const normalizedComments = (data ?? []).map((comment) => ({
+          ...comment,
+          is_owner: user?.id === comment.user_id,
+          user_role: comment.user_role as any,
+        }));
+
+        setComments(normalizedComments as MaterialComment[]);
       } catch (err) {
         if (!isMounted) return;
         setError(
@@ -52,18 +60,22 @@ export default function CommentSection({ materialId }: CommentSectionProps) {
     return () => {
       isMounted = false;
     };
-  }, [materialId]);
+  }, [materialId, user?.id]);
 
   const handleAddComment = useCallback(
     async (text: string) => {
+      if (!user?.id) {
+        toast.error("Anda harus login untuk menambah komentar");
+        return;
+      }
+
       setIsSubmitting(true);
 
       try {
         const { data, error: createError } = await createMaterialComment(
+          user.id,
           materialId,
-          {
-            comment: text,
-          },
+          text,
         );
 
         if (createError) {
@@ -74,8 +86,15 @@ export default function CommentSection({ materialId }: CommentSectionProps) {
         }
 
         if (data) {
-          // Optimistic append — nanti bisa diganti refetch dari backend
-          setComments((prev) => [...prev, data]);
+          const newComment: MaterialComment = {
+            ...data,
+            comment: data.comment ?? "",
+            user_name: user?.name ?? "Anda",
+            user_role: (user?.role ?? "siswa") as any,
+            is_owner: true,
+          };
+
+          setComments((prev) => [...prev, newComment]);
         }
 
         toast.success("Komentar terkirim");
@@ -87,7 +106,7 @@ export default function CommentSection({ materialId }: CommentSectionProps) {
         setIsSubmitting(false);
       }
     },
-    [materialId],
+    [materialId, user?.id, user?.name, user?.role],
   );
 
   return (

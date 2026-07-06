@@ -270,6 +270,45 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: number
+          material_id: number | null
+          user_id: number | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: number
+          material_id?: number | null
+          user_id?: number | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: number
+          material_id?: number | null
+          user_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location: {
         Row: {
           created_at: string
@@ -712,6 +751,20 @@ export type Database = {
           submission_id: number
           submission_status: string
           submitted_at: string
+        }[]
+      }
+      get_material_comments: {
+        Args: { p_material_id: number }
+        Returns: {
+          class_name: string
+          comment: string
+          created_at: string
+          id: number
+          material_id: number
+          profile_picture: string
+          user_id: number
+          user_name: string
+          user_role: string
         }[]
       }
       get_student_material_detail: {
