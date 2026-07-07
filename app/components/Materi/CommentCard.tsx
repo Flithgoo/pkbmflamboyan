@@ -11,7 +11,7 @@ interface CommentCardProps {
 }
 
 export default function CommentCard({ comment }: CommentCardProps) {
-  const isTutor = comment.user_role === "Tutor";
+  const isTutor = comment.user_role === "tutor";
 
   return (
     <div
@@ -28,7 +28,11 @@ export default function CommentCard({ comment }: CommentCardProps) {
         />
         <AvatarFallback
           className={`font-semibold text-sm ${
-            isTutor ? "bg-emerald-500 text-white" : "bg-amber-400 text-white"
+            isTutor
+              ? "bg-amber-400 text-white"
+              : comment.user_role === "admin"
+                ? "bg-slate-100 text-slate-700"
+                : "bg-emerald-500 text-white"
           }`}
         >
           {getInitials(comment.user_name)}
@@ -44,8 +48,10 @@ export default function CommentCard({ comment }: CommentCardProps) {
           <span
             className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
               isTutor
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-amber-100 text-amber-700"
+                ? "bg-amber-100 text-amber-700"
+                : comment.user_role === "admin"
+                  ? "bg-slate-100 text-slate-700"
+                  : "bg-emerald-100 text-emerald-700"
             }`}
           >
             {comment.user_role}

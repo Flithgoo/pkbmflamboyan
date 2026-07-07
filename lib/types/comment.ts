@@ -1,4 +1,4 @@
-export type CommentUserRole = "Tutor" | "Siswa";
+export type CommentUserRole = "admin" | "tutor" | "pelajar";
 
 export interface MaterialComment {
   id: number;
@@ -13,4 +13,10 @@ export interface MaterialComment {
 
 export interface CreateCommentPayload {
   comment: string;
+  // Sementara dikirim dari client karena belum ada backend/session.
+  // Nanti kalau backend sudah ada, field ini bisa dihapus—role & nama
+  // akan diambil dari session user di server.
+  user_name?: string;
+  user_role?: CommentUserRole;
+  class_name?: string | null;
 }

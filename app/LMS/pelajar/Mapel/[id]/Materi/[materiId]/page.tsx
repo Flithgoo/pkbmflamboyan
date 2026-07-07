@@ -30,6 +30,7 @@ import { submitAssignment } from "@/lib/api/assignment";
 import "react-quill/dist/quill.snow.css";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
+import CommentSection from "@/app/components/Materi/CommentSection";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -539,6 +540,9 @@ export default function MaterialDetailPage({
                     )}
                   </>
                 )}
+
+                {/* Komentar */}
+                <CommentSection materialId={material.id} />
               </div>
 
               {/* Sidebar - Attendance */}
