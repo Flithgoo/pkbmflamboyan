@@ -111,7 +111,7 @@ const pelajarDashboardLinks = [
   { name: "Absensi", href: "/LMS/pelajar/Absensi", icon: Users },
   { name: "Pengumuman", href: "/LMS/pelajar/Pengumuman", icon: BellRing },
   { name: "Ujian", href: "/LMS/pelajar/Ujian", icon: ClipboardCheck },
-  { name: "Bantuan", href: "/LMS/Bantuan", icon: Info },
+  { name: "Bantuan", href: "/LMS/pelajar/Bantuan", icon: Info },
 ];
 
 const tutorDashboardLinks = [
