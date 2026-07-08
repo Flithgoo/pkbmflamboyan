@@ -11,7 +11,7 @@ export default async function StudentDashboardPage() {
   const data = await getStudentDashboardData();
 
   return (
-    <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
+    <div className="w-full flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
       <WelcomeCard welcome={data.welcome} />
 
       <StatCardGrid stats={data.stats} />
