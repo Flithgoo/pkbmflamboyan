@@ -26,7 +26,7 @@ export type StatAccent = "emerald" | "amber";
 
 export interface WelcomeInfo {
   name: string;
-  role: UserRole;
+  role: string;
   /** Contoh: "Kelas XI RPL 2" (khusus siswa) */
   subtitle?: string;
 }
@@ -61,7 +61,7 @@ export interface MateriItem {
   title: string;
   subject: string;
   createdAt: string; // ISO date string
-  type: "Materi" | "Tugas";
+  type: string;
 }
 
 export interface AnnouncementItem {

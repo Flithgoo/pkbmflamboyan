@@ -49,7 +49,7 @@ export function MateriPerBulanChart({ data }: MateriPerBulanChartProps) {
               stroke="#64748b"
             />
             <Tooltip
-              formatter={(value) => [`${value}%`, "Kehadiran"]}
+              formatter={(value) => [`${value}`, "Total materi & tugas"]}
               contentStyle={{
                 borderRadius: 8,
                 borderColor: "#e2e8f0",

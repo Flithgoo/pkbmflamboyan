@@ -38,7 +38,7 @@ export async function addUserAction(formData: FormData) {
   }
 
   console.log("app/lib/actions/user.ts User added successfully:", data);
-  redirect("/LMS/admin"); // redirect jika berhasil
+  redirect("/LMS/admin/Pengguna"); // redirect jika berhasil
 }
 
 export async function editUserAction(formData: FormData) {
@@ -84,7 +84,7 @@ export async function editUserAction(formData: FormData) {
     throw new Error(typeof error === "string" ? error : error.message);
   }
 
-  redirect("/LMS/admin");
+  redirect("/LMS/admin/Pengguna");
 }
 
 export async function deleteUserAction(id: number) {

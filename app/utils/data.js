@@ -129,7 +129,7 @@ const tutorDashboardLinks = [
 
 const adminDashboardLinks = [
   { name: "Dashboard", icon: Home, href: "/LMS/admin" },
-  { name: "Pengguna", icon: Users, href: "/LMS/admin#daftar-pengguna" },
+  { name: "Pengguna", icon: Users, href: "/LMS/admin/Pengguna" },
   {
     name: "Sinkronisasi Dapodik",
     icon: UserPlus,

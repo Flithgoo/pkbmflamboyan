@@ -63,7 +63,7 @@ export function StatCard({ data }: StatCardProps) {
         <div
           className={cn(
             "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
-            accentStyles
+            accentStyles,
           )}
         >
           <Icon className="h-5 w-5" />
