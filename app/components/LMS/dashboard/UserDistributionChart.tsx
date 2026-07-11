@@ -16,14 +16,14 @@ interface UserDistributionChartProps {
 }
 
 // emerald-600, amber-500, slate-400 — konsisten dengan palet utama aplikasi
-const COLORS = ["#059669", "#f59e0b", "#94a3b8"];
+const COLORS = ["#94a3b8", "#f59e0b", "#059669"];
 
 export function UserDistributionChart({ data }: UserDistributionChartProps) {
   return (
     <Card className="border-slate-200 shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold text-slate-800">
-          Distribusi User
+          Distribusi Pengguna
         </CardTitle>
       </CardHeader>
       <CardContent className="h-72 pt-2">
@@ -42,7 +42,7 @@ export function UserDistributionChart({ data }: UserDistributionChartProps) {
               ))}
             </Pie>
             <Tooltip
-              formatter={(value) => [`${value}%`, "Kehadiran"]}
+              formatter={(value) => [`${value} user`, "Total"]}
               contentStyle={{
                 borderRadius: 8,
                 borderColor: "#e2e8f0",

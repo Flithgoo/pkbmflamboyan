@@ -1,6 +1,9 @@
-import { getAuthContext } from "@/lib/getAuthContext";
+// lib/api/dashboard/admin.ts
 
-export async function getAdminDashboard() {
+import { getAuthContext } from "@/lib/getAuthContext";
+import type { AdminDashboardData } from "@/lib/types/dashboard";
+
+export async function getAdminDashboard(): Promise<AdminDashboardData> {
   const { supabase } = await getAuthContext();
 
   const [users, students, tutors, materials] = await Promise.all([
@@ -15,7 +18,7 @@ export async function getAdminDashboard() {
         count: "exact",
         head: true,
       })
-      .eq("role", "student"),
+      .eq("role", "pelajar"),
 
     supabase
       .from("users")
@@ -31,9 +34,12 @@ export async function getAdminDashboard() {
     }),
   ]);
 
+  /**
+   * Distribusi role user
+   */
   const { data: roles } = await supabase.from("users").select("role");
 
-  const roleChart =
+  const roleDistribution =
     roles?.reduce(
       (acc, item) => {
         acc[item.role] = (acc[item.role] ?? 0) + 1;
@@ -43,21 +49,82 @@ export async function getAdminDashboard() {
       {} as Record<string, number>,
     ) ?? {};
 
+  /**
+   * Pengumuman terbaru sistem
+   * Menggunakan materials.upload_type
+   */
+  const { data: announcements } = await supabase
+    .from("materials")
+    .select(
+      `
+      id,
+      title,
+      content,
+      created_at
+    `,
+    )
+    .eq("upload_type", "Pengumuman")
+    .order("created_at", {
+      ascending: false,
+    })
+    .limit(3);
+
   return {
-    data: {
-      stats: {
-        users: users.count ?? 0,
-        students: students.count ?? 0,
-        tutors: tutors.count ?? 0,
-        materials: materials.count ?? 0,
+    stats: [
+      {
+        id: "total-user",
+        label: "Total User",
+        value: users.count ?? 0,
+        icon: "user-cog",
+        accent: "emerald",
+        helperText: "Seluruh pengguna",
       },
 
-      roleChart: Object.entries(roleChart).map(([name, value]) => ({
-        name,
-        value,
-      })),
-    },
+      {
+        id: "pelajar",
+        label: "Pelajar",
+        value: students.count ?? 0,
+        icon: "graduation-cap",
+        accent: "amber",
+        helperText: "Aktif terdaftar",
+      },
 
-    error: null,
+      {
+        id: "tutor",
+        label: "Tutor",
+        value: tutors.count ?? 0,
+        icon: "users",
+        accent: "emerald",
+        helperText: "Pengajar aktif",
+      },
+
+      {
+        id: "materi",
+        label: "Materi",
+        value: materials.count ?? 0,
+        icon: "book-open",
+        accent: "amber",
+        helperText: "Terpublikasi",
+      },
+    ],
+
+    userDistribution: Object.entries(roleDistribution).map(([role, total]) => ({
+      role,
+
+      total,
+    })),
+
+    systemUpdates:
+      announcements?.map((item) => ({
+        id: String(item.id),
+
+        title: item.title,
+
+        content: item.content ?? "",
+
+        createdAt: item.created_at,
+
+        priority: "normal" as const,
+      })) ?? [],
   };
 }

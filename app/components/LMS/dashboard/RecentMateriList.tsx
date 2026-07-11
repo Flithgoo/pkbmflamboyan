@@ -31,8 +31,13 @@ export function RecentMateriList({
         {items.map((item) => {
           const Icon = item.type === "Tugas" ? ClipboardList : BookOpen;
           return (
-            <div key={item.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+            <div
+              key={item.id}
+              className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"
+            >
+              <div
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${item.type === "Materi" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}
+              >
                 <Icon className="h-4 w-4" />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-0.5">

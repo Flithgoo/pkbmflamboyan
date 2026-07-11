@@ -26,7 +26,10 @@ export default async function StudentDashboardPage() {
         </div>
       </div>
 
-      <RecentMateriList items={data.recentMateri} title="5 Materi Terbaru" />
+      <RecentMateriList
+        items={data.recentMateri}
+        title="5 Materi & Tugas Terbaru"
+      />
     </div>
   );
 }

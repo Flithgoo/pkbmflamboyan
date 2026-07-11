@@ -2,9 +2,10 @@ import { StatCardGrid } from "@components/LMS/dashboard/StatCard";
 import { UserDistributionChart } from "@components/LMS/dashboard/UserDistributionChart";
 import { AnnouncementList } from "@components/LMS/dashboard/AnnouncementList";
 import { getAdminDashboardData } from "@/lib/types/dashboard-dummy";
+import { getAdminDashboard } from "@/lib/api/dashboard/admin";
 
 export default async function AdminDashboardPage() {
-  const data = await getAdminDashboardData();
+  const data = await getAdminDashboard();
 
   return (
     <div className="w-full flex flex-col gap-6 p-4 sm:p-6 lg:p-8">
@@ -26,7 +27,7 @@ export default async function AdminDashboardPage() {
         <div className="lg:col-span-2">
           <AnnouncementList
             items={data.systemUpdates}
-            title="Informasi Terbaru Sistem"
+            title="Pengumuman terakhir"
           />
         </div>
       </div>

@@ -8,6 +8,16 @@ interface AnnouncementListProps {
   title?: string;
 }
 
+function stripHtml(html: string) {
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .trim();
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("id-ID", {
     day: "numeric",
@@ -48,7 +58,7 @@ export function AnnouncementList({
                 )}
               </div>
               <p className="line-clamp-2 text-xs text-slate-400">
-                {item.content}
+                {stripHtml(item.content)}
               </p>
               <span className="text-xs text-slate-300">
                 {formatDate(item.createdAt)}

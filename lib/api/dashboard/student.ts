@@ -48,20 +48,9 @@ export async function getStudentDashboard(): Promise<StudentDashboardData> {
   const classIds = userClasses?.map((item) => item.class_id) ?? [];
 
   const locationId = userLocation?.location_id;
-  console.log("🚀 ~ getStudentDashboard ~ locationId:", locationId);
   if (!locationId) {
     throw new Error("Location not found");
   }
-  /**
-   * Total materi
-   */
-  const { count: materialCount } = await supabase
-    .from("material_classes")
-    .select("material_id", {
-      count: "exact",
-      head: true,
-    })
-    .in("class_id", classIds);
 
   /**
    * Semua materi kelas
@@ -99,7 +88,6 @@ export async function getStudentDashboard(): Promise<StudentDashboardData> {
   /**
    * Filter tipe konten
    */
-  const tugas = materialList.filter((item) => item.upload_type === "Tugas");
 
   const recentMateri = materialList.slice(0, 5).map((item) => ({
     id: String(item.id),
@@ -180,9 +168,31 @@ export async function getStudentDashboard(): Promise<StudentDashboardData> {
 
   const totalMaterials = materialList.length;
 
-  const totalTasks = materialList.filter(
-    (item) => item.upload_type === "Tugas",
-  ).length;
+  const today = new Date().toISOString();
+
+  const { data: activeAssignments } = await supabase
+    .from("assignments")
+    .select(
+      `
+    id,
+    due_date,
+    materials(
+      id,
+      upload_type,
+      material_classes(
+        class_id
+      )
+    )
+  `,
+    )
+    .gte("due_date", today);
+
+  const totalTasks =
+    activeAssignments?.filter((assignment) =>
+      assignment.materials?.material_classes?.some((item) =>
+        classIds.includes(item.class_id),
+      ),
+    ).length ?? 0;
 
   return {
     welcome: {
