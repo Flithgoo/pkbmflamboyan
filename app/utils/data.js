@@ -107,8 +107,8 @@ const pelajarDashboardLinks = [
     href: "/LMS/pelajar/Mapel",
     icon: BookOpen,
   },
-  { name: "Tugas", href: "/LMS/pelajar/Tugas", icon: ClipboardList },
-  { name: "Absensi", href: "/LMS/pelajar/Absensi", icon: Users },
+  { name: "Profil", href: "/LMS/pelajar/Profil", icon: Users },
+  { name: "Absensi", href: "/LMS/pelajar/Absensi", icon: ClipboardList },
   { name: "Pengumuman", href: "/LMS/pelajar/Pengumuman", icon: BellRing },
   { name: "Ujian", href: "/LMS/pelajar/Ujian", icon: ClipboardCheck },
   { name: "Bantuan", href: "/LMS/pelajar/Bantuan", icon: Info },
@@ -116,13 +116,13 @@ const pelajarDashboardLinks = [
 
 const tutorDashboardLinks = [
   { name: "Dashboard", href: "/LMS/tutor", icon: Home },
+  { name: "Profil", href: "/LMS/tutor/Profil", icon: BellRing },
   {
     name: "Mata Pelajaran",
     href: "/LMS/tutor/Mapel",
     icon: BookOpen,
   },
   { name: "Absensi", href: "/LMS/tutor/Absensi", icon: Users },
-  { name: "Pengumuman", href: "/LMS/tutor/Pengumuman", icon: BellRing },
   { name: "Penilaian", href: "/LMS/tutor/Penilaian", icon: NotebookIcon },
   { name: "Bantuan", href: "/LMS/Bantuan", icon: Info },
 ];

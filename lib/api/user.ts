@@ -4,6 +4,8 @@ import { createSupabaseServerClient } from "@/app/utils/supabase-server";
 import { cookies } from "next/headers";
 import { verifyJwt } from "@/lib/jwt";
 import { isAuthorizedAdmin } from "../isAuthorized";
+import bcrypt from "bcryptjs";
+import { uploadOrReplaceProfilePicture } from "../services/profile-picture";
 
 const getAuthContext = async (): Promise<{
   token: string;
@@ -40,20 +42,7 @@ export async function getUser() {
 }
 
 export async function getUserById(id: number) {
-  const { token, supabase } = await getAuthContext();
-  let user = null; // Initialize user as null
-  if (token) {
-    try {
-      user = await verifyJwt(token); // user = { id, username, role }
-    } catch (error) {
-      console.error("JWT verification failed:", error);
-      user = null;
-    }
-  }
-
-  if (!user || user.role !== "admin") {
-    return { data: null, error: "Not authorized" };
-  }
+  const { supabase } = await getAuthContext();
 
   const { data, error } = await supabase
     .from("users")
@@ -255,4 +244,118 @@ export async function deleteUser(id: number) {
     return { error };
   }
   return { data, error: null };
+}
+
+// Kebutuhan profil pelajar dan tutor
+
+export async function changePassword(
+  id: number,
+  oldPassword: string,
+  newPassword: string,
+) {
+  const { supabase } = await getAuthContext();
+  const { data: user } = await getUserById(id);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const isValidPassword = await bcrypt.compare(oldPassword, user.password);
+
+  if (!isValidPassword) {
+    throw new Error("Password lama salah");
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+
+  const { error } = await supabase
+    .from("users")
+    .update({
+      password: passwordHash,
+    })
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("Change password error:", error);
+    return { error };
+    throw new Error("Gagal mengubah password");
+  }
+
+  return {
+    success: true,
+    message: "Password berhasil diubah",
+  };
+}
+
+export async function getUserClassAndLocation(id: number) {
+  const { supabase } = await getAuthContext();
+
+  const { data: user } = await getUserById(id);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const { data, error } = await supabase
+    .from("users")
+    .select(
+      `
+      user_class(
+        classes(
+          id,
+          name
+        )
+      ),
+
+      user_location(
+        location(
+          id,
+          name
+        )
+      )
+    `,
+    )
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.error("Get user class location error:", error);
+
+    throw new Error("Gagal mengambil kelas dan lokasi user");
+  }
+
+  return {
+    class: data.user_class?.classes ?? null,
+    location: data.user_location?.location ?? null,
+  };
+}
+
+export async function updateProfilePicture(
+  userId: number,
+  file: File,
+  oldPicture: string | null,
+) {
+  const { supabase } = await getAuthContext();
+
+  const profilePictureUrl = await uploadOrReplaceProfilePicture(
+    file,
+    oldPicture,
+  );
+
+  if (!profilePictureUrl) {
+    throw new Error("gagal edit foto profil");
+  }
+
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({
+      profile_picture: profilePictureUrl,
+    })
+    .eq("id", userId);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  return profilePictureUrl;
 }

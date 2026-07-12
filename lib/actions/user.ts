@@ -1,10 +1,14 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { insertUser, editUser, deleteUser } from "@/lib/api/user";
+import {
+  insertUser,
+  editUser,
+  deleteUser,
+  updateProfilePicture,
+} from "@/lib/api/user";
 import { redirect } from "next/navigation";
 import { uploadProfilePicture } from "@/app/utils/uploadPicHelper";
-import { editProfilePicture } from "@/app/utils/editPicHelper";
 import { uploadOrReplaceProfilePicture } from "../services/profile-picture";
 
 export async function addUserAction(formData: FormData) {
@@ -96,4 +100,18 @@ export async function deleteUserAction(id: number) {
     `app/lib/actions/user.ts User with id = ${id} deleted successfully`,
   );
   return { success: true };
+}
+
+export async function updateProfilePictureAction(formData: FormData) {
+  const newPicture = formData.get("newPicture") as File;
+  const oldPicture = formData.get("oldPicture") as string;
+  console.log("🚀 ~ updateProfilePictureAction ~ oldPicture:", oldPicture);
+
+  const userId = Number(formData.get("userId"));
+
+  if (!newPicture) {
+    throw new Error("File tidak ditemukan");
+  }
+
+  return await updateProfilePicture(userId, newPicture, oldPicture || null);
 }
