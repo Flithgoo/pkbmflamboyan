@@ -3,12 +3,12 @@
 import { ProfileCard } from "@components/Profil/ProfileCard";
 import { ChangePasswordForm } from "@components/Profil/ChangePasswordForm";
 import { useUserStore } from "@/src/store/useUserStore";
+import Loading from "@/app/components/Loading";
 
 export default function UbahPasswordTutorPage() {
   const { user } = useUserStore();
-  console.log("🚀 ~ UbahPasswordTutorPage ~ user:", user);
   if (!user) {
-    throw new Error("User tidak ditemukan");
+    return <Loading text="Loading Profil Tutor" />;
   }
 
   return (
