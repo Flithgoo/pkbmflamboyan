@@ -97,45 +97,6 @@ export default function AdminDashboard() {
         </div>
       </header>
       <main>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-start">
-            <h2 className="text-xl font-semibold mb-2 text-emerald-700">
-              Pengguna
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Kelola data siswa, guru, dan admin.
-            </p>
-            <Link
-              href="#daftar-pengguna"
-              className="mt-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold"
-            >
-              Lihat Pengguna
-            </Link>
-          </div>
-          <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-start">
-            <h2 className="text-xl font-semibold mb-2 text-emerald-700">
-              Kelas & Materi
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Atur kelas, materi, dan tugas pembelajaran.
-            </p>
-            <button className="mt-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-semibold">
-              Kelola Kelas
-            </button>
-          </div>
-          <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-start">
-            <h2 className="text-xl font-semibold mb-2 text-emerald-700">
-              Laporan
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Lihat statistik dan laporan aktivitas.
-            </p>
-            <button className="mt-auto px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition font-semibold">
-              Lihat Laporan
-            </button>
-          </div>
-        </div>
-
         <section
           id="daftar-pengguna"
           className="bg-white rounded-2xl shadow p-6 mt-6 overflow-x-auto"

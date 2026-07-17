@@ -2,8 +2,7 @@ import {
   Home,
   BookOpen,
   Users,
-  Settings,
-  BarChart2,
+  UserCheck,
   UserPlus,
   ClipboardList,
   BellRing,
@@ -108,23 +107,19 @@ const pelajarDashboardLinks = [
     icon: BookOpen,
   },
   { name: "Profil", href: "/LMS/pelajar/Profil", icon: Users },
-  { name: "Absensi", href: "/LMS/pelajar/Absensi", icon: ClipboardList },
-  { name: "Pengumuman", href: "/LMS/pelajar/Pengumuman", icon: BellRing },
-  { name: "Ujian", href: "/LMS/pelajar/Ujian", icon: ClipboardCheck },
   { name: "Bantuan", href: "/LMS/pelajar/Bantuan", icon: Info },
 ];
 
 const tutorDashboardLinks = [
   { name: "Dashboard", href: "/LMS/tutor", icon: Home },
-  { name: "Profil", href: "/LMS/tutor/Profil", icon: BellRing },
+  { name: "Profil", href: "/LMS/tutor/Profil", icon: Users },
   {
     name: "Mata Pelajaran",
     href: "/LMS/tutor/Mapel",
     icon: BookOpen,
   },
-  { name: "Absensi", href: "/LMS/tutor/Absensi", icon: Users },
+  { name: "Absensi", href: "/LMS/tutor/Absensi", icon: UserCheck },
   { name: "Penilaian", href: "/LMS/tutor/Penilaian", icon: NotebookIcon },
-  { name: "Bantuan", href: "/LMS/Bantuan", icon: Info },
 ];
 
 const adminDashboardLinks = [
@@ -136,8 +131,6 @@ const adminDashboardLinks = [
     href: "/LMS/admin/SinkronDapodik",
   },
   { name: "Mata Pelajaran", icon: BookOpen, href: "/LMS/admin/MataPelajaran" },
-  { name: "Laporan", icon: BarChart2, href: "/LMS/admin/laporan" },
-  { name: "Pengaturan", icon: Settings, href: "/LMS/admin/settings" },
 ];
 
 export {
