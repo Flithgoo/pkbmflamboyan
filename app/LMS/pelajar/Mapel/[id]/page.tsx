@@ -17,6 +17,7 @@ import { useUserStore } from "@/src/store/useUserStore";
 import { Subject } from "@/lib/types/types";
 import Link from "next/link";
 import { stripHtmlAndTruncate } from "@/app/utils/react-quill-helper";
+import Loading from "@/app/components/Loading";
 
 type SubjectWithTutor = Subject & {
   tutor_name: string;

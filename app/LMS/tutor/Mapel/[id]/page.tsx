@@ -178,14 +178,16 @@ export default function MateriMapelPage({
       tutor_id: user?.id as number,
       mapel_id: Number(params.id),
       is_absensi_enabled: isAbsensiEnabled,
-      absensi_start: isAbsensiEnabled ? absensiStart : undefined,
-      absensi_end: isAbsensiEnabled ? absensiEnd : undefined,
-      // ✅ BARU: Tambahkan deadline tugas ke payload
-      due_date: jenisUpload === "Tugas" ? taskDeadline : undefined,
+      absensi_start: new Date(absensiStart).toISOString(),
+      absensi_end: new Date(absensiEnd).toISOString(),
+      due_date: taskDeadline ? new Date(taskDeadline).toISOString() : undefined,
     };
 
     try {
       setLoading(true);
+      console.log("absensiStart:", absensiStart);
+      console.log("absensiEnd:", absensiEnd);
+      console.log("payload:", payload);
       const { success } = await addMaterialAction(payload);
       if (!success) throw new Error("Gagal menambahkan materi.");
 

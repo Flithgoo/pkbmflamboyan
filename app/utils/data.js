@@ -101,12 +101,12 @@ const listFaq = [
 
 const pelajarDashboardLinks = [
   { name: "Dashboard", href: "/LMS/pelajar", icon: Home },
+  { name: "Profil", href: "/LMS/pelajar/Profil", icon: Users },
   {
     name: "Mata Pelajaran",
     href: "/LMS/pelajar/Mapel",
     icon: BookOpen,
   },
-  { name: "Profil", href: "/LMS/pelajar/Profil", icon: Users },
   { name: "Bantuan", href: "/LMS/pelajar/Bantuan", icon: Info },
 ];
 
