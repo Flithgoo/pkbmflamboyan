@@ -36,9 +36,11 @@ export async function POST(request: NextRequest) {
     const users: any[] = existingUsers ?? [];
 
     // const byEmail = new Map<string, any>();
+    const byName = new Map<string, any>();
     const byUsername = new Map<string, any>();
     // index by email & username (case-insensitive)
     for (const u of users) {
+      if (u.name) byName.set(String(u.name).toLowerCase(), u);
       if (u.username) byUsername.set(String(u.username).toLowerCase(), u);
       // tidak ada record emial sbnrnya cmn jika mau tambah email, kode dibwh diisi
       // if (u.email) byEmail.set(String(u.email).toLowerCase(), u);
@@ -86,7 +88,10 @@ export async function POST(request: NextRequest) {
       }
 
       // try find
-      const found = username && byUsername.get(username.toLowerCase());
+      const found =
+        (name && byName.get(name.toLowerCase())) ||
+        (username && byUsername.get(username.toLowerCase()));
+
       const classRecord = allClasses?.find(
         (c) => String(c.name).toLowerCase() === String(userClass).toLowerCase(),
       );
@@ -95,7 +100,7 @@ export async function POST(request: NextRequest) {
         // new user
         if (sync) {
           try {
-            // default password 'password' (admin should force reset)
+            // default password == username (admin mengharuskan pengguna mengubah password)
             if (name && username && userClass) {
               const hashedPassword = await bcrypt.hash(username, 10);
               await insertUser(
