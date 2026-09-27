@@ -39,9 +39,10 @@ export async function addUserAction(formData: FormData) {
   );
   if (error) {
     throw new Error(`Error inserting user: ${error.message}`);
+  } else {
+    console.log("app/lib/actions/user.ts User added successfully:", data);
   }
 
-  console.log("app/lib/actions/user.ts User added successfully:", data);
   redirect("/LMS/admin/Pengguna"); // redirect jika berhasil
 }
 

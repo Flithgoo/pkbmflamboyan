@@ -4,7 +4,6 @@ import { getAllUser } from "@/lib/api/user";
 import React, { useEffect, useState } from "react";
 import UserTable from "@/app/components/LMS/admin/(Pengguna)/UserTable";
 import ConfirmDeleteModal from "@/app/components/LMS/admin/ConfirmDeleteUserModal";
-import Link from "next/link";
 import {
   deleteUserAction,
   addUserAction,
@@ -50,7 +49,7 @@ export default function AdminDashboard() {
       // Refresh data
       await fetchUsers();
     } else {
-      alert("Gagal menghapus pengguna. Silakan coba lagi.");
+      alert("Gagal menghapus pengguna. Silakan coba lagi. " + result?.error);
       console.error("Error deleting user:", result?.error);
     }
   }
@@ -63,7 +62,7 @@ export default function AdminDashboard() {
       await fetchUsers();
     } catch (error) {
       console.error("Error adding user:", error);
-      alert("Gagal menambah pengguna. Silakan coba lagi.");
+      alert("Gagal menambah pengguna. Silakan coba lagi. " + error);
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +77,7 @@ export default function AdminDashboard() {
       await fetchUsers();
     } catch (error) {
       console.error("Error editing user:", error);
-      alert("Gagal mengedit pengguna. Silakan coba lagi.");
+      alert("Gagal mengedit pengguna. Silakan coba lagi. " + error);
     } finally {
       setIsLoading(false);
     }
