@@ -96,6 +96,8 @@ export async function POST(request: NextRequest) {
         (c) => String(c.name).toLowerCase() === String(userClass).toLowerCase(),
       );
 
+      console.log("found:", found);
+      console.log("allClasses:", allClasses);
       if (!found) {
         // new user
         if (sync) {
@@ -130,13 +132,35 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // compare fields
+
+        // compare fields
         const diffs: any = {};
+
         if (name && String(name) !== String(found.name ?? ""))
           diffs.name = { before: found.name ?? "", after: name };
+
         if (username && String(username) !== String(found.username ?? ""))
-          diffs.username = { before: found.username ?? "", after: username };
+          diffs.username = {
+            before: found.username ?? "",
+            after: username,
+          };
+
         if (role && String(role) !== String(found.role ?? "pelajar"))
-          diffs.role = { before: found.role ?? "pelajar", after: role };
+          diffs.role = {
+            before: found.role ?? "pelajar",
+            after: role,
+          };
+
+        // bandingkan kelas Dapodik dengan kelas di database
+        if (
+          classRecord &&
+          String(classRecord.id) !== String(found.class_id ?? "")
+        ) {
+          diffs.class_id = {
+            before: found.class_id ?? null,
+            after: classRecord.id,
+          };
+        }
 
         if (Object.keys(diffs).length > 0) {
           if (sync) {
@@ -151,15 +175,19 @@ export async function POST(request: NextRequest) {
                 classRecord ? classRecord.id : found.class_id,
                 null,
               );
+
               updatedCount++;
             } catch (e) {
               notInserted.push({
                 rowIndex: i,
-                reason: `Gagal update: ${e instanceof Error ? e.message : String(e)}`,
+                reason: `Gagal update: ${
+                  e instanceof Error ? e.message : String(e)
+                }`,
                 row,
               });
             }
           }
+
           changed.push({ ident: email ?? username, diffs });
         }
       }

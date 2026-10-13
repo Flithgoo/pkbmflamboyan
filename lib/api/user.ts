@@ -55,10 +55,11 @@ export async function getUserById(id: number) {
 
 export async function getAllUser() {
   const { token, supabase } = await getAuthContext();
-  let user = null; // Initialize user as null
+  let user = null;
+
   if (token) {
     try {
-      user = await verifyJwt(token); // user = { id, email, role }
+      user = await verifyJwt(token);
     } catch (error) {
       console.error("JWT verification failed:", error);
       user = null;
@@ -69,8 +70,32 @@ export async function getAllUser() {
     return { data: null, error: "Not authorized" };
   }
 
-  const { data, error } = await supabase.from("users").select("*");
-  return { data, error };
+  const { data: users, error: usersError } = await supabase
+    .from("users")
+    .select("*");
+
+  if (usersError) {
+    return { data: null, error: usersError };
+  }
+
+  const { data: userClasses, error: classesError } = await supabase
+    .from("user_class")
+    .select("user_id, class_id");
+
+  if (classesError) {
+    return { data: null, error: classesError };
+  }
+
+  const classMap = new Map(
+    (userClasses ?? []).map((uc) => [String(uc.user_id), uc.class_id]),
+  );
+
+  const data = (users ?? []).map((u) => ({
+    ...u,
+    class_id: classMap.get(String(u.id)) ?? null,
+  }));
+
+  return { data, error: null };
 }
 
 export async function getUserLocationAndClass(id: number) {
