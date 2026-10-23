@@ -293,6 +293,7 @@ export default function SinkronDapodikPage() {
                         key.includes("nama") ||
                         key.includes("nisn") ||
                         key.includes("nipd")
+                        // tambahkan kelas nanti
                       ) {
                         return String(v).toLowerCase().includes(lower);
                       }
