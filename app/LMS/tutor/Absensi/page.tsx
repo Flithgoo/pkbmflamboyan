@@ -473,7 +473,7 @@ export default function AbsensiPage() {
           paginatedSessions.map((session) => (
             <Link
               key={session.id}
-              href={`/LMS/tutor/attendance/${session.id}`}
+              href={`/LMS/tutor/Absensi/${session.id}`}
               className="block bg-white rounded-xl shadow hover:shadow-lg transition border-l-4 border-emerald-500 p-4"
             >
               <div className="flex justify-between items-start mb-3">
