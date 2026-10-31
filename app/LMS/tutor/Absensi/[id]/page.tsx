@@ -660,7 +660,9 @@ export default function AttendanceDetailPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-center text-sm text-gray-600">
+                    <td
+                      className={`px-6 py-4 text-center text-sm ${!record.attendance_updated_by ? "text-gray-600" : "text-amber-600"}`}
+                    >
                       {record.attendance_time
                         ? new Date(record.attendance_time).toLocaleTimeString(
                             "id-ID",
