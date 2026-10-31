@@ -39,6 +39,8 @@ interface AttendanceRecord {
   student_name: string;
   status: string;
   attendance_time: string | null;
+  attendance_updated_at: string | null;
+  attendance_updated_by: number | null;
 }
 
 interface SessionDetail {
@@ -132,6 +134,8 @@ export default function AttendanceDetailPage() {
           student_name: item.student_name,
           status: item.status as "hadir" | "absen" | "izin" | "belum absen",
           attendance_time: item.attendance_time,
+          attendance_updated_at: item.attendance_updated_at,
+          attendance_updated_by: item.attendance_updated_by,
         }));
 
         setRecords(attendanceRecords);
@@ -535,7 +539,7 @@ export default function AttendanceDetailPage() {
         </div>
       </div>
 
-      {/* Filters & Actions */}
+      {/* Filters & Actions (Desktop) */}
       <div className="mb-6 bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
         <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-end">
           <div className="flex-1">
@@ -665,7 +669,15 @@ export default function AttendanceDetailPage() {
                               minute: "2-digit",
                             },
                           )
-                        : "—"}
+                        : record.attendance_updated_at &&
+                            record.status !== "belum absen"
+                          ? new Date(
+                              record.attendance_updated_at,
+                            ).toLocaleTimeString("id-ID", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button
@@ -756,10 +768,14 @@ export default function AttendanceDetailPage() {
                 </div>
               )}
 
-              <div className="pt-4 border-t border-gray-200 text-xs text-gray-600">
+              <div
+                className={`pt-4 border-t border-gray-200 text-xs text-gray-600`}
+              >
                 <p>
                   Waktu Check-in:{" "}
-                  <span className="font-medium">
+                  <span
+                    className={`font-medium ${!record.attendance_updated_by ? "text-gray-600" : "text-amber-600"}`}
+                  >
                     {record.attendance_time
                       ? new Date(record.attendance_time).toLocaleTimeString(
                           "id-ID",
@@ -768,7 +784,15 @@ export default function AttendanceDetailPage() {
                             minute: "2-digit",
                           },
                         )
-                      : "—"}
+                      : record.attendance_updated_at &&
+                          record.status !== "belum absen"
+                        ? new Date(
+                            record.attendance_updated_at,
+                          ).toLocaleTimeString("id-ID", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "—"}
                   </span>
                 </p>
               </div>

@@ -602,38 +602,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      add_material_with_attendance:
-        | {
-            Args: {
-              absensi_end?: string
-              absensi_start?: string
-              content: string
-              is_absensi_enabled?: boolean
-              jenis_upload: string
-              kelas: Json
-              mapel_id: number
-              p_location_id: number
-              title: string
-              tutor_id: number
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              absensi_end?: string
-              absensi_start?: string
-              content: string
-              is_absensi_enabled?: boolean
-              jenis_upload: string
-              kelas: Json
-              mapel_id: number
-              p_due_date?: string
-              p_location_id: number
-              title: string
-              tutor_id: number
-            }
-            Returns: undefined
-          }
+      add_material_with_attendance: {
+        Args: {
+          absensi_end?: string
+          absensi_start?: string
+          content: string
+          is_absensi_enabled?: boolean
+          jenis_upload: string
+          kelas: Json
+          mapel_id: number
+          p_due_date?: string
+          p_location_id: number
+          title: string
+          tutor_id: number
+        }
+        Returns: undefined
+      }
       delete_user: { Args: { p_user_id: number }; Returns: boolean }
       get_active_session_with_attendance: {
         Args: { p_material_id: number; p_user_id: number }
@@ -744,6 +728,8 @@ export type Database = {
         Args: { p_session_id: number }
         Returns: {
           attendance_time: string
+          attendance_updated_at: string
+          attendance_updated_by: number
           created_at: string
           id: number
           location_name: string
